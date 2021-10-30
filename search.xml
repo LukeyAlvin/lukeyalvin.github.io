@@ -1,125 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>PAT1001_害死人不偿命的(3n+1)猜想</title>
-    <url>/2021/10/30/PAT1001-%E5%AE%B3%E6%AD%BB%E4%BA%BA%E4%B8%8D%E5%81%BF%E5%91%BD%E7%9A%84-3n-1-%E7%8C%9C%E6%83%B3/</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>卡拉兹(Callatz)猜想：对任何一个正整数 n，如果它是偶数，那么把它砍掉一半；如果它是奇数，那么把 (3n+1) 砍掉一半。这样一直反复砍下去，最后一定在某一步得到 n=1。卡拉兹在 1950 年的世界数学家大会上公布了这个猜想，传说当时耶鲁大学师生齐动员，拼命想证明这个貌似很傻很天真的命题，结果闹得学生们无心学业，一心只证 (3n+1)，以至于有人说这是一个阴谋，卡拉兹是在蓄意延缓美国数学界教学与科研的进展……</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-<p>我们今天的题目不是证明卡拉兹猜想，而是对给定的任一不超过 1000 的正整数 n，简单地数一下，需要多少步（砍几下）才能得到 n=1？<br>输入格式：</p>
-<blockquote>
-<p>每个测试输入包含 1 个测试用例，即给出正整数 n 的值。</p>
-</blockquote>
-<p>输出格式：</p>
-<blockquote>
-<p>输出从 n 计算到 1 需要的步数。</p>
-</blockquote>
-<p>输入样例：</p>
-<blockquote>
-<p>3<br>  结尾无空行</p>
-</blockquote>
-<p>输出样例：</p>
-<blockquote>
-<p>5<br>  结尾无空行</p>
-</blockquote>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;iostream&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">judgeParity</span><span class="params">(<span class="keyword">int</span> n)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">deal</span><span class="params">(<span class="keyword">bool</span> flag,<span class="keyword">int</span> n)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (n!=<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">bool</span> flag = <span class="built_in">judgeParity</span>(n);</span><br><span class="line">        n = <span class="built_in">deal</span>(flag,n);</span><br><span class="line">        ++count;</span><br><span class="line">    &#125;  </span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;count = &quot;</span> &lt;&lt; count &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">judgeParity</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(n%<span class="number">2</span>==<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span>    </span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">deal</span><span class="params">(<span class="keyword">bool</span> flag,<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in"><span class="keyword">switch</span></span> (flag)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">        n = n/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        n = (<span class="number">3</span>*n+<span class="number">1</span>)/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<div class="note success"><p>初学,待进一步优化......</p></div>
-]]></content>
-      <categories>
-        <category>c++笔记</category>
-      </categories>
-      <tags>
-        <tag>c++</tag>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>tf坐标变换实践一_静态坐标变化</title>
-    <url>/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>案例描述:现有一机器人模型，核心构成包含主体与雷达，各对应一坐标系，坐标系的原点分别位于主体与雷达的物理中心，已知雷达原点相对于主体原点位移关系如下: x=0.2 y=0.0 z=0.5。当前雷达检测到一障碍物，在雷达坐标系中障碍物的坐标为 (2.0 3.0 5.0),请问，该障碍物相对于主体的坐标是多少？</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-
-<p><strong>实现分析:</strong></p>
-<ol>
-<li>坐标系相对关系，可以通过发布方发布</li>
-<li>订阅方，订阅到发布的坐标系相对关系，再传入坐标点信息(可以写死)，然后借助于 tf 实现坐标变换，并将结果输出</li>
-</ol>
-<p><strong>实现流程:</strong></p>
-<ol>
-<li>新建功能包，添加依赖</li>
-<li>编写发布方实现</li>
-<li>编写订阅方实现</li>
-<li>执行并查看结果</li>
-</ol>
-<h1 id="命令实现"><a href="#命令实现" class="headerlink" title="命令实现"></a>命令实现</h1><h2 id="发布者命令实现"><a href="#发布者命令实现" class="headerlink" title="发布者命令实现"></a>发布者命令实现</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rosrun tf2_ros static_transform_publisher 0.2 0 0.5 0 0 0 /baselink /laser</span><br></pre></td></tr></table></figure>
-
-<p>解释:rosrun tf2_ros static_transform_publisher x偏移量 y偏移量 z偏移量 z偏航角度 y俯仰角度 x翻滚角度 父级坐标系 子级坐标系</p>
-<h2 id="查看发布信息"><a href="#查看发布信息" class="headerlink" title="查看发布信息"></a>查看发布信息</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rostopic list</span><br><span class="line">/rosout</span><br><span class="line">/rosout_agg</span><br><span class="line">/tf_static</span><br><span class="line">/turtle1/cmd_vel</span><br><span class="line">/turtle1/color_sensor</span><br><span class="line">/turtle1/pose</span><br><span class="line">alvin@ros:~/catkin_ws$ rostopic <span class="built_in">echo</span> /tf_static</span><br><span class="line">transforms: </span><br><span class="line">  - </span><br><span class="line">    header: </span><br><span class="line">      seq: 1</span><br><span class="line">      stamp: </span><br><span class="line">        secs: 1635601530</span><br><span class="line">        nsecs: 483203886</span><br><span class="line">      frame_id: <span class="string">&quot;base_link&quot;</span></span><br><span class="line">    child_frame_id: <span class="string">&quot;laser&quot;</span></span><br><span class="line">    transform: </span><br><span class="line">      translation: </span><br><span class="line">        x: 0.2</span><br><span class="line">        y: 0.0</span><br><span class="line">        z: 0.5</span><br><span class="line">      rotation: </span><br><span class="line">        x: 0.0</span><br><span class="line">        y: 0.0</span><br><span class="line">        z: 0.0</span><br><span class="line">        w: 1.0</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
-
-<h1 id="C-代码实现"><a href="#C-代码实现" class="headerlink" title="C++代码实现"></a>C++代码实现</h1><h2 id="发布者实现"><a href="#发布者实现" class="headerlink" title="发布者实现"></a>发布者实现</h2><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ros/ros.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/static_transform_broadcaster.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/TransformStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2/LinearMath/Quaternion.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">    ros::<span class="built_in">init</span>(argc,argv,<span class="string">&quot;static_pub&quot;</span>);</span><br><span class="line">    <span class="comment">//创建发布者对象</span></span><br><span class="line">    tf2_ros::StaticTransformBroadcaster broadcaster;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//坐标信息</span></span><br><span class="line">    geometry_msgs::TransformStamped tfs;</span><br><span class="line">    tfs.header.seq = <span class="number">1</span>;</span><br><span class="line">    tfs.header.stamp = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">    tfs.header.frame_id = <span class="string">&quot;base_link&quot;</span>;</span><br><span class="line">    tfs.child_frame_id = <span class="string">&quot;laser&quot;</span>;</span><br><span class="line">    tfs.transform.translation.x = <span class="number">0.2</span>;</span><br><span class="line">    tfs.transform.translation.y = <span class="number">0</span>;</span><br><span class="line">    tfs.transform.translation.z = <span class="number">0.5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将欧拉角转换成四元数</span></span><br><span class="line">    tf2::Quaternion qtn;</span><br><span class="line">    qtn.<span class="built_in">setRPY</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    tfs.transform.rotation.x = qtn.<span class="built_in">getX</span>();</span><br><span class="line">    tfs.transform.rotation.y = qtn.<span class="built_in">getY</span>();</span><br><span class="line">    tfs.transform.rotation.z = qtn.<span class="built_in">getZ</span>();</span><br><span class="line">    tfs.transform.rotation.w = qtn.<span class="built_in">getW</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//发布坐标</span></span><br><span class="line">    broadcaster.<span class="built_in">sendTransform</span>(tfs);</span><br><span class="line"></span><br><span class="line">    ros::<span class="built_in">spin</span>()</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="订阅者实现"><a href="#订阅者实现" class="headerlink" title="订阅者实现"></a>订阅者实现</h2><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ros/ros.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/buffer.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/transform_listener.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/PointStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_geometry_msgs/tf2_geometry_msgs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">setlocale</span>(LC_ALL,<span class="string">&quot;&quot;</span>);</span><br><span class="line">    ros::<span class="built_in">init</span>(argc,argv,<span class="string">&quot;static_sub&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建监听者对象</span></span><br><span class="line">    tf2_ros::Buffer buffer;</span><br><span class="line">    <span class="function">tf2_ros::TransformListener <span class="title">listener</span><span class="params">(buffer)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">ros::Rate <span class="title">rate</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">    <span class="keyword">while</span>(ros::<span class="built_in">ok</span>())&#123;</span><br><span class="line">        <span class="comment">//定义某坐标点在laser坐标系下的值</span></span><br><span class="line">        geometry_msgs::PointStamped point_laser;</span><br><span class="line">        point_laser.header.frame_id = <span class="string">&quot;laser&quot;</span>;</span><br><span class="line">        point_laser.header.stamp = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">        point_laser.point.x = <span class="number">1</span> ;</span><br><span class="line">        point_laser.point.y = <span class="number">2</span> ;</span><br><span class="line">        point_laser.point.z = <span class="number">7.3</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">//将laser坐标系的点的坐标,转换成基坐标系下的坐标</span></span><br><span class="line">            geometry_msgs::PointStamped point_base;</span><br><span class="line">            point_base = buffer.<span class="built_in">transform</span>(point_laser,<span class="string">&quot;base_link&quot;</span>);</span><br><span class="line">            <span class="built_in">ROS_INFO</span>(<span class="string">&quot;转换后的数据:(%.2f,%.2f,%.2f),参考的坐标系是:%s&quot;</span>,</span><br><span class="line">                     point_base.point.x,</span><br><span class="line">                     point_base.point.y,</span><br><span class="line">                     point_base.point.z,</span><br><span class="line">                     point_base.header.frame_id.<span class="built_in">c_str</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in"><span class="keyword">catch</span></span>(<span class="keyword">const</span> std::exception&amp; e)</span><br><span class="line">        &#123;</span><br><span class="line">             <span class="built_in">ROS_INFO</span>(<span class="string">&quot;程序异常.....&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        rate.<span class="built_in">sleep</span>();</span><br><span class="line">        ros::<span class="built_in">spinOnce</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="CMakeLists-txt"><a href="#CMakeLists-txt" class="headerlink" title="CMakeLists.txt"></a>CMakeLists.txt</h2><figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="comment">## Declare a C++ executable</span></span><br><span class="line"><span class="comment">## With catkin_make all packages are built within a single CMake context</span></span><br><span class="line"><span class="comment">## The recommended prefix ensures that target names across packages don&#x27;t collide</span></span><br><span class="line"><span class="keyword">add_executable</span>(static_tf_pub src/static_tf_pub.cpp)</span><br><span class="line"><span class="keyword">add_executable</span>(static_tf_sub src/static_tf_sub.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Add cmake target dependencies of the executable</span></span><br><span class="line"><span class="comment">## same as for the library above</span></span><br><span class="line"><span class="keyword">add_dependencies</span>(static_tf_pub <span class="variable">$&#123;$&#123;PROJECT_NAME&#125;</span>_EXPORTED_TARGETS&#125; <span class="variable">$&#123;catkin_EXPORTED_TARGETS&#125;</span>)</span><br><span class="line"><span class="keyword">add_dependencies</span>(static_tf_sub <span class="variable">$&#123;$&#123;PROJECT_NAME&#125;</span>_EXPORTED_TARGETS&#125; <span class="variable">$&#123;catkin_EXPORTED_TARGETS&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Specify libraries to link a library or executable target against</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(static_tf_pub</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">target_link_libraries</span>(static_tf_sub</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
-<h1 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rosrun tf_pratice static_tf_pub </span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rosrun tf_pratice static_tf_sub </span><br><span class="line">[ INFO] [1635601858.503067357]: 程序异常.....</span><br><span class="line">[ INFO] [1635601859.503191179]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601860.503162320]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601861.503066538]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601862.503088002]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601863.503098757]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601864.503162287]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>ROS</category>
-      </categories>
-      <tags>
-        <tag>ros</tag>
-        <tag>tf坐标变换</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PAT1002_写出这个数</title>
-    <url>/2021/10/30/PAT1002-%E5%86%99%E5%87%BA%E8%BF%99%E4%B8%AA%E6%95%B0/</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>读入一个正整数 <em>n</em>，计算其各位数字之和，用汉语拼音写出和的每一位数字。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-<p>输入格式：</p>
-<blockquote>
-<p> 每个测试输入包含 1 个测试用例，即给出自然数 <em>n</em> 的值。这里保证 <em>n</em> 小于 10100。</p>
-</blockquote>
-<p>输出格式：</p>
-<blockquote>
-<p> 在一行内输出 <em>n</em> 的各位数字之和的每一位，拼音数字间有 1 空格，但一行中最后一个拼音数字后没有空格。</p>
-</blockquote>
-<p>输入样例：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1234567890987654321123456789</span><br><span class="line">结尾无空行</span><br></pre></td></tr></table></figure>
-
-<p>输出样例：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yi san wu</span><br><span class="line">结尾无空行</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;iostream&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;string&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">order</span><span class="params">(<span class="keyword">int</span> num)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    string n;</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n.<span class="built_in">length</span>(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> x = (<span class="keyword">int</span>)n[i] - <span class="number">48</span>;</span><br><span class="line">        sum = x + sum;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;sum= &quot;</span> &lt;&lt; sum &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">order</span>(sum);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 如果 n/10==0，则输出n</span></span><br><span class="line"><span class="comment">// 否则 先对n/10进行相同处理，之后输出n%10</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">order</span><span class="params">(<span class="keyword">int</span> num)</span></span>&#123;</span><br><span class="line">    string c_num[<span class="number">10</span>]=&#123;<span class="string">&quot;ling&quot;</span>,<span class="string">&quot;yi&quot;</span>,<span class="string">&quot;er&quot;</span>,<span class="string">&quot;san&quot;</span>,<span class="string">&quot;si&quot;</span>,<span class="string">&quot;wu&quot;</span>,<span class="string">&quot;liu&quot;</span>,<span class="string">&quot;qi&quot;</span>,<span class="string">&quot;ba&quot;</span>,<span class="string">&quot;jiu&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(num&gt;<span class="number">10</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">order</span>(num/<span class="number">10</span>);</span><br><span class="line">        <span class="keyword">int</span> num1 = num%<span class="number">10</span>;</span><br><span class="line">        cout &lt;&lt; c_num[num1]&lt;&lt; <span class="string">&#x27;\t&#x27;</span>;</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; c_num[num] &lt;&lt; <span class="string">&#x27;\t&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <categories>
-        <category>c++笔记</category>
-      </categories>
-      <tags>
-        <tag>c++</tag>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>视觉SLAM综述简介</title>
     <url>/2021/10/30/%E8%A7%86%E8%A7%89%20SLAM%E7%BB%BC%E8%BF%B0%E7%AE%80%E4%BB%8B/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -372,6 +253,125 @@
       </categories>
       <tags>
         <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>tf坐标变换实践一_静态坐标变化</title>
+    <url>/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>案例描述:现有一机器人模型，核心构成包含主体与雷达，各对应一坐标系，坐标系的原点分别位于主体与雷达的物理中心，已知雷达原点相对于主体原点位移关系如下: x=0.2 y=0.0 z=0.5。当前雷达检测到一障碍物，在雷达坐标系中障碍物的坐标为 (2.0 3.0 5.0),请问，该障碍物相对于主体的坐标是多少？</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+
+<p><strong>实现分析:</strong></p>
+<ol>
+<li>坐标系相对关系，可以通过发布方发布</li>
+<li>订阅方，订阅到发布的坐标系相对关系，再传入坐标点信息(可以写死)，然后借助于 tf 实现坐标变换，并将结果输出</li>
+</ol>
+<p><strong>实现流程:</strong></p>
+<ol>
+<li>新建功能包，添加依赖</li>
+<li>编写发布方实现</li>
+<li>编写订阅方实现</li>
+<li>执行并查看结果</li>
+</ol>
+<h1 id="命令实现"><a href="#命令实现" class="headerlink" title="命令实现"></a>命令实现</h1><h2 id="发布者命令实现"><a href="#发布者命令实现" class="headerlink" title="发布者命令实现"></a>发布者命令实现</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rosrun tf2_ros static_transform_publisher 0.2 0 0.5 0 0 0 /baselink /laser</span><br></pre></td></tr></table></figure>
+
+<p>解释:rosrun tf2_ros static_transform_publisher x偏移量 y偏移量 z偏移量 z偏航角度 y俯仰角度 x翻滚角度 父级坐标系 子级坐标系</p>
+<h2 id="查看发布信息"><a href="#查看发布信息" class="headerlink" title="查看发布信息"></a>查看发布信息</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rostopic list</span><br><span class="line">/rosout</span><br><span class="line">/rosout_agg</span><br><span class="line">/tf_static</span><br><span class="line">/turtle1/cmd_vel</span><br><span class="line">/turtle1/color_sensor</span><br><span class="line">/turtle1/pose</span><br><span class="line">alvin@ros:~/catkin_ws$ rostopic <span class="built_in">echo</span> /tf_static</span><br><span class="line">transforms: </span><br><span class="line">  - </span><br><span class="line">    header: </span><br><span class="line">      seq: 1</span><br><span class="line">      stamp: </span><br><span class="line">        secs: 1635601530</span><br><span class="line">        nsecs: 483203886</span><br><span class="line">      frame_id: <span class="string">&quot;base_link&quot;</span></span><br><span class="line">    child_frame_id: <span class="string">&quot;laser&quot;</span></span><br><span class="line">    transform: </span><br><span class="line">      translation: </span><br><span class="line">        x: 0.2</span><br><span class="line">        y: 0.0</span><br><span class="line">        z: 0.5</span><br><span class="line">      rotation: </span><br><span class="line">        x: 0.0</span><br><span class="line">        y: 0.0</span><br><span class="line">        z: 0.0</span><br><span class="line">        w: 1.0</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<h1 id="C-代码实现"><a href="#C-代码实现" class="headerlink" title="C++代码实现"></a>C++代码实现</h1><h2 id="发布者实现"><a href="#发布者实现" class="headerlink" title="发布者实现"></a>发布者实现</h2><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ros/ros.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/static_transform_broadcaster.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/TransformStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2/LinearMath/Quaternion.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"> <span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"> </span>&#123;</span><br><span class="line">    ros::<span class="built_in">init</span>(argc,argv,<span class="string">&quot;static_pub&quot;</span>);</span><br><span class="line">    <span class="comment">//创建发布者对象</span></span><br><span class="line">    tf2_ros::StaticTransformBroadcaster broadcaster;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//坐标信息</span></span><br><span class="line">    geometry_msgs::TransformStamped tfs;</span><br><span class="line">    tfs.header.seq = <span class="number">1</span>;</span><br><span class="line">    tfs.header.stamp = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">    tfs.header.frame_id = <span class="string">&quot;base_link&quot;</span>;</span><br><span class="line">    tfs.child_frame_id = <span class="string">&quot;laser&quot;</span>;</span><br><span class="line">    tfs.transform.translation.x = <span class="number">0.2</span>;</span><br><span class="line">    tfs.transform.translation.y = <span class="number">0</span>;</span><br><span class="line">    tfs.transform.translation.z = <span class="number">0.5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//将欧拉角转换成四元数</span></span><br><span class="line">    tf2::Quaternion qtn;</span><br><span class="line">    qtn.<span class="built_in">setRPY</span>(<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>);</span><br><span class="line">    tfs.transform.rotation.x = qtn.<span class="built_in">getX</span>();</span><br><span class="line">    tfs.transform.rotation.y = qtn.<span class="built_in">getY</span>();</span><br><span class="line">    tfs.transform.rotation.z = qtn.<span class="built_in">getZ</span>();</span><br><span class="line">    tfs.transform.rotation.w = qtn.<span class="built_in">getW</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//发布坐标</span></span><br><span class="line">    broadcaster.<span class="built_in">sendTransform</span>(tfs);</span><br><span class="line"></span><br><span class="line">    ros::<span class="built_in">spin</span>()</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="订阅者实现"><a href="#订阅者实现" class="headerlink" title="订阅者实现"></a>订阅者实现</h2><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ros/ros.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/buffer.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/transform_listener.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/PointStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_geometry_msgs/tf2_geometry_msgs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">setlocale</span>(LC_ALL,<span class="string">&quot;&quot;</span>);</span><br><span class="line">    ros::<span class="built_in">init</span>(argc,argv,<span class="string">&quot;static_sub&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建监听者对象</span></span><br><span class="line">    tf2_ros::Buffer buffer;</span><br><span class="line">    <span class="function">tf2_ros::TransformListener <span class="title">listener</span><span class="params">(buffer)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">ros::Rate <span class="title">rate</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">    <span class="keyword">while</span>(ros::<span class="built_in">ok</span>())&#123;</span><br><span class="line">        <span class="comment">//定义某坐标点在laser坐标系下的值</span></span><br><span class="line">        geometry_msgs::PointStamped point_laser;</span><br><span class="line">        point_laser.header.frame_id = <span class="string">&quot;laser&quot;</span>;</span><br><span class="line">        point_laser.header.stamp = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">        point_laser.point.x = <span class="number">1</span> ;</span><br><span class="line">        point_laser.point.y = <span class="number">2</span> ;</span><br><span class="line">        point_laser.point.z = <span class="number">7.3</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">//将laser坐标系的点的坐标,转换成基坐标系下的坐标</span></span><br><span class="line">            geometry_msgs::PointStamped point_base;</span><br><span class="line">            point_base = buffer.<span class="built_in">transform</span>(point_laser,<span class="string">&quot;base_link&quot;</span>);</span><br><span class="line">            <span class="built_in">ROS_INFO</span>(<span class="string">&quot;转换后的数据:(%.2f,%.2f,%.2f),参考的坐标系是:%s&quot;</span>,</span><br><span class="line">                     point_base.point.x,</span><br><span class="line">                     point_base.point.y,</span><br><span class="line">                     point_base.point.z,</span><br><span class="line">                     point_base.header.frame_id.<span class="built_in">c_str</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in"><span class="keyword">catch</span></span>(<span class="keyword">const</span> std::exception&amp; e)</span><br><span class="line">        &#123;</span><br><span class="line">             <span class="built_in">ROS_INFO</span>(<span class="string">&quot;程序异常.....&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        rate.<span class="built_in">sleep</span>();</span><br><span class="line">        ros::<span class="built_in">spinOnce</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="CMakeLists-txt"><a href="#CMakeLists-txt" class="headerlink" title="CMakeLists.txt"></a>CMakeLists.txt</h2><figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="comment">## Declare a C++ executable</span></span><br><span class="line"><span class="comment">## With catkin_make all packages are built within a single CMake context</span></span><br><span class="line"><span class="comment">## The recommended prefix ensures that target names across packages don&#x27;t collide</span></span><br><span class="line"><span class="keyword">add_executable</span>(static_tf_pub src/static_tf_pub.cpp)</span><br><span class="line"><span class="keyword">add_executable</span>(static_tf_sub src/static_tf_sub.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Add cmake target dependencies of the executable</span></span><br><span class="line"><span class="comment">## same as for the library above</span></span><br><span class="line"><span class="keyword">add_dependencies</span>(static_tf_pub <span class="variable">$&#123;$&#123;PROJECT_NAME&#125;</span>_EXPORTED_TARGETS&#125; <span class="variable">$&#123;catkin_EXPORTED_TARGETS&#125;</span>)</span><br><span class="line"><span class="keyword">add_dependencies</span>(static_tf_sub <span class="variable">$&#123;$&#123;PROJECT_NAME&#125;</span>_EXPORTED_TARGETS&#125; <span class="variable">$&#123;catkin_EXPORTED_TARGETS&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Specify libraries to link a library or executable target against</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(static_tf_pub</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">target_link_libraries</span>(static_tf_sub</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h1 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rosrun tf_pratice static_tf_pub </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/catkin_ws$ rosrun tf_pratice static_tf_sub </span><br><span class="line">[ INFO] [1635601858.503067357]: 程序异常.....</span><br><span class="line">[ INFO] [1635601859.503191179]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601860.503162320]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601861.503066538]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601862.503088002]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601863.503098757]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br><span class="line">[ INFO] [1635601864.503162287]: 转换后的数据:(1.20,2.00,7.80),参考的坐标系是:base_link</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>ROS</category>
+      </categories>
+      <tags>
+        <tag>ros</tag>
+        <tag>tf坐标变换</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PAT1002_写出这个数</title>
+    <url>/2021/10/30/PAT1002-%E5%86%99%E5%87%BA%E8%BF%99%E4%B8%AA%E6%95%B0/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>读入一个正整数 <em>n</em>，计算其各位数字之和，用汉语拼音写出和的每一位数字。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>输入格式：</p>
+<blockquote>
+<p> 每个测试输入包含 1 个测试用例，即给出自然数 <em>n</em> 的值。这里保证 <em>n</em> 小于 10100。</p>
+</blockquote>
+<p>输出格式：</p>
+<blockquote>
+<p> 在一行内输出 <em>n</em> 的各位数字之和的每一位，拼音数字间有 1 空格，但一行中最后一个拼音数字后没有空格。</p>
+</blockquote>
+<p>输入样例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1234567890987654321123456789</span><br><span class="line">结尾无空行</span><br></pre></td></tr></table></figure>
+
+<p>输出样例：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">yi san wu</span><br><span class="line">结尾无空行</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;iostream&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;string&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">order</span><span class="params">(<span class="keyword">int</span> num)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    string n;</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">int</span> sum = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n.<span class="built_in">length</span>(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> x = (<span class="keyword">int</span>)n[i] - <span class="number">48</span>;</span><br><span class="line">        sum = x + sum;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;sum= &quot;</span> &lt;&lt; sum &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">order</span>(sum);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 如果 n/10==0，则输出n</span></span><br><span class="line"><span class="comment">// 否则 先对n/10进行相同处理，之后输出n%10</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">order</span><span class="params">(<span class="keyword">int</span> num)</span></span>&#123;</span><br><span class="line">    string c_num[<span class="number">10</span>]=&#123;<span class="string">&quot;ling&quot;</span>,<span class="string">&quot;yi&quot;</span>,<span class="string">&quot;er&quot;</span>,<span class="string">&quot;san&quot;</span>,<span class="string">&quot;si&quot;</span>,<span class="string">&quot;wu&quot;</span>,<span class="string">&quot;liu&quot;</span>,<span class="string">&quot;qi&quot;</span>,<span class="string">&quot;ba&quot;</span>,<span class="string">&quot;jiu&quot;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(num&gt;<span class="number">10</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">order</span>(num/<span class="number">10</span>);</span><br><span class="line">        <span class="keyword">int</span> num1 = num%<span class="number">10</span>;</span><br><span class="line">        cout &lt;&lt; c_num[num1]&lt;&lt; <span class="string">&#x27;\t&#x27;</span>;</span><br><span class="line">    &#125;  </span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        cout &lt;&lt; c_num[num] &lt;&lt; <span class="string">&#x27;\t&#x27;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>c++笔记</category>
+      </categories>
+      <tags>
+        <tag>c++</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PAT1001_害死人不偿命的(3n+1)猜想</title>
+    <url>/2021/10/30/PAT1001-%E5%AE%B3%E6%AD%BB%E4%BA%BA%E4%B8%8D%E5%81%BF%E5%91%BD%E7%9A%84-3n-1-%E7%8C%9C%E6%83%B3/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>卡拉兹(Callatz)猜想：对任何一个正整数 n，如果它是偶数，那么把它砍掉一半；如果它是奇数，那么把 (3n+1) 砍掉一半。这样一直反复砍下去，最后一定在某一步得到 n=1。卡拉兹在 1950 年的世界数学家大会上公布了这个猜想，传说当时耶鲁大学师生齐动员，拼命想证明这个貌似很傻很天真的命题，结果闹得学生们无心学业，一心只证 (3n+1)，以至于有人说这是一个阴谋，卡拉兹是在蓄意延缓美国数学界教学与科研的进展……</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>我们今天的题目不是证明卡拉兹猜想，而是对给定的任一不超过 1000 的正整数 n，简单地数一下，需要多少步（砍几下）才能得到 n=1？<br>输入格式：</p>
+<blockquote>
+<p>每个测试输入包含 1 个测试用例，即给出正整数 n 的值。</p>
+</blockquote>
+<p>输出格式：</p>
+<blockquote>
+<p>输出从 n 计算到 1 需要的步数。</p>
+</blockquote>
+<p>输入样例：</p>
+<blockquote>
+<p>3<br>  结尾无空行</p>
+</blockquote>
+<p>输出样例：</p>
+<blockquote>
+<p>5<br>  结尾无空行</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;iostream&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">judgeParity</span><span class="params">(<span class="keyword">int</span> n)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">deal</span><span class="params">(<span class="keyword">bool</span> flag,<span class="keyword">int</span> n)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n;</span><br><span class="line">    cin &gt;&gt; n;</span><br><span class="line">    <span class="keyword">int</span> count = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (n!=<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">bool</span> flag = <span class="built_in">judgeParity</span>(n);</span><br><span class="line">        n = <span class="built_in">deal</span>(flag,n);</span><br><span class="line">        ++count;</span><br><span class="line">    &#125;  </span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;count = &quot;</span> &lt;&lt; count &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">judgeParity</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(n%<span class="number">2</span>==<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">else</span>    </span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">deal</span><span class="params">(<span class="keyword">bool</span> flag,<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in"><span class="keyword">switch</span></span> (flag)</span><br><span class="line">    &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">        n = n/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">        n = (<span class="number">3</span>*n+<span class="number">1</span>)/<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<div class="note success"><p>初学,待进一步优化......</p></div>
+]]></content>
+      <categories>
+        <category>c++笔记</category>
+      </categories>
+      <tags>
+        <tag>c++</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
 </search>
