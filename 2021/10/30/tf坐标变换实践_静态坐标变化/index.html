@@ -19,13 +19,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="案例描述:现有一机器人模型，核心构成包含主体与雷达，各对应一坐标系，坐标系的原点分别位于主体与雷达的物理中心，已知雷达原点相对于主体原点位移关系如下: x&#x3D;0.2 y&#x3D;0.0 z&#x3D;0.5。当前雷达检测到一障碍物，在雷达坐标系中障碍物的坐标为 (2.0 3.0 5.0),请问，该障碍物相对于主体的坐标是多少？">
 <meta property="og:type" content="article">
 <meta property="og:title" content="tf坐标变换实践一_静态坐标变化">
-<meta property="og:url" content="http://example.com/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/index.html">
+<meta property="og:url" content="http://lukeyalvin.top/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/index.html">
 <meta property="og:site_name" content="Robot Go!">
 <meta property="og:description" content="案例描述:现有一机器人模型，核心构成包含主体与雷达，各对应一坐标系，坐标系的原点分别位于主体与雷达的物理中心，已知雷达原点相对于主体原点位移关系如下: x&#x3D;0.2 y&#x3D;0.0 z&#x3D;0.5。当前雷达检测到一障碍物，在雷达坐标系中障碍物的坐标为 (2.0 3.0 5.0),请问，该障碍物相对于主体的坐标是多少？">
 <meta property="og:locale" content="zh_CN">
@@ -36,7 +36,7 @@
 <meta property="article:tag" content="tf坐标变换">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/">
+<link rel="canonical" href="http://lukeyalvin.top/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/">
 
 
 <script id="page-configurations">
@@ -200,7 +200,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/R-C.jpeg">
@@ -351,7 +351,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/" title="tf坐标变换实践一_静态坐标变化">http://example.com/2021/10/30/tf坐标变换实践_静态坐标变化/</a>
+    <a href="http://lukeyalvin.top/2021/10/30/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E9%9D%99%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E5%8C%96/" title="tf坐标变换实践一_静态坐标变化">http://lukeyalvin.top/2021/10/30/tf坐标变换实践_静态坐标变化/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -490,6 +490,20 @@
       </div>
   </nav>
 </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
 
 
 <div style="">
@@ -924,6 +938,22 @@ window.addEventListener('pjax:success', () => {
 
 
   
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
 
 
 
@@ -978,7 +1008,6 @@ NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
 </script>
 
 
-  <script async src="/js/cursor/fireworks.js"></script>
 
 
     </div>
