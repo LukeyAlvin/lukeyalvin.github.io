@@ -2,6 +2,7 @@
 title: GitHub Pages设置自定义域名失效
 tags: [GitHub,Hexo]
 comments: true
+data: 2021-10-30 10:44:42
 categories: 经验
 ---
 在GitHub Pages设置自定义域名之后，发现每次hexo d 后都会失效，又要重新设置，太麻烦了。

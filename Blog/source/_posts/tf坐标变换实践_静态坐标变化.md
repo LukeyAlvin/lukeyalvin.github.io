@@ -78,15 +78,16 @@ transforms:
  int main(int argc, char *argv[])
  {
     ros::init(argc,argv,"static_pub");
-    //创建发布者对象
+    //创建发布者对象(TF广播器)
     tf2_ros::StaticTransformBroadcaster broadcaster;
     
     //坐标信息
     geometry_msgs::TransformStamped tfs;
     tfs.header.seq = 1;
     tfs.header.stamp = ros::Time::now();
-    tfs.header.frame_id = "base_link";
-    tfs.child_frame_id = "laser";
+    tfs.header.frame_id = "base_link";//父坐标系ID
+    tfs.child_frame_id = "laser"; //子坐标系ID
+     //坐标点位于乌龟位姿的偏移量
     tfs.transform.translation.x = 0.2;
     tfs.transform.translation.y = 0;
     tfs.transform.translation.z = 0.5;
