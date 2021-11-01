@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://lukeyalvin.top/2021/11/01/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E5%A4%9A%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2/</loc>
+    <loc>http://lukeyalvin.top/2021/11/01/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E4%B9%8C%E9%BE%9F%E8%B7%9F%E9%9A%8F/</loc>
     
     <lastmod>2021-11-01</lastmod>
     
@@ -10,6 +10,13 @@
   
   <url>
     <loc>http://lukeyalvin.top/2021/11/01/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E5%8A%A8%E6%80%81%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2/</loc>
+    
+    <lastmod>2021-11-01</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://lukeyalvin.top/2021/11/01/tf%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2%E5%AE%9E%E8%B7%B5_%E5%A4%9A%E5%9D%90%E6%A0%87%E5%8F%98%E6%8D%A2/</loc>
     
     <lastmod>2021-11-01</lastmod>
     
@@ -124,6 +131,13 @@
   
   <url>
     <loc>http://lukeyalvin.top/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/</loc>
+    <lastmod>2021-11-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://lukeyalvin.top/tags/turtlesim/</loc>
     <lastmod>2021-11-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
