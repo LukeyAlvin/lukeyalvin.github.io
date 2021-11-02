@@ -1,6 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>gazebo加载world出现黑屏问题</title>
+    <url>/2021/11/02/gazebo%E5%8A%A0%E8%BD%BDworld%E5%87%BA%E7%8E%B0%E9%BB%91%E5%B1%8F%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>近期发在gazebo在加载一些world环境时,总是出现下面黑屏的情况,这是因为model库加载不正确导致的</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png"/>
+
+<p>解决方法： 通过直接下载所有模型到用户的根目录下的.gazebo/models/下 </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/</span><br><span class="line">$ mkdir -p models</span><br><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/models/</span><br><span class="line">$ wget http://file.ncnynl.com/ros/gazebo_models.txt</span><br><span class="line">$ wget -i gazebo_models.txt</span><br><span class="line">$ ls model.tar.g* | xargs -n1 tar xzvf</span><br></pre></td></tr></table></figure>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-49.png"/>
+
+<p>完美解决</p>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/>]]></content>
+      <categories>
+        <category>ROS</category>
+      </categories>
+      <tags>
+        <tag>BUG</tag>
+        <tag>gazebo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>turtlebot3仿真实践</title>
+    <url>/2021/11/02/turtlebot3%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>TurtleBot3 是一个小型，低成本，完全可编程，基于 ROS 的移动机器人。 它旨在用于教育，研究，产品原型和爱好应用的目的。TurtleBot3 的目标是大幅降低平台的尺寸和价格，而不会牺牲性能，功能和质量。由于提供了其他选项，如底盘，计算机和传感器，TurtleBot3 可以通过各种方式进行定制。TurtleBot3 意愿通过应用 SBC（单板计算机），深度传感器和 3D 打印的最新技术进步，成为创客运动的中心。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<h1 id="下载turtlebot3仿真包"><a href="#下载turtlebot3仿真包" class="headerlink" title="下载turtlebot3仿真包"></a>下载turtlebot3仿真包</h1><ul>
+<li>环境准备</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ sudo apt-get install ros-noetic-turtlebot3 ros-noetic-turtlebot3-description ros-noetic-turtlebot3-gazebo ros-noetic-turtlebot3-msgs ros-noetic-turtlebot3-slam ros-noetic-turtlebot3-teleop</span><br></pre></td></tr></table></figure>
+
+<p>以上会避免之后问题里出现的报错</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws/src/</span><br><span class="line">$ git <span class="built_in">clone</span> -b noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git</span><br><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws &amp;&amp; catkin_make</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>问题:turtlebot3_msgs报错</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws &amp;&amp; catkin_make</span><br><span class="line">Could not find a package configuration file provided by</span><br><span class="line"><span class="string">&quot;turtlebot3_msgs&quot;</span> with any of the following names:</span><br><span class="line"> </span><br><span class="line">turtlebot3_msgsConfig.cmake</span><br><span class="line">turtlebot3_msgs-config.cmake</span><br><span class="line"> </span><br><span class="line">Add the installation prefix of <span class="string">&quot;turtlebot3_msgs&quot;</span> to CMAKE_PREFIX_PATH or <span class="built_in">set</span> <span class="string">&quot;turtlebot3_msg_DIR&quot;</span> to a directory containing one of the above files.</span><br></pre></td></tr></table></figure>
+
+<p>解决方案:这是因为缺少相关的包</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo apt-get install ros-noetic-turtlebot3-msgs</span><br></pre></td></tr></table></figure>
+
+<h2 id="Empty-World"><a href="#Empty-World" class="headerlink" title="Empty World"></a>Empty World</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>问题:Resource not found: turtlebot3_description</li>
+</ul>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-21.png"/>
+
+<p>解决方案:这种情况的发生是因为turtlebot3_gazebo包没有对<code>turtlebot3_description</code>声名依赖,你应该安装一下这个依赖</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ros-noetic-turtlebot3-description</span><br></pre></td></tr></table></figure>
+
+<p>其他版本的ros可以尝试更换<code>noetic</code>为你当前的版本</p>
+<p>参考链接:<a href="https://answers.ros.org/question/348299/error-in-roslaunch-turtlebot3_gazebo-turtlebot3_worldlaunch/"><strong>Error in “roslaunch turtlebot3_gazebo turtlebot3_world.launch “</strong></a></p>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-30.png"/>
+
+<h2 id="TurtleBot3-World"><a href="#TurtleBot3-World" class="headerlink" title="TurtleBot3 World"></a>TurtleBot3 World</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_world.launch</span><br></pre></td></tr></table></figure>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-34.png"/>
+
+<h2 id="TurtleBot3-House"><a href="#TurtleBot3-House" class="headerlink" title="TurtleBot3 House"></a>TurtleBot3 House</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle_pi</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_house.launch</span><br></pre></td></tr></table></figure>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/>
+
+<h1 id="SLAM仿真"><a href="#SLAM仿真" class="headerlink" title="SLAM仿真"></a>SLAM仿真</h1><p>When SLAM in Gazebo simulator, you can select or create various environments and robot models in virtual world. Other than preparing simulation environment instead of bringing up the robot, SLAM Simulation is pretty similar to that of <a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/slam/#slam">SLAM</a> with the actual TurtleBot3.</p>
+<p>The following instructions require prerequisites from the previous sections, so please review to the <a href="https://emanual.robotis.com/docs/en/platform/turtlebot3/simulation/">Simulation</a> section first.</p>
+<h2 id="加载仿真环境"><a href="#加载仿真环境" class="headerlink" title="加载仿真环境"></a>加载仿真环境</h2><p>Three Gazebo environments are prepared, but for creating a map with SLAM, it is recommended to use either <strong>TurtleBot3 World</strong> or <strong>TurtleBot3 House</strong>.<br>Use one of the following commands to load the Gazebo environment.</p>
+<p>In this instruction, TurtleBot3 World will be used.<br>Please use the proper keyword among <code>burger</code>, <code>waffle</code>, <code>waffle_pi</code> for the <code>TURTLEBOT3_MODEL</code> parameter.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle_pi</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_house.launch</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行SLAM节点"><a href="#运行SLAM节点" class="headerlink" title="运行SLAM节点"></a>运行SLAM节点</h2><p>Open a new terminal from Remote PC with <code>Ctrl</code> + <code>Alt</code> + <code>T</code> and run the SLAM node. Gmapping SLAM method is used by default.<br>Please use the proper keyword among <code>burger</code>, <code>waffle</code>, <code>waffle_pi</code> for the <code>TURTLEBOT3_MODEL</code> parameter.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping</span><br></pre></td></tr></table></figure>
+
+<h2 id="运行键盘控制节点"><a href="#运行键盘控制节点" class="headerlink" title="运行键盘控制节点"></a>运行键盘控制节点</h2><p>Open a new terminal from Remote PC with <code>Ctrl</code> + <code>Alt</code> + <code>T</code> and run the teleoperation node from the Remote PC.<br>Please use the proper keyword among <code>burger</code>, <code>waffle</code>, <code>waffle_pi</code> for the <code>TURTLEBOT3_MODEL</code> parameter.</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch</span><br><span class="line"></span><br><span class="line"> Control Your TurtleBot3!</span><br><span class="line"> ---------------------------</span><br><span class="line"> Moving around:</span><br><span class="line">        w</span><br><span class="line">   a    s    d</span><br><span class="line">        x</span><br><span class="line"></span><br><span class="line"> w/x : increase/decrease linear velocity</span><br><span class="line"> a/d : increase/decrease angular velocity</span><br><span class="line"> space key, s : force stop</span><br><span class="line"></span><br><span class="line"> CTRL-C to quit</span><br></pre></td></tr></table></figure>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-50.png"/>
+
+]]></content>
+      <categories>
+        <category>ROS</category>
+      </categories>
+      <tags>
+        <tag>gazebo</tag>
+        <tag>ros</tag>
+        <tag>机器人仿真</tag>
+        <tag>turtlebot3</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>机器人仿真实践_gazebo+rviz综合实践</title>
     <url>/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_gazebo+rviz%E7%BB%BC%E5%90%88%E5%AE%9E%E8%B7%B5/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -12,8 +116,8 @@
 
 <span id="more"></span>
 
-<h1 id="实践一-机器人运动控制"><a href="#实践一-机器人运动控制" class="headerlink" title="实践一:机器人运动控制"></a>实践一:机器人运动控制</h1><h2 id="1-ros-control-简介"><a href="#1-ros-control-简介" class="headerlink" title="1.ros_control 简介"></a>1.ros_control 简介</h2><p>**场景:**同一套 ROS 程序，如何部署在不同的机器人系统上，比如：开发阶段为了提高效率是在仿真平台上测试的，部署时又有不同的实体机器人平台，不同平台的实现是有差异的，如何保证 ROS 程序的可移植性？ROS 内置的解决方式是 ros_control。</p>
-<p>**ros_control:**是一组软件包，它包含了控制器接口，控制器管理器，传输和硬件接口。ros_control 是一套机器人控制的中间件，是一套规范，不同的机器人平台只要按照这套规范实现，那么就可以保证 与ROS 程序兼容，通过这套规范，实现了一种可插拔的架构设计，大大提高了程序设计的效率与灵活性。</p>
+<h1 id="实践一-机器人运动控制"><a href="#实践一-机器人运动控制" class="headerlink" title="实践一:机器人运动控制"></a>实践一:机器人运动控制</h1><h2 id="1-ros-control-简介"><a href="#1-ros-control-简介" class="headerlink" title="1.ros_control 简介"></a>1.ros_control 简介</h2><p><strong>场景:</strong> 同一套 ROS 程序，如何部署在不同的机器人系统上，比如：开发阶段为了提高效率是在仿真平台上测试的，部署时又有不同的实体机器人平台，不同平台的实现是有差异的，如何保证 ROS 程序的可移植性？ROS 内置的解决方式是 ros_control。</p>
+<p><strong>ros_control:</strong> 是一组软件包，它包含了控制器接口，控制器管理器，传输和硬件接口。ros_control 是一套机器人控制的中间件，是一套规范，不同的机器人平台只要按照这套规范实现，那么就可以保证 与ROS 程序兼容，通过这套规范，实现了一种可插拔的架构设计，大大提高了程序设计的效率与灵活性。</p>
 <p>gazebo 已经实现了 ros_control 的相关接口，如果需要在 gazebo 中控制机器人运动，直接调用相关接口即可</p>
 <h2 id="2-运动控制实现流程-Gazebo"><a href="#2-运动控制实现流程-Gazebo" class="headerlink" title="2.运动控制实现流程(Gazebo)"></a>2.运动控制实现流程(Gazebo)</h2><p>承上，运动控制基本流程:</p>
 <ol>
@@ -80,11 +184,11 @@
         <category>ROS</category>
       </categories>
       <tags>
+        <tag>gazebo</tag>
         <tag>ros</tag>
         <tag>机器人仿真</tag>
         <tag>rviz</tag>
         <tag>xacro</tag>
-        <tag>gazebo</tag>
       </tags>
   </entry>
   <entry>
@@ -147,10 +251,10 @@
         <category>ROS</category>
       </categories>
       <tags>
+        <tag>gazebo</tag>
         <tag>ros</tag>
         <tag>机器人仿真</tag>
         <tag>xacro</tag>
-        <tag>gazebo</tag>
       </tags>
   </entry>
   <entry>
