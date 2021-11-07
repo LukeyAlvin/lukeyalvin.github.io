@@ -93,7 +93,7 @@
 
 <img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-50.png"/>
 
-<div class="pdfobject-container" data-target="https://lukeyalvin.top/file/turtlebot3入门教程（中文版）.pdf" data-height="500px"></div>]]></content>
+<div class="pdfobject-container" data-target="./file/turtlebot3入门教程（中文版）.pdf" data-height="500px"></div>]]></content>
       <categories>
         <category>ROS</category>
       </categories>
