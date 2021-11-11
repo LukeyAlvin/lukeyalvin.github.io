@@ -209,7 +209,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/11/11/c++%E5%A4%B4%E6%96%87%E4%BB%B6/" class="post-title-link" itemprop="url">未命名</a>
+            <a href="/2021/11/11/c++%E5%A4%B4%E6%96%87%E4%BB%B6/" class="post-title-link" itemprop="url">c++头文件</a>
         </h2>
 
         <div class="post-meta">
@@ -220,7 +220,16 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-11-11 16:32:18 / 修改时间：22:35:48" itemprop="dateCreated datePublished" datetime="2021-11-11T16:32:18+08:00">2021-11-11</time>
+              <time title="创建时间：2021-11-11 16:32:18 / 修改时间：22:38:27" itemprop="dateCreated datePublished" datetime="2021-11-11T16:32:18+08:00">2021-11-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/c/" itemprop="url" rel="index"><span itemprop="name">c++</span></a>
+                </span>
             </span>
 
           
@@ -243,7 +252,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4.6k</span>
+              <span>4.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -262,121 +271,20 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h1><p>面向对象的基本特点:</p>
-<blockquote>
-<p>一切东西都是对象</p>
-<p>程序就是一堆互相传递消息告诉对方需要做什么的对象</p>
-<p>没一个对象都有自己的内存,内存里面还是对象</p>
-<p>任何对象都有一种类型</p>
-<p>一个特定类型的所有对象可以接收相同的消息(反过来说,所有能接收相同消息的对象可以认为是同一个类型)</p>
-</blockquote>
-<p>每个对象都有一个接口:</p>
-<blockquote>
-<p>接口是接受消息的一种方式</p>
-<p>接口被定义在这个对象所属的类别里</p>
-</blockquote>
-<p>隐藏的实现(The Hidden Implementation):</p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_16-47.png" width="60%"/>
+          <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>面向对象的基本特点:一切东西都是对象;程序就是一堆互相传递消息告诉对方需要做什么的对象;没一个对象都有自己的内存,内存里面还是对象;任何对象都有一种类型;一个特定类型的所有对象可以接收相同的消息(反过来说,所有能接收相同消息的对象可以认为是同一个类型;</p>
 
-<h1 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h1><p>一般来说,我们每一个类都应该新建一个<code>.cpp</code>文件和一个与之对应的<code>.h</code>文件;</p>
-<p><code>.h</code>文件用来<strong>声明(declaration)</strong> 方法和变量,旨在告诉你这个类的大体结构是什么,能干嘛?有什么变量?</p>
-<blockquote>
-<p>我们称<code>.h</code>文件里的class为构造函数</p>
-<blockquote>
-<p>作用:相当于接口</p>
-<ul>
-<li>The header is a <strong>contract</strong> between you and the user of your code</li>
-<li>The compile <strong>enforces the contract</strong> by requiring you to declare all structures and function before they are used.</li>
-</ul>
-</blockquote>
-</blockquote>
-<p><code>.cpp</code>文件则是核心代码部分,<strong>定义(definition)<strong>某些变量或者方法以及逻辑实现.而这些方法和变量都是<code>.h</code>文件所</strong>声明</strong>的.</p>
-<p>在<code>.cpp</code>文件使用的时候,我们一般使用<code>#include</code>来引入<code>.h</code>文件中<strong>声明</strong>的方法或者变量,<code>#include</code>的含义如下图所示;</p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_17-06.png" width="60%"/>
-
-<h1 id="在Unix查看C-的编译过程"><a href="#在Unix查看C-的编译过程" class="headerlink" title="在Unix查看C++的编译过程"></a>在Unix查看C++的编译过程</h1><p>我们新建两个文件,<code>a.h</code>和<code>a.cpp</code>,如下</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">int</span> global;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后使用命令<code>g++ a.cpp --save-temps </code>编译,表示保留编译过程中的文件</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-rw-rw-r-- 1 alvin alvin    41 Nov 11 19:49 a.cpp</span><br><span class="line">-rw-rw-r-- 1 alvin alvin    22 Nov 11 19:39 a.h</span><br><span class="line">-rw-rw-r-- 1 alvin alvin   198 Nov 11 19:49 a.ii  <span class="comment">#编译预处理指令结束后的结果</span></span><br><span class="line">-rw-rw-r-- 1 alvin alvin  1400 Nov 11 19:49 a.o  <span class="comment"># 目标代码</span></span><br><span class="line">-rwxrwxr-x 1 alvin alvin 16496 Nov 11 19:49 a.out* <span class="comment"># 最终可以执行的代码</span></span><br><span class="line">-rw-rw-r-- 1 alvin alvin   654 Nov 11 19:49 a.s <span class="comment"># 汇编代码</span></span><br></pre></td></tr></table></figure>
-
-<p>查看文件<code>a.ii</code>,可以查看到头文件先被抄进来,与<code>cpp</code>文件组合在一起,被编译器去执行,这也就印证了之前的那一张图.</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1 &quot;a.cpp&quot;</span></span><br><span class="line"><span class="comment"># 1 &quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"><span class="comment"># 1 &quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"><span class="comment"># 1 &quot;/usr/include/stdc-predef.h&quot; 1 3 4</span></span><br><span class="line"><span class="comment"># 1 &quot;&lt;command-line&gt;&quot; 2</span></span><br><span class="line"><span class="comment"># 1 &quot;a.cpp&quot;</span></span><br><span class="line"><span class="comment"># 1 &quot;a.h&quot; 1</span></span><br><span class="line">void f();</span><br><span class="line">int global;</span><br><span class="line"><span class="comment"># 2 &quot;a.cpp&quot; 2</span></span><br><span class="line">int <span class="function"><span class="title">main</span></span>()</span><br><span class="line">&#123;</span><br><span class="line"> <span class="built_in">return</span> 0;</span><br><span class="line">&#125;     </span><br></pre></td></tr></table></figure>
-
-<h1 id="头文件的易错点"><a href="#头文件的易错点" class="headerlink" title="头文件的易错点"></a>头文件的易错点</h1><h2 id="易错点一-声明与定义"><a href="#易错点一-声明与定义" class="headerlink" title="易错点一:声明与定义"></a>易错点一:声明与定义</h2><h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><p>在之前的<code>a.h</code>中的代码,一个函数f还有一个变量<code>global</code>,但是它们并全非<strong>声明</strong>,变量<code>global</code>是一种<strong>定义</strong>!这么做是错误的,为什么?举个例子:</p>
-<p>我们新建一个文件<code>b.cpp</code></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>现在需要将<code>a.cpp</code>和<code>b.cpp</code>组合在一起,执行命令<code>g++ a.cpp b.cpp --save-temps</code></p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_20-17.png" width="50%"/>
-
-<p><code>multiple definition of global</code>?显然<code>a.o</code> <code>b.o</code>重复定义了global,查看临时文件,可以看出编译已经完成(这是因为编译器是分开编译<code>a.cpp</code>和<code>b.cpp</code>),已经生产<code>.o</code>文件,但是没有生成<code>.out</code>.出错的原因在于<code>ld</code>(链接器),没有完成<code>a.cpp</code>和<code>b.cpp</code>的链接,什么原因?</p>
-<blockquote>
-<p>原因就在于我们在<code>a.h</code>的文件中的<code>global</code>是定义而非声明,因为<code>a.cpp</code>和<code>b.cpp</code>都包含了<code>a.h</code>文件,而<code>global</code>又是定义而非声明,因此说明它被定义了两次,故报错.</p>
-</blockquote>
-<p>既然如此,怎样让<code>a.h</code>中的变量<code>global</code>变成声明呢?加上<code>extern</code>,显然这样能够很好的解决问题.</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br></pre></td></tr></table></figure>
-
-<p>但是,如果此时我们需要在<code>b.cpp</code>文件中去使用这个变量</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    global++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后再次尝试执行命令<code>g++ a.cpp b.cpp --save-temps</code></p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">alvin@ros:~/cPlus_ws/<span class="built_in">test</span>$ g++ a.cpp b.cpp --save-temps </span><br><span class="line">/usr/bin/ld: b.o: <span class="keyword">in</span> <span class="keyword">function</span> `f()<span class="string">&#x27;:</span></span><br><span class="line"><span class="string">b.cpp:(.text+0xa): undefined reference to `global&#x27;</span></span><br><span class="line">/usr/bin/ld: b.cpp:(.text+0x13): undefined reference to `global<span class="string">&#x27;</span></span><br><span class="line"><span class="string">collect2: error: ld returned 1 exit status</span></span><br></pre></td></tr></table></figure>
-
-<p>报错显示没有定义<code>undefine</code>变量<code>global</code>,显然,我们<code>.h</code>文件仅仅是声明了有<code>global</code>这个变量,但是在<code>b.cpp</code>中去使用的时候却没有去定义,因此编译器通过了,但<code>ld</code>没有找到.</p>
-<p>解决方案:修改<code>b.cpp</code></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="keyword">int</span> global;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    global++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>关于<strong>声明(declaration)</strong> 和<strong>定义(definition)</strong></p>
-<ul>
-<li>一个<code>.cpp</code>文件就是一个编译单元</li>
-<li>只有声明的东西才能放入<code>.h</code><ul>
-<li>extern变量</li>
-<li>函数的原型</li>
-<li>类/<code>struct </code>声明</li>
-</ul>
-</li>
-</ul>
-<h2 id="易错点二-h的标准头文件结构"><a href="#易错点二-h的标准头文件结构" class="headerlink" title="易错点二:.h的标准头文件结构"></a>易错点二:<code>.h</code>的标准头文件结构</h2><h3 id="标准头文件结构的含义"><a href="#标准头文件结构的含义" class="headerlink" title="标准头文件结构的含义"></a>标准头文件结构的含义</h3><p>一般情况下,我们的<code>.h</code>文件不像是上面定义的那样,格式应该如下:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _A_H_</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _A_H_</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<p>那么<code>#</code>的三行作用是什么作用呢?意思就是如果我们没有定义<code>_A_H_</code>,那么我们定义<code>_A_H_</code>,直至我们定义为止(<code>endif</code>),但是,如果我们先前已经定义了呢?则<code>#ifndef _A_H_</code>与<code>#endif</code>之间的代码将不会被执行.</p>
-<p>比如我们修改<code>a.h</code>的文件如下:</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _A_H_</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _A_H_</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<p>显然,我们可以预料到函数f以及声明的变量<code>global</code>将不会被执行.</p>
-<p>执行指令<code>g++ a.cpp --save-temps</code></p>
-<p>查看编译过程文件<code>a.ii</code>,显而易见,预料是对的!因此,我们可以初步得知它的表层含义.</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.ii</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;/usr/include/stdc-predef.h&quot;</span> <span class="number">1</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="标准头文件结构的作用"><a href="#标准头文件结构的作用" class="headerlink" title="标准头文件结构的作用"></a>标准头文件结构的作用</h3><p>那么它的实际用处是什么呢?</p>
-<p>我们重新改写一下<code>a.h</code>文件</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>然后新建一个<code>b.h</code>文件,而<code>b.h</code>包含了<code>a.h</code>的类的变量<code>a</code></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="keyword">extern</span> A a;</span><br></pre></td></tr></table></figure>
-
-<p>最后修改一下<code>a.cpp</code>, 它由于需求必须引入两个头文件.</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;b.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>执行命令<code>g++ a.cpp --save-temps</code></p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_22-18.png"/>
-
-<p>报错显示<code>error: redefinition of ‘class A’</code>,重新定义了<code>classA</code>这个类</p>
-<p>什么原因呢?查看编译过程文件<code>a.ii</code></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;/usr/include/stdc-predef.h&quot;</span> <span class="number">1</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;b.h&quot;</span> <span class="number">1</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;b.h&quot;</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> A a;</span><br><span class="line"># <span class="number">3</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>很明显.程序确实在编译过程中定义了两次<code>classA</code>这个类</p>
-<p>怎么修改?重新修改<code>a.h</code></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> _A_H_</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _A_H_</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<p>此时再度执行就会发现,一切正常,查看编译过程文件<code>a.ii</code></p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;/usr/include/stdc-predef.h&quot;</span> <span class="number">1</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;b.h&quot;</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> A a;</span><br><span class="line"># <span class="number">3</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>标准头文件结构的作用就是防止同一个<code>cpp</code>文件多次调用某一个<code>.h</code>文件时,避免头文件里类被反复调用而产生错误.</p>
-
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/11/c++%E5%A4%B4%E6%96%87%E4%BB%B6/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1437,7 +1345,7 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-count">5</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
