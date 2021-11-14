@@ -1,6 +1,223 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>QR分解</title>
+    <url>/2021/11/14/QR%E5%88%86%E8%A7%A3/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>QR分解的目的在于将矩阵转化成正交矩阵和上三角矩阵的乘积，对应的分解公式是A=Q*R。正交矩阵有很多良好的性质，比如矩阵的逆和矩阵的转置相同，任意一个向量和正交矩阵的乘积不改变向量的范数等等。QR分解可以用于求解线性方程组，线性拟合。更重要的是QR分解是QR算法的基础，可以用于各种特征值问题，所以QR分集的应用非常广泛。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<p><img src="/home/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/v2-58d2fc0f9c7d36e567201a3ba28f29e2_1440w.jpg" alt="QR分解"></p>
+<h2 id="预备知识-Schmidt正交化"><a href="#预备知识-Schmidt正交化" class="headerlink" title="预备知识:Schmidt正交化"></a>预备知识:Schmidt正交化</h2><blockquote>
+<p>在线性代数中，如果内积空间上的一组向量能够组成一个子空间，那么这一组向量就称为这个子空间的一个基。Gram－Schmidt正交化提供了一种方法，能够通过这一子空间上的一个基得出子空间的一个正交基，并可进一步求出对应的标准正交基。</p>
+<p>这种正交化方法以约尔根·佩德森·格拉姆和艾哈德·施密特命名，然而比他们更早的拉普拉斯（Laplace）和柯西（Cauchy）已经发现了这一方法。在李群分解中，这种方法被推广为岩泽分解（Iwasawa decomposition）。</p>
+<p>在数值计算中，Gram－Schmidt正交化是数值不稳定的，计算中累积的舍入误差会使最终结果的正交性变得很差。因此在实际应用中通常使用豪斯霍尔德(Householder)变换或Givens旋转进行正交化。可以用于矩阵计算。</p>
+</blockquote>
+<h3 id="记法"><a href="#记法" class="headerlink" title="记法"></a>记法</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_23-03.png"/>
+
+<h3 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_23-04.png" width="80%"/>
+
+<h3 id="算法"><a href="#算法" class="headerlink" title="算法"></a>算法</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_23-04_1.png"/>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_23-04_2.png"/>
+
+<h3 id="不同的形式"><a href="#不同的形式" class="headerlink" title="不同的形式"></a>不同的形式</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_23-05.png"/>
+]]></content>
+      <categories>
+        <category>线性代数</category>
+      </categories>
+      <tags>
+        <tag>线性代数</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>线性代数</title>
+    <url>/2021/11/14/%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0_5/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>主要复习线性代数基础中的内容:向量的内积 、 长度及正交性,正交矩阵\正交变换,相似矩阵,相似对角化,对称矩阵的对角化</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<h2 id="向量的内积-、-长度及正交性"><a href="#向量的内积-、-长度及正交性" class="headerlink" title="向量的内积 、 长度及正交性"></a>向量的内积 、 长度及正交性</h2><h3 id="向量的内积"><a href="#向量的内积" class="headerlink" title="向量的内积"></a>向量的内积</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_20-501.png"/>
+
+<h3 id="向量的长度-范数"><a href="#向量的长度-范数" class="headerlink" title="向量的长度(范数)"></a>向量的长度(范数)</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_20-511.png"/>
+
+<h3 id="标准正交基"><a href="#标准正交基" class="headerlink" title="标准正交基"></a>标准正交基</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_20-551.png"/>
+
+<h3 id="史密特-Schmidt-正交化"><a href="#史密特-Schmidt-正交化" class="headerlink" title="史密特(Schmidt)正交化"></a>史密特(Schmidt)正交化</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_20-561.png"/>
+
+<h3 id="正交矩阵"><a href="#正交矩阵" class="headerlink" title="正交矩阵"></a>正交矩阵</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_21-0i1.png"/>
+
+<h3 id="正交变换"><a href="#正交变换" class="headerlink" title="正交变换"></a>正交变换</h3><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_21-l01_1.png"/>
+
+<h2 id="特征值与特征向量"><a href="#特征值与特征向量" class="headerlink" title="特征值与特征向量"></a>特征值与特征向量</h2><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_21-gfgf05.png"/>
+
+<h2 id="相似矩阵"><a href="#相似矩阵" class="headerlink" title="相似矩阵"></a>相似矩阵</h2><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-14_21-fdfd08.png"/>
+
+
+
+<h2 id="矩阵的对角化"><a href="#矩阵的对角化" class="headerlink" title="矩阵的对角化"></a>矩阵的对角化</h2><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/fdfd.png"/>
+
+
+
+<p><img src="/home/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/ohh.png"></p>
+<h2 id="对称矩阵的对角化"><a href="#对称矩阵的对角化" class="headerlink" title="对称矩阵的对角化"></a>对称矩阵的对角化</h2><p>对称矩阵:若矩阵$A$满足 $A=A^T$,则为对称矩阵</p>
+<p><strong>性质 1</strong> 对称矩阵的特征值为实数.</p>
+<p><strong>性质 2</strong> 设$λ 1 ， λ 2 $是对称矩阵 A 的两个特征值，$p 1 ，p 2$ 是对应的特征向量.</p>
+<p>若$λ 1 ≠λ 2$ ，则$ p 1$ 与 $p 2 $正交.</p>
+<p><strong>定理 5</strong> 设 $A $为 $n $阶对称矩阵，则必有正交矩阵 $P$，使 $P^{-1} A P = P^T A P =Λ$ ，其<br>中$Λ $是以$ A $的$ n $个特征值为对角元的对角矩阵.</p>
+<p><strong>推论</strong> 设$ A$ 为$ n $阶对称矩阵，λ 是 A 的特征方程的 $k $重根，则矩阵$ A - λE$ 的<br>秩 $R（A - λE）= n-k$，从而对应特征值$λ$恰有 $k $个线性无关的特征向量.</p>
+]]></content>
+      <categories>
+        <category>线性代数</category>
+      </categories>
+      <tags>
+        <tag>线性代数</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SLAM_14习题_ch2</title>
+    <url>/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>本次习题，你需要使⽤ Eigen 库，编写程序，求解⼀个线性⽅程组。为此，你需要先<br>了解⼀些有关线性⽅程组数值解法的原理。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<p>Eigen（<a href="http://eigen.tuxfamily.org)是常用的/">http://eigen.tuxfamily.org）是常⽤的</a> C++ 矩阵运算库，具有很⾼的运算效率。⼤部分<br>需要在 C++ 中使⽤矩阵运算的库，都会选⽤ Eigen 作为基本代数库，例如 Google Tensorflow，Google<br>Ceres，GTSAM 等。本次习题，你需要使⽤ Eigen 库，编写程序，求解⼀个线性⽅程组。为此，你需要先<br>了解⼀些有关线性⽅程组数值解法的原理。<br>设线性⽅程 Ax = b，在 A 为⽅阵的前提下，请回答以下问题：</p>
+<p>提⽰：你可能需要参考相关的数学书籍或⽂章。请善⽤搜索引擎。Eigen 固定⼤⼩矩阵最⼤⽀持到 50，<br>所以你会⽤到动态⼤⼩的矩阵。</p>
+<blockquote>
+<p> 1.在什么条件下，x 有解且唯⼀？</p>
+</blockquote>
+<p>定理  n 元线性方程组$ Ax = b$<br>（i） <strong>无解</strong>的充分必要条件是$ R（A）＜R（A，b）$；<br>（ii） <strong>有惟一解</strong>的充分必要条件是$ R（A）= R（A，b）= n$；<br>（iii） <strong>有无限多解</strong>的充分必要条件是 $R（A）= R（A，b）＜n.$</p>
+<blockquote>
+<p> 2.⾼斯消元法的原理是什么？</p>
+</blockquote>
+<p>高斯消元法主要是通过用<strong>初等行变换</strong>将增广矩阵化为行阶梯阵，然后通过回带求解线性方程组的解。</p>
+<p><img src="/home/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/v2-43c79654d421239b9a6e262b9d91acbe_b.jpg" alt="img"></p>
+<blockquote>
+<p> 3.QR 分解的原理是什么？</p>
+</blockquote>
+<p>正交阵的定义:</p>
+<ul>
+<li>如果 n 阶矩阵 A 满足$A ^T A = E （即 A^{-1} = A^T ）$，那么称 A 为正交矩阵，简称<strong>正交阵</strong>.</li>
+</ul>
+<p>QR分解:</p>
+<ul>
+<li>将矩阵转化成正交矩阵和上三角矩阵的乘积，对应的分解公式是$A=Q*R$。(其中 Q 是正交阵， R 是 upper triangle 矩阵.)</li>
+<li></li>
+</ul>
+<blockquote>
+<p> 4.Cholesky 分解的原理是什么？</p>
+</blockquote>
+<blockquote>
+<p> 5编程实现 A 为 100 × 100 随机矩阵时，⽤ QR 和 Cholesky 分解求 x 的程序。你可以参考本次课<br>⽤到的 useEigen 例程。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>slam14讲</category>
+      </categories>
+      <tags>
+        <tag>slam14讲</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>fatal  error ‘xxxx’ was not declared in this scope</title>
+    <url>/2021/11/13/%22xxx%22is%20not%20std/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>运行slam14_ch3代码visualizeGeometry报错error: ‘xxxx’ was not declared in this scope</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_21-40.png"/>
+
+<p>亲测方案：CMakeLists.txt 添加 set(CMAKE_CXX_STANDARD 14)<br>或者：set(CMAKE_CXX_FLAGS “-std=c++14 -O2 ${SSE_FLAGS} -msse4”) </p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( visualizeGeometry )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD <span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加Eigen头文件</span></span><br><span class="line"><span class="keyword">include_directories</span>( <span class="string">&quot;/usr/include/eigen3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加Pangolin依赖</span></span><br><span class="line"><span class="keyword">find_package</span>( Pangolin )</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;Pangolin_INCLUDE_DIRS&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>( visualizeGeometry visualizeGeometry.cpp )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( visualizeGeometry <span class="variable">$&#123;Pangolin_LIBRARIES&#125;</span> )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>slam</category>
+      </categories>
+      <tags>
+        <tag>BUG</tag>
+        <tag>slam</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>fatal error Eigen/Core No such file or directory</title>
+    <url>/2021/11/13/eigen%E6%8A%A5%E9%94%99/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>已添加eigen库的路径到IncludePath，include&lt;Eigen/Dense&gt;也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+
+<span id="more"></span>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31.png"/>
+
+<h1 id="方案一-修改vscode配置文件"><a href="#方案一-修改vscode配置文件" class="headerlink" title="方案一:修改vscode配置文件"></a>方案一:修改vscode配置文件</h1><ol>
+<li><p>添加eigen库的路径到IncludePath. （c_cpp_properties.json）</p>
+<blockquote>
+<p>“/usr/include/eigen3/**”,<br>“/usr/include/eigen3/“         </p>
+</blockquote>
+</li>
+</ol>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_2.png" width="50%"/>
+
+<p>vscode中c_cpp_properties.json的”includePath”告诉vscode插件在哪里找到头文件，便于进行源码查看和debug，并没有告诉gcc编译器这个路径。</p>
+<ol start="2">
+<li>添加eigen库的路径到编译参数”args”.（tasks.json）</li>
+</ol>
+<p>在”args”里加入如下代码,task：”args”负责gcc等编译器的编译指令。</p>
+<blockquote>
+<p>“-I”,</p>
+<p>“/usr/include/eigen3”</p>
+</blockquote>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_1.png" width="50%"/>
+
+<h1 id="方案二-使用命令"><a href="#方案二-使用命令" class="headerlink" title="方案二:使用命令"></a>方案二:使用命令</h1><p>命令<code>g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</code>的意思就是编译代码,指定头文件位置,并输出可执行文件</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</span><br><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ ./main </span><br><span class="line">1 2 3</span><br><span class="line">4 5 6</span><br></pre></td></tr></table></figure>
+
+<h1 id="方案三-使用CMake"><a href="#方案三-使用CMake" class="headerlink" title="方案三:使用CMake"></a>方案三:使用CMake</h1><p>用vscode编写这类的调用第三方，其实最好的方式是用cmake，</p>
+<p>首先，配置c_cpp_properties.json中的includepath，这里配置的目的只是为了在vscode里没有红色波浪线，看起来美观。</p>
+<p>这里和方案一的第一步是一样的!</p>
+<p>项目结构如下：</p>
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-38.png"/>
+
+<p>CMakeLists.txt内容如下：</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span> (VERSION <span class="number">2.8</span>.<span class="number">11</span>)</span><br><span class="line"><span class="keyword">project</span> (demo)</span><br><span class="line"><span class="keyword">find_package</span>(Eigen3 REQUIRED)</span><br><span class="line"><span class="keyword">include_directories</span>(/usr/<span class="keyword">include</span>/eigen3)</span><br><span class="line"><span class="keyword">add_executable</span> (eigenMatrix eigenMatrix.cpp)</span><br></pre></td></tr></table></figure>
+
+<p>运行代码:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">./eigenMatrix</span><br></pre></td></tr></table></figure>
+
+<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-39.png" width="50%"/>]]></content>
+      <categories>
+        <category>c++</category>
+      </categories>
+      <tags>
+        <tag>BUG</tag>
+        <tag>eigen</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>c++头文件</title>
     <url>/2021/11/11/c++%E5%A4%B4%E6%96%87%E4%BB%B6/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -1251,7 +1468,7 @@
 
 ]]></content>
       <categories>
-        <category>c++笔记</category>
+        <category>c++</category>
       </categories>
       <tags>
         <tag>c++</tag>
@@ -1288,7 +1505,7 @@
 <div class="note success"><p>初学,待进一步优化......</p></div>
 ]]></content>
       <categories>
-        <category>c++笔记</category>
+        <category>c++</category>
       </categories>
       <tags>
         <tag>c++</tag>
