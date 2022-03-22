@@ -288,9 +288,7 @@
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
-
 <span id="more"></span>
-
 <p><strong>案例分析:</strong></p>
 <ol>
 <li>首先，需要发布 son1 相对于 world，以及 son2 相对于 world 的坐标消息</li>
@@ -299,11 +297,8 @@
 </ol>
 <h1 id="C-代码实现"><a href="#C-代码实现" class="headerlink" title="C++代码实现"></a>C++代码实现</h1><h2 id="发布方"><a href="#发布方" class="headerlink" title="发布方"></a>发布方</h2><p><strong>前提:</strong> 发布两个子坐标系节点(也是静态坐标节点)</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">launch</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">&quot;tf2_ros&quot;</span> <span class="attr">name</span>=<span class="string">&quot;son1&quot;</span> <span class="attr">type</span>=<span class="string">&quot;static_transform_publisher&quot;</span> <span class="attr">args</span>=<span class="string">&quot;0.2 0.8 0.3 0 0 0 /world /son1&quot;</span> <span class="attr">output</span>=<span class="string">&quot;screen&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">node</span> <span class="attr">pkg</span>=<span class="string">&quot;tf2_ros&quot;</span> <span class="attr">name</span>=<span class="string">&quot;son2&quot;</span> <span class="attr">type</span>=<span class="string">&quot;static_transform_publisher&quot;</span> <span class="attr">args</span>=<span class="string">&quot;0.5 0 0 0 0 0 /world /son2&quot;</span> <span class="attr">output</span>=<span class="string">&quot;screen&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">launch</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
 <h2 id="订阅方"><a href="#订阅方" class="headerlink" title="订阅方"></a>订阅方</h2><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;ros/ros.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/buffer.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_ros/transform_listener.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/TransformStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;geometry_msgs/PointStamped.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;tf2_geometry_msgs/tf2_geometry_msgs.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">setlocale</span>(LC_ALL,<span class="string">&quot;&quot;</span>);</span><br><span class="line">    ros::<span class="built_in">init</span>(argc,argv,<span class="string">&quot;dynamic_pub&quot;</span>);</span><br><span class="line">    <span class="comment">//创建监听对象,接受发布的静态坐标</span></span><br><span class="line">    tf2_ros::Buffer buffer;</span><br><span class="line">    <span class="function">tf2_ros::TransformListener <span class="title">listener</span><span class="params">(buffer)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">ros::Rate <span class="title">rate</span><span class="params">(<span class="number">1</span>)</span></span>;</span><br><span class="line">    <span class="keyword">while</span> (ros::<span class="built_in">ok</span>())</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">try</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">//解析son1中的点相对于son2的坐标</span></span><br><span class="line">            geometry_msgs::TransformStamped tfs = buffer.<span class="built_in">lookupTransform</span>(<span class="string">&quot;son2&quot;</span>,<span class="string">&quot;son1&quot;</span>,ros::<span class="built_in">Time</span>(<span class="number">0</span>));</span><br><span class="line">            <span class="built_in">ROS_INFO</span>(<span class="string">&quot;Son1 相对于 Son2 的坐标关系:父坐标系ID=%s,子坐标系ID=%s,坐标关系:x=%.2f,y=%.2f,z=%.2f&quot;</span>,</span><br><span class="line">                    tfs.header.frame_id.<span class="built_in">c_str</span>(),tfs.child_frame_id.<span class="built_in">c_str</span>(),</span><br><span class="line">                    tfs.transform.translation.x,</span><br><span class="line">                    tfs.transform.translation.y,</span><br><span class="line">                    tfs.transform.translation.z);</span><br><span class="line"></span><br><span class="line">            <span class="comment">//坐标点解析</span></span><br><span class="line">            geometry_msgs::PointStamped point_son1;</span><br><span class="line">            point_son1.header.frame_id = <span class="string">&quot;son1&quot;</span>;</span><br><span class="line">            point_son1.header.stamp = ros::Time::<span class="built_in">now</span>();</span><br><span class="line">            point_son1.point.x = <span class="number">1</span>;</span><br><span class="line">            point_son1.point.y = <span class="number">2</span>;</span><br><span class="line">            point_son1.point.z = <span class="number">3</span>;</span><br><span class="line"></span><br><span class="line">            geometry_msgs::PointStamped point_son2;</span><br><span class="line">            <span class="comment">//PS:调用 transform 必须包含头文件&quot;tf2_geometry_msgs/tf2_geometry_msgs.h&quot;</span></span><br><span class="line">            point_son2 = buffer.<span class="built_in">transform</span>(point_son1,<span class="string">&quot;son2&quot;</span>);</span><br><span class="line">            <span class="built_in">ROS_INFO</span>(<span class="string">&quot;在 Son2 中的坐标:x=%.2f,y=%.2f,z=%.2f&quot;</span>,</span><br><span class="line">                    point_son2.point.x,</span><br><span class="line">                    point_son2.point.y,</span><br><span class="line">                    point_son2.point.z);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in"><span class="keyword">catch</span></span>(<span class="keyword">const</span> std::exception&amp; e)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">ROS_INFO</span>(<span class="string">&quot;发生异常:%s&quot;</span>,e.<span class="built_in">what</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        rate.<span class="built_in">sleep</span>();</span><br><span class="line">        ros::<span class="built_in">spinOnce</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
 <h1 id="CMakeLists-txt"><a href="#CMakeLists-txt" class="headerlink" title="CMakeLists.txt"></a>CMakeLists.txt</h1><figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## Declare a C++ executable</span></span><br><span class="line"><span class="comment">## With catkin_make all packages are built within a single CMake context</span></span><br><span class="line"><span class="comment">## The recommended prefix ensures that target names across packages don&#x27;t collide</span></span><br><span class="line"><span class="keyword">add_executable</span>(dynamic_tf src/dynamic_tf.cpp)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Add cmake target dependencies of the executable</span></span><br><span class="line"><span class="comment">## same as for the library above</span></span><br><span class="line"><span class="keyword">add_dependencies</span>(dynamic_tf <span class="variable">$&#123;$&#123;PROJECT_NAME&#125;</span>_EXPORTED_TARGETS&#125; <span class="variable">$&#123;catkin_EXPORTED_TARGETS&#125;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">## Specify libraries to link a library or executable target against</span></span><br><span class="line"><span class="keyword">target_link_libraries</span>(dynamic_tf</span><br><span class="line">  <span class="variable">$&#123;catkin_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
-
 
     </div>
 
@@ -460,20 +455,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -777,7 +772,7 @@ if(canvas.getContext){
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -786,12 +781,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">90k</span>
+    <span title="站点总字数">106k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:22</span>
+    <span title="站点阅读时长">1:37</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
@@ -962,6 +957,8 @@ window.addEventListener('pjax:success', () => {
 
 
     <div id="pjax">
+  
+
   
 
   

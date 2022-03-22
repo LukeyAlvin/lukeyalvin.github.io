@@ -302,73 +302,52 @@
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
-
 <span id="more"></span>
-
 <h1 id="下载turtlebot3仿真包"><a href="#下载turtlebot3仿真包" class="headerlink" title="下载turtlebot3仿真包"></a>下载turtlebot3仿真包</h1><ul>
 <li>环境准备</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install ros-noetic-turtlebot3 ros-noetic-turtlebot3-description ros-noetic-turtlebot3-gazebo ros-noetic-turtlebot3-msgs ros-noetic-turtlebot3-slam ros-noetic-turtlebot3-teleop</span><br></pre></td></tr></table></figure>
-
 <p>以上会避免之后问题里出现的报错</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws/src/</span><br><span class="line">$ git <span class="built_in">clone</span> -b noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git</span><br><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws &amp;&amp; catkin_make</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>问题:turtlebot3_msgs报错</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/catkin_ws &amp;&amp; catkin_make</span><br><span class="line">Could not find a package configuration file provided by</span><br><span class="line"><span class="string">&quot;turtlebot3_msgs&quot;</span> with any of the following names:</span><br><span class="line"> </span><br><span class="line">turtlebot3_msgsConfig.cmake</span><br><span class="line">turtlebot3_msgs-config.cmake</span><br><span class="line"> </span><br><span class="line">Add the installation prefix of <span class="string">&quot;turtlebot3_msgs&quot;</span> to CMAKE_PREFIX_PATH or <span class="built_in">set</span> <span class="string">&quot;turtlebot3_msg_DIR&quot;</span> to a directory containing one of the above files.</span><br></pre></td></tr></table></figure>
-
 <p>解决方案:这是因为缺少相关的包</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install ros-noetic-turtlebot3-msgs</span><br></pre></td></tr></table></figure>
-
 <h2 id="Empty-World"><a href="#Empty-World" class="headerlink" title="Empty World"></a>Empty World</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch</span><br></pre></td></tr></table></figure>
-
 <ul>
 <li>问题:Resource not found: turtlebot3_description</li>
 </ul>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-21.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-21.png"/></p>
 <p>解决方案:这种情况的发生是因为turtlebot3_gazebo包没有对<code>turtlebot3_description</code>声名依赖,你应该安装一下这个依赖</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros-noetic-turtlebot3-description</span><br></pre></td></tr></table></figure>
-
 <p>其他版本的ros可以尝试更换<code>noetic</code>为你当前的版本</p>
 <p>参考链接:<a target="_blank" rel="noopener" href="https://answers.ros.org/question/348299/error-in-roslaunch-turtlebot3_gazebo-turtlebot3_worldlaunch/"><strong>Error in “roslaunch turtlebot3_gazebo turtlebot3_world.launch “</strong></a></p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-30.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-30.png"/></p>
 <h2 id="TurtleBot3-World"><a href="#TurtleBot3-World" class="headerlink" title="TurtleBot3 World"></a>TurtleBot3 World</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_world.launch</span><br></pre></td></tr></table></figure>
-
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-34.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-34.png"/></p>
 <h2 id="TurtleBot3-House"><a href="#TurtleBot3-House" class="headerlink" title="TurtleBot3 House"></a>TurtleBot3 House</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle_pi</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_house.launch</span><br></pre></td></tr></table></figure>
-
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/></p>
 <h1 id="SLAM仿真"><a href="#SLAM仿真" class="headerlink" title="SLAM仿真"></a>SLAM仿真</h1><p>在 Gazebo 模拟器中进行 SLAM 时，您可以在虚拟世界中选择或创建各种环境和机器人模型。 除了准备模拟环境而不是启动机器人之外，SLAM 仿真与实际的 TurtleBot3 的SLAM非常相似。</p>
 <h2 id="加载仿真环境"><a href="#加载仿真环境" class="headerlink" title="加载仿真环境"></a>加载仿真环境</h2><p>准备了三个 Gazebo 环境，但要使用 SLAM 创建地图，建议使用 <strong>TurtleBot3 World</strong> 或 <strong>TurtleBot3 House</strong>。<br>使用以下命令之一加载 Gazebo 环境。</p>
 <p>在本指令中，将使用 TurtleBot3 World。<br>请在 <code>burger</code>、<code>waffle</code>、<code>waffle_pi</code> 中为 <code>TURTLEBOT3_MODEL</code> 参数使用正确的关键字。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=waffle_pi</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_house.launch</span><br></pre></td></tr></table></figure>
-
 <h2 id="运行SLAM节点"><a href="#运行SLAM节点" class="headerlink" title="运行SLAM节点"></a>运行SLAM节点</h2><p>从远程 PC 使用 <code>Ctrl</code> + <code>Alt</code> + <code>T</code> 打开一个新终端并运行 SLAM 节点。 默认使用 Gmapping SLAM 方法。<br>请在 <code>burger</code>、<code>waffle</code>、<code>waffle_pi</code> 中为 <code>TURTLEBOT3_MODEL</code> 参数使用正确的关键字。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping</span><br></pre></td></tr></table></figure>
-
 <h2 id="运行键盘控制节点"><a href="#运行键盘控制节点" class="headerlink" title="运行键盘控制节点"></a>运行键盘控制节点</h2><p>使用<code>Ctrl</code>+<code>Alt</code>+<code>T</code>从远程 PC 打开一个新终端，然后从远程 PC 运行远程操作节点。<br>请在 <code>burger</code>、<code>waffle</code>、<code>waffle_pi</code> 中为 <code>TURTLEBOT3_MODEL</code> 参数使用正确的关键字。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch</span><br><span class="line"></span><br><span class="line"> Control Your TurtleBot3!</span><br><span class="line"> ---------------------------</span><br><span class="line"> Moving around:</span><br><span class="line">        w</span><br><span class="line">   a    s    d</span><br><span class="line">        x</span><br><span class="line"></span><br><span class="line"> w/x : increase/decrease linear velocity</span><br><span class="line"> a/d : increase/decrease angular velocity</span><br><span class="line"> space key, s : force stop</span><br><span class="line"></span><br><span class="line"> CTRL-C to quit</span><br></pre></td></tr></table></figure>
-
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-50.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-50.png"/></p>
 <h1 id="导航仿真"><a href="#导航仿真" class="headerlink" title="导航仿真"></a>导航仿真</h1><p>就像 Gazebo 模拟器中的 SLAM 一样，你可以在虚拟导航世界中选择或创建各种环境和机器人模型。 但是，在运行导航之前必须准备适当的地图。 除了准备仿真环境而不是制作机器人之外，仿真导航与实际的导航非常相似。</p>
 <h2 id="加载仿真环境-1"><a href="#加载仿真环境-1" class="headerlink" title="加载仿真环境"></a>加载仿真环境</h2><p>在前面的 SLAM 部分中，TurtleBot3 World 用于创建地图。 导航将使用相同的 Gazebo 环境。请在 burger、waffle、waffle_pi 中为 TURTLEBOT3_MODEL 参数使用正确的关键字。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_gazebo turtlebot3_world.launch</span><br></pre></td></tr></table></figure>
-
 <h2 id="运行导航节点"><a href="#运行导航节点" class="headerlink" title="运行导航节点"></a>运行导航节点</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">export</span> TURTLEBOT3_MODEL=burger</span><br><span class="line">$ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=<span class="variable">$HOME</span>/map.yaml</span><br></pre></td></tr></table></figure>
-
 <h2 id="初始姿态估计"><a href="#初始姿态估计" class="headerlink" title="初始姿态估计"></a>初始姿态估计</h2><p>必须在运行导航之前执行初始姿态估计，因为此过程会初始化对导航至关重要的 AMCL 参数。 TurtleBot3 必须正确定位在地图上，LDS 传感器数据与显示的地图整齐地重叠。</p>
 <p>单击 RViz 菜单中的 2D Pose Estimate 按钮。</p>
 <p>单击实际机器人所在的地图，然后将绿色大箭头拖向机器人面向的方向。</p>
 <p>重复步骤 1 和 2，直到 LDS 传感器数据覆盖在保存的地图上。</p>
 <p>启动键盘遥操作节点，在地图上精确定位机器人。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch</span><br></pre></td></tr></table></figure>
-
 
     </div>
 
@@ -527,20 +506,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -844,7 +823,7 @@ if(canvas.getContext){
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -853,12 +832,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">90k</span>
+    <span title="站点总字数">106k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:22</span>
+    <span title="站点阅读时长">1:37</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
@@ -1029,6 +1008,8 @@ window.addEventListener('pjax:success', () => {
 
 
     <div id="pjax">
+  
+
   
 
   

@@ -296,14 +296,10 @@
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
-
 <span id="more"></span>
-
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_21-40.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_21-40.png"/></p>
 <p>亲测方案：CMakeLists.txt 添加 set(CMAKE_CXX_STANDARD 14)<br>或者：set(CMAKE_CXX_FLAGS “-std=c++14 -O2 ${SSE_FLAGS} -msse4”) </p>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( visualizeGeometry )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD <span class="number">14</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加Eigen头文件</span></span><br><span class="line"><span class="keyword">include_directories</span>( <span class="string">&quot;/usr/include/eigen3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加Pangolin依赖</span></span><br><span class="line"><span class="keyword">find_package</span>( Pangolin )</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;Pangolin_INCLUDE_DIRS&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>( visualizeGeometry visualizeGeometry.cpp )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( visualizeGeometry <span class="variable">$&#123;Pangolin_LIBRARIES&#125;</span> )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
 
     </div>
 
@@ -459,20 +455,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -776,7 +772,7 @@ if(canvas.getContext){
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -785,12 +781,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">90k</span>
+    <span title="站点总字数">106k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:22</span>
+    <span title="站点阅读时长">1:37</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
@@ -961,6 +957,8 @@ window.addEventListener('pjax:success', () => {
 
 
     <div id="pjax">
+  
+
   
 
   

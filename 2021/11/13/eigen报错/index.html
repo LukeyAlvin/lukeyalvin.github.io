@@ -22,12 +22,12 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="已添加eigen库的路径到IncludePath，include&lt;Eigen&#x2F;Dense&gt;也没有小灯泡，可是编译出错：fatal error: Eigen&#x2F;Dense: No such file or directory">
+  <meta name="description" content="已添加eigen库的路径到IncludePath，include也没有小灯泡，可是编译出错：fatal error: Eigen&#x2F;Dense: No such file or directory">
 <meta property="og:type" content="article">
 <meta property="og:title" content="fatal error Eigen&#x2F;Core No such file or directory">
 <meta property="og:url" content="http://lukeyalvin.top/2021/11/13/eigen%E6%8A%A5%E9%94%99/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="已添加eigen库的路径到IncludePath，include&lt;Eigen&#x2F;Dense&gt;也没有小灯泡，可是编译出错：fatal error: Eigen&#x2F;Dense: No such file or directory">
+<meta property="og:description" content="已添加eigen库的路径到IncludePath，include也没有小灯泡，可是编译出错：fatal error: Eigen&#x2F;Dense: No such file or directory">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31.png">
 <meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_2.png">
@@ -275,7 +275,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1k</span>
+              <span>985</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -296,15 +296,12 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>已添加eigen库的路径到IncludePath，include&lt;Eigen/Dense&gt;也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </p>
+            <p>已添加eigen库的路径到IncludePath，include<Eigen/Dense>也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
-
 <span id="more"></span>
-
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31.png"/></p>
 <h1 id="方案一-修改vscode配置文件"><a href="#方案一-修改vscode配置文件" class="headerlink" title="方案一:修改vscode配置文件"></a>方案一:修改vscode配置文件</h1><ol>
 <li><p>添加eigen库的路径到IncludePath. （c_cpp_properties.json）</p>
 <blockquote>
@@ -312,10 +309,9 @@
 </blockquote>
 </li>
 </ol>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_2.png" width="50%"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_2.png" width="50%"/></p>
 <p>vscode中c_cpp_properties.json的”includePath”告诉vscode插件在哪里找到头文件，便于进行源码查看和debug，并没有告诉gcc编译器这个路径。</p>
-<ol start="2">
+<ol>
 <li>添加eigen库的路径到编译参数”args”.（tasks.json）</li>
 </ol>
 <p>在”args”里加入如下代码,task：”args”负责gcc等编译器的编译指令。</p>
@@ -323,24 +319,20 @@
 <p>“-I”,</p>
 <p>“/usr/include/eigen3”</p>
 </blockquote>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_1.png" width="50%"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-31_1.png" width="50%"/></p>
 <h1 id="方案二-使用命令"><a href="#方案二-使用命令" class="headerlink" title="方案二:使用命令"></a>方案二:使用命令</h1><p>命令<code>g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</code>的意思就是编译代码,指定头文件位置,并输出可执行文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</span><br><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ ./main </span><br><span class="line">1 2 3</span><br><span class="line">4 5 6</span><br></pre></td></tr></table></figure>
-
 <h1 id="方案三-使用CMake"><a href="#方案三-使用CMake" class="headerlink" title="方案三:使用CMake"></a>方案三:使用CMake</h1><p>用vscode编写这类的调用第三方，其实最好的方式是用cmake，</p>
 <p>首先，配置c_cpp_properties.json中的includepath，这里配置的目的只是为了在vscode里没有红色波浪线，看起来美观。</p>
 <p>这里和方案一的第一步是一样的!</p>
 <p>项目结构如下：</p>
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-38.png"/>
-
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-38.png"/></p>
 <p>CMakeLists.txt内容如下：</p>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span> (VERSION <span class="number">2.8</span>.<span class="number">11</span>)</span><br><span class="line"><span class="keyword">project</span> (demo)</span><br><span class="line"><span class="keyword">find_package</span>(Eigen3 REQUIRED)</span><br><span class="line"><span class="keyword">include_directories</span>(/usr/<span class="keyword">include</span>/eigen3)</span><br><span class="line"><span class="keyword">add_executable</span> (eigenMatrix eigenMatrix.cpp)</span><br></pre></td></tr></table></figure>
-
 <p>运行代码:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">./eigenMatrix</span><br></pre></td></tr></table></figure>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-39.png" width="50%"/></p>
 
-<img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-13_10-39.png" width="50%"/>
     </div>
 
     
@@ -496,20 +488,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-count">26</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-count">8</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -813,7 +805,7 @@ if(canvas.getContext){
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -822,12 +814,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">90k</span>
+    <span title="站点总字数">106k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:22</span>
+    <span title="站点阅读时长">1:37</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
@@ -998,6 +990,8 @@ window.addEventListener('pjax:success', () => {
 
 
     <div id="pjax">
+  
+
   
 
   
