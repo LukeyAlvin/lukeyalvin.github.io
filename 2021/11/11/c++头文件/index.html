@@ -309,7 +309,7 @@
 <p>接口被定义在这个对象所属的类别里</p>
 </blockquote>
 <p>隐藏的实现(The Hidden Implementation):</p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_16-47.png" width="60%"/></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_16-47.png" width="60%"></p>
 <h1 id="头文件"><a href="#头文件" class="headerlink" title="头文件"></a>头文件</h1><p>一般来说,我们每一个类都应该新建一个<code>.cpp</code>文件和一个与之对应的<code>.h</code>文件;</p>
 <p><code>.h</code>文件用来<strong>声明(declaration)</strong> 方法和变量,旨在告诉你这个类的大体结构是什么,能干嘛?有什么变量?</p>
 <blockquote>
@@ -324,7 +324,7 @@
 </blockquote>
 <p><code>.cpp</code>文件则是核心代码部分,<strong>定义(definition)</strong>某些变量或者方法以及逻辑实现.而这些方法和变量都是<code>.h</code>文件所<strong>声明</strong>的.</p>
 <p>在<code>.cpp</code>文件使用的时候,我们一般使用<code>#include</code>来引入<code>.h</code>文件中<strong>声明</strong>的方法或者变量,<code>#include</code>的含义如下图所示;</p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_17-06.png" width="60%"/></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_17-06.png" width="60%"></p>
 <h1 id="在Unix查看C-的编译过程"><a href="#在Unix查看C-的编译过程" class="headerlink" title="在Unix查看C++的编译过程"></a>在Unix查看C++的编译过程</h1><p>我们新建两个文件,<code>a.h</code>和<code>a.cpp</code>,如下</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">int</span> global;</span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//a.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
@@ -336,7 +336,7 @@
 <p>我们新建一个文件<code>b.cpp</code></p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
 <p>现在需要将<code>a.cpp</code>和<code>b.cpp</code>组合在一起,执行命令<code>g++ a.cpp b.cpp --save-temps</code></p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_20-17.png" width="50%"/></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_20-17.png" width="50%"></p>
 <p><code>multiple definition of global</code>?显然<code>a.o</code> <code>b.o</code>重复定义了global,查看临时文件,可以看出编译已经完成(这是因为编译器是分开编译<code>a.cpp</code>和<code>b.cpp</code>),已经生产<code>.o</code>文件,但是没有生成<code>.out</code>.出错的原因在于<code>ld</code>(链接器),没有完成<code>a.cpp</code>和<code>b.cpp</code>的链接,什么原因?</p>
 <blockquote>
 <p>原因就在于我们在<code>a.h</code>的文件中的<code>global</code>是定义而非声明,因为<code>a.cpp</code>和<code>b.cpp</code>都包含了<code>a.h</code>文件,而<code>global</code>又是定义而非声明,因此说明它被定义了两次,故报错.</p>
@@ -377,7 +377,7 @@
 <p>最后修改一下<code>a.cpp</code>, 它由于需求必须引入两个头文件.</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;b.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>执行命令<code>g++ a.cpp --save-temps</code></p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_22-18.png"/></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_22-18.png"></p>
 <p>报错显示<code>error: redefinition of ‘class A’</code>,重新定义了<code>classA</code>这个类</p>
 <p>什么原因呢?查看编译过程文件<code>a.ii</code></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;/usr/include/stdc-predef.h&quot;</span> <span class="number">1</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;b.h&quot;</span> <span class="number">1</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;b.h&quot;</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> A a;</span><br><span class="line"># <span class="number">3</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -542,14 +542,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -868,12 +868,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">106k</span>
+    <span title="站点总字数">125k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:37</span>
+    <span title="站点阅读时长">1:54</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

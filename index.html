@@ -191,7 +191,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/22/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91/">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/R-C.jpeg">
@@ -205,7 +205,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/22/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91/" class="post-title-link" itemprop="url">拼接点云(PCL库)</a>
+            <a href="/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" class="post-title-link" itemprop="url">使用g2o拟合曲线</a>
         </h2>
 
         <div class="post-meta">
@@ -216,7 +216,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-03-22 15:53:00 / 修改时间：16:43:43" itemprop="dateCreated datePublished" datetime="2022-03-22T15:53:00+08:00">2022-03-22</time>
+              <time title="创建时间：2022-03-23 16:15:57 / 修改时间：21:19:53" itemprop="dateCreated datePublished" datetime="2022-03-23T16:15:57+08:00">2022-03-23</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -237,8 +237,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2022/03/22/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/22/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91/" itemprop="commentCount"></span>
+    <a title="valine" href="/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -248,14 +248,228 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>613</span>
+              <span>5.3k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>g2o（General Graphic Optimization，G2O）。它是一个基于图优化的库。图优化，是把优化问题表现成图（Graph）的一种方式。这里的图是图论意义上的图。一个图由若干个<strong>顶点（Vertex）</strong>，以及连接着这些节点的<strong>边（Edge）</strong>组成。进而，用<strong>顶点表示优化变量</strong>，用<strong>边表示误差项</strong>。最基本的图优化，是用图模型来表达一个非线性最小二乘的优化问题。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" class="post-title-link" itemprop="url">使用Ceres拟合曲线</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-23 10:30:33 / 修改时间：16:11:10" itemprop="dateCreated datePublished" datetime="2022-03-23T10:30:33+08:00">2022-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>Ceres solver 是谷歌开发的一款用于<a target="_blank" rel="noopener" href="https://so.csdn.net/so/search?q=非线性&amp;spm=1001.2101.3001.7020">非线性</a>优化的库，在谷歌的开源激光雷达 slam 项目 cartographer 中被大量使用。Ceres 官网上的文档非常详细地介绍了其具体使用方法，相比于另外一个在 slam 中被广泛使用的图优化库 G2O，ceres 的文档可谓相当丰富详细。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/23/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91-PCL%E5%BA%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/23/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91-PCL%E5%BA%93/" class="post-title-link" itemprop="url">拼接点云(PCL库)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-23 10:21:23 / 修改时间：10:25:27" itemprop="dateCreated datePublished" datetime="2022-03-23T10:21:23+08:00">2022-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/23/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91-PCL%E5%BA%93/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/23/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91-PCL%E5%BA%93/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
             </span>
 
         </div>
@@ -275,7 +489,7 @@
           </blockquote>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/03/22/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91/#more" rel="contents">
+              <a class="btn" href="/2022/03/23/%E6%8B%BC%E6%8E%A5%E7%82%B9%E4%BA%91-PCL%E5%BA%93/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -650,7 +864,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-22 16:10:03" itemprop="dateModified" datetime="2022-03-22T16:10:03+08:00">2022-03-22</time>
+                <time title="修改时间：2022-03-23 10:27:56" itemprop="dateModified" datetime="2022-03-23T10:27:56+08:00">2022-03-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1038,232 +1252,6 @@
   
   
   
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/R-C.jpeg">
-      <meta itemprop="name" content="上善若水">
-      <meta itemprop="description" content="东北大学控制工程研究生">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Robot Go!">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/" class="post-title-link" itemprop="url">SLAM_14习题_ch2</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-14 19:53:50" itemprop="dateCreated datePublished" datetime="2021-11-14T19:53:50+08:00">2021-11-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-22 16:45:40" itemprop="dateModified" datetime="2022-03-22T16:45:40+08:00">2022-03-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/slam14%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">slam14讲</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>本次习题，你需要使⽤ Eigen 库，编写程序，求解⼀个线性⽅程组。为此，你需要先<br>了解⼀些有关线性⽅程组数值解法的原理。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/14/SLAM_14%E4%B9%A0%E9%A2%98_ch2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2021/11/13/%22xxx%22is%20not%20std/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/R-C.jpeg">
-      <meta itemprop="name" content="上善若水">
-      <meta itemprop="description" content="东北大学控制工程研究生">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Robot Go!">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/13/%22xxx%22is%20not%20std/" class="post-title-link" itemprop="url">fatal  error ‘xxxx’ was not declared in this scope</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-11-13 21:38:32" itemprop="dateCreated datePublished" datetime="2021-11-13T21:38:32+08:00">2021-11-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-22 16:44:54" itemprop="dateModified" datetime="2022-03-22T16:44:54+08:00">2022-03-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/slam/" itemprop="url" rel="index"><span itemprop="name">slam</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/13/%22xxx%22is%20not%20std/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/13/%22xxx%22is%20not%20std/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>556</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>运行slam14_ch3代码visualizeGeometry报错error: ‘xxxx’ was not declared in this scope</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/13/%22xxx%22is%20not%20std/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
   
   <nav class="pagination">
@@ -1335,14 +1323,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">7</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -1661,12 +1649,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">106k</span>
+    <span title="站点总字数">125k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">1:37</span>
+    <span title="站点阅读时长">1:54</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
