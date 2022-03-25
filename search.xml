@@ -1,6 +1,406 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>PnP中的BA问题</title>
+    <url>/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三角化，或者由 $RGB-D$ 相机的深度图确定。因此，在双目或$ RGB-D$ 的视觉里程计中，我们可以直接使用$ PnP$ 估计相机运动。而在单目视觉里程计中，必须先进行初始化，然后才能使用 $PnP$。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p><img src="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325170738748.png" alt="image-20220325170738748"></p>
+<p>$PnP $问题有很多种求解方法，例如用三对点估计位姿的 $P3P$，直接线性变换$(DLT)$，$EPnP(Efficient PnP)$，$UPnP$等等。此外，还能用非线性优化的方式，构建最小二乘问题并迭代求解，也就是万金油式的$ Bundle Adjustment$。</p>
+<p>其中$P3P$利用了三角形相似性质，求解投影点 $a, b, c$ 在相机坐标系下的 3D 坐标，最后把问题转换成一个 3D 到 3D 的位姿估计问题($ICP$问题)。但是，$P3P$ 只利用三个点的信息。当给定的配对点多于 3 组时，难以利用更多的信息；而且，如果 3D 点或 2D 点受噪声影响，或者存在误匹配，则算法失效。</p>
+<p>在 $SLAM$ 当中，通常的做法是先使用 $P3P/EPnP$ 等方法估计相机位姿，然后构建最小二乘优化问题对估计值进行调整$（Bundle Adjustment）$。</p>
+<h2 id="Bundle-Adjustment"><a href="#Bundle-Adjustment" class="headerlink" title="Bundle Adjustment"></a>Bundle Adjustment</h2><p>我们可以把 $PnP $问题构建成一个定义于李代数上的非线性最小二乘问题。前面说的线性方法，往往是<strong>先求相</strong><br><strong>机位姿，再求空间点位置</strong>，而非线性优化则是把它们都看成优化变量，放在一起优化。这是一种非常通用的求解方式，我们可以用它对$ PnP $或$ ICP $给出的结果进行优化。</p>
+<h3 id="PnP中的BA问题"><a href="#PnP中的BA问题" class="headerlink" title="PnP中的BA问题"></a>PnP中的BA问题</h3><p>在 $PnP $中，这个$ Bundle Adjustment $问题，是一个最小化重投影误差（Reprojection error）的问题。</p>
+<p><img src="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325192454090.png" alt="image-20220325192454090"></p>
+<p>该问题的误差项，是将像素坐标（观测到的投影位置）与 3D 点按照当前估计的位姿进行投影得到的位置相比较得到的误差，所以称之为重投影误差。如图，我们通过特征匹配，知道了 $p_1$和 $p_2$是同一个空间点$P$ 的投影，但是我们不知道相机的位姿。在初始值中，$P $的投影$\hat{p_2}$与实际的$ p_2$之间有一定的距离。于是我们调整相机的位姿，使得这个距离变小。不过，由于这个调整需要考虑很多个点，所以最后每个点的误差通常都不会精确为零。</p>
+<p>考虑 $n$ 个三维空间点 $P $和它们的投影$ p$，我们希望计算相机的位姿 $R, t，$它的李代数表示为 $ξ$。假设某空间点坐标为$ P_i = [X_i , Y_i , Z_i ]^{T} $，其投影的像素坐标为 $u_i = [u_i , v_i ]^{T} $。<br>像素位置与空间点位置的关系如下：</p>
+<script type="math/tex; mode=display">
+s_i
+\left[
+\begin{matrix}
+u_i\\v_i\\1
+\end{matrix}
+\right]=
+Kexp(ξ^{\land})
+\left[
+\begin{matrix}
+X_i\\Y_i\\Z_i\\1
+\end{matrix}
+\right]</script><p>写成矩阵形式：</p>
+<script type="math/tex; mode=display">
+s_iu_i=Kexp(ξ^{\land})P_i</script><p>由于相机位姿未知以及观测点的噪声，该等式存在一个误差，把误差求和，构建最小二乘问题，然后寻找最好的相机位姿，使它最小化:</p>
+<script type="math/tex; mode=display">
+ξ^{*}=arg \underset{ξ}{min}\frac{1}{2}\sum^n_{i=1}\parallel u_i-\frac{1} {s_i}Kexp(ξ^{\land})P_i\parallel^2_2</script><p>求每个误差项关于优化变量的导数，也就是线性化：</p>
+<script type="math/tex; mode=display">
+e(x+\Delta x)\approx e(x)+J\Delta x</script><p>$e $为像素坐标误差（2 维），$x$ 为相机位姿（6 维）时，$J$ 将是一个 2 × 6 的矩阵。</p>
+<h3 id="优化位姿"><a href="#优化位姿" class="headerlink" title="优化位姿"></a>优化位姿</h3><p>记变换到相机坐标系下的空间点坐标为 $P^′$:</p>
+<script type="math/tex; mode=display">
+s
+\left[
+\begin{matrix}
+u\\v\\1
+\end{matrix}
+\right]=
+\left[
+\begin{matrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{matrix}
+\right]
+\left[
+\begin{matrix}
+X^{′}\\Y^{′}\\Z^{′}
+\end{matrix}
+\right]</script><p>利用第 3 行消去 $s$（实际上就是$ P^{′ }$的距离），得：</p>
+<script type="math/tex; mode=display">
+u=f_x\frac{X^′}{Z^′}+c_x\\
+v=f_y\frac{Y^′}{Z^′}+c_y</script><p>对 $ξ^{\land} $左乘扰动量$ δξ$，然后考虑 $e$ 的变化关于扰动量的导数。利用链式法则:</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi}=
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{e(\delta \xi⊕\xi)}{\delta \xi}=
+\frac{\partial e}{\partial P^′}
+\frac{\partial P^′}{\partial \delta \xi}</script><p>其中：$\frac{\partial e}{\partial P^′}$</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P^′}=-
+\begin{bmatrix}
+\frac{\partial u}{\partial X^′}&
+\frac{\partial u}{\partial Y^′}&
+\frac{\partial u}{\partial Z^′}            \\ 
+\frac{\partial v}{\partial X^′}&
+\frac{\partial v}{\partial Y^′}&
+\frac{\partial v}{\partial Z^′}
+\end{bmatrix}=-
+\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+\end{bmatrix}</script><p>$\frac{\partial P^′}{\partial \delta \xi}$为变换后的点关于李代数的导数：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{\partial P^′}{\partial \delta \xi}&=
+\frac{\partial(TP)}{\partial \delta \xi} \\ &=
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{exp(\delta \xi ^{\land})exp(\xi ^{\land})p-exp(\xi ^{\land})p}{\delta \xi}\\&\approx
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{(I+\delta \xi ^{\land})exp(\xi ^{\land})p-exp(\xi ^{\land})p}{\delta \xi}\\&=
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{\delta \xi ^{\land}exp(\xi ^{\land})p}{\delta \xi}\\&=
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{\begin{bmatrix}
+\delta \phi^{\land}&\delta \rho \\
+0^T&0
+\end{bmatrix}
+\begin{bmatrix}
+Rp+t \\
+1
+\end{bmatrix}
+}{\delta \xi}\\&=
+\underset{\delta \xi \rightarrow0}{lim}
+\frac{\begin{bmatrix}
+\delta \phi^{\land}(Rp+t)+\delta \rho  \\
+0
+\end{bmatrix}
+}
+{\delta \xi}\\&=
+\begin{bmatrix}
+I &-(RP+t)^{\land}\\
+0^{T}&0^{T}
+\end{bmatrix}\\&=
+\begin{bmatrix}
+I &-P^{′\land}\\
+0^{T}&0^{T}
+\end{bmatrix}\\&=
+(TP)^⊙
+
+
+
+\end{align}</script><p>两项相乘：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{\partial e}{\partial \delta \xi}&=
+\frac{\partial e}{\partial P^′}
+\frac{\partial P^′}{\partial \delta \xi}\\&=-
+\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
+&-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
+\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+&-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&-\frac{f_yX^′}{Z^{′}}
+\end{bmatrix}\\&=
+J
+\end{align}</script><p>这个雅可比矩阵描述了重投影误差关于相机位姿李代数的一阶变化关系</p>
+<h3 id="优化空间点位置"><a href="#优化空间点位置" class="headerlink" title="优化空间点位置"></a>优化空间点位置</h3><p>讨论 $e$关于空间点 $P $的导数</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P}=
+\frac{\partial e}{\partial P^′}
+\frac{\partial P^′}{\partial P}</script><p>由于：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+P^′&=exp(\xi ^{\land})P=RP+t\\
+\frac{\partial P^′}{\partial P}&=R
+\end{align}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial P}=-
+\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+\end{bmatrix}R</script><p><strong>我们推导了观测相机方程关于相机位姿与特征点的两个导数矩阵。它们十分重要，能够在优化过程中提供重要的梯度方向，指导优化的迭代。</strong></p>
+]]></content>
+      <categories>
+        <category>SLAM十四讲</category>
+      </categories>
+      <tags>
+        <tag>SLAM实践</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>求解PnP并使用BA优化</title>
+    <url>/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>我们用 $OpenCV $提供的$ EPnP $求解 $PnP $问题，然后通过 $g2o $对结果进行优化。由于 $PnP$ 需要使用 $3D$ 点，为了避免初始化带来的麻烦，我们使用了 $RGB-D $相机中的深度图，作为特征点的 3D位置。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>在例程中，我们得到配对特征点后，在第一个图的深度图中寻找它们的深度，并求出空间位置。以此空间位置为 $3D $点，再以第二个图像的像素位置为$ 2D $点，调用 $EPnP$ 求解 $PnP $问题。</p>
+<h2 id="1-特征点匹配"><a href="#1-特征点匹配" class="headerlink" title="1.特征点匹配"></a>1.特征点匹配</h2><h2 id="2-建立3D点"><a href="#2-建立3D点" class="headerlink" title="2.建立3D点"></a>2.建立3D点</h2><h2 id="3-求解PnP"><a href="#3-求解PnP" class="headerlink" title="3.求解PnP"></a>3.求解PnP</h2><h2 id="4-使用BA优化"><a href="#4-使用BA优化" class="headerlink" title="4.使用BA优化"></a>4.使用BA优化</h2>]]></content>
+      <categories>
+        <category>SLAM十四讲</category>
+      </categories>
+      <tags>
+        <tag>SLAM实践</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>md公式积累</title>
+    <url>/2022/03/25/md%E5%85%AC%E5%BC%8F%E7%A7%AF%E7%B4%AF/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>Makedown常用符号。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="矩阵："><a href="#矩阵：" class="headerlink" title="矩阵："></a>矩阵：</h1><ul>
+<li>matrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{matrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{matrix}</script><ul>
+<li>pmatrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{pmatrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{pmatrix}</script><ul>
+<li>bmatrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{bmatrix}</script><ul>
+<li>Bmatrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{Bmatrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{Bmatrix}</script><ul>
+<li>vmatrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{vmatrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{vmatrix}</script><ul>
+<li>Vmatrix</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{Vmatrix}
+f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
+\end{Vmatrix}</script><h1 id="约等于，三角形"><a href="#约等于，三角形" class="headerlink" title="约等于，三角形"></a>约等于，三角形</h1><script type="math/tex; mode=display">
+e(x+\Delta x)\approx e(x)+J\Delta x</script><h1 id="集合符号"><a href="#集合符号" class="headerlink" title="集合符号"></a>集合符号</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>\in</th>
+<th>∈</th>
+<th>属于</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\notin</td>
+<td>∉</td>
+<td>不属于</td>
+</tr>
+<tr>
+<td>\subset</td>
+<td>⊂</td>
+<td>真子集</td>
+</tr>
+<tr>
+<td>\not \subset</td>
+<td>⊄</td>
+<td>非子集</td>
+</tr>
+<tr>
+<td>\subseteq</td>
+<td>⊆</td>
+<td>子集</td>
+</tr>
+<tr>
+<td>\supset</td>
+<td>⊃</td>
+<td>超集</td>
+</tr>
+<tr>
+<td>\supseteq</td>
+<td>⊇</td>
+<td>超集</td>
+</tr>
+<tr>
+<td>\cup</td>
+<td>∪</td>
+<td>并集</td>
+</tr>
+<tr>
+<td>\cap</td>
+<td>∩</td>
+<td>交集</td>
+</tr>
+<tr>
+<td>\mathbb{R}</td>
+<td>R</td>
+<td>实数集</td>
+</tr>
+<tr>
+<td>\emptyset</td>
+<td>∅</td>
+<td>空集</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h1 id="希腊符号"><a href="#希腊符号" class="headerlink" title="希腊符号"></a>希腊符号</h1><div class="table-container">
+<table>
+<thead>
+<tr>
+<th>\alpha</th>
+<th>α</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\beta</td>
+<td>β</td>
+</tr>
+<tr>
+<td>\gamma</td>
+<td>γ</td>
+</tr>
+<tr>
+<td>\Gamma</td>
+<td>Γ</td>
+</tr>
+<tr>
+<td>\theta</td>
+<td>θ</td>
+</tr>
+<tr>
+<td>\Theta</td>
+<td>Θ</td>
+</tr>
+<tr>
+<td>\delta</td>
+<td>δ</td>
+</tr>
+<tr>
+<td>\Delta</td>
+<td>Δ</td>
+</tr>
+<tr>
+<td>\triangledown</td>
+<td>▽</td>
+</tr>
+<tr>
+<td>\epsilon</td>
+<td>ϵ</td>
+</tr>
+<tr>
+<td>\zeta</td>
+<td>ζ</td>
+</tr>
+<tr>
+<td>\eta</td>
+<td>η</td>
+</tr>
+<tr>
+<td>\kappa</td>
+<td>κ</td>
+</tr>
+<tr>
+<td>\lambda</td>
+<td>λ</td>
+</tr>
+<tr>
+<td>\mu</td>
+<td>μ</td>
+</tr>
+<tr>
+<td>\nu</td>
+<td>ν</td>
+</tr>
+<tr>
+<td>\xi</td>
+<td>ξ</td>
+</tr>
+<tr>
+<td>\pi</td>
+<td>π</td>
+</tr>
+<tr>
+<td>\sigma</td>
+<td>σ</td>
+</tr>
+<tr>
+<td>\tau</td>
+<td>τ</td>
+</tr>
+<tr>
+<td>\upsilon</td>
+<td>υ</td>
+</tr>
+<tr>
+<td>\phi</td>
+<td>ϕ</td>
+</tr>
+<tr>
+<td>\omega</td>
+<td>ω</td>
+</tr>
+<tr>
+<td>\rho</td>
+<td>$\rho $</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>极限</p>
+<script type="math/tex; mode=display">
+\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script>]]></content>
+      <categories>
+        <category>Makedown</category>
+      </categories>
+      <tags>
+        <tag>Makedown</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对极约束求解相机运动</title>
     <url>/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -125,7 +525,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -168,7 +568,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -200,7 +600,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -256,7 +656,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -282,7 +682,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -310,7 +710,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -330,7 +730,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -351,7 +751,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -407,7 +807,7 @@ x_3 & x_4
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
   </entry>
   <entry>
@@ -437,13 +837,8 @@ x_3 & x_4
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>实践</tag>
+        <tag>SLAM实践</tag>
       </tags>
-  </entry>
-  <entry>
-    <title></title>
-    <url>/2021/11/22/CMake/</url>
-    <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title>线性代数知识补充</title>
