@@ -22,17 +22,22 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="东北大学控制工程研究生">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Robot Go!">
-<meta property="og:url" content="http://lukeyalvin.top/tags/eigen/index.html">
+  <meta name="description" content="此次实践使用RGB-D相机主要是因为它省略掉了深度的恢复部分，如果使用单目相机，则需要进行深度的恢复，在之前的实践内容中，我们使用单目相机主要是采用基于特征点的深度恢复，后面会介绍相应的基于块匹配的深度恢复。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RGB-D直接法实践">
+<meta property="og:url" content="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="东北大学控制工程研究生">
+<meta property="og:description" content="此次实践使用RGB-D相机主要是因为它省略掉了深度的恢复部分，如果使用单目相机，则需要进行深度的恢复，在之前的实践内容中，我们使用单目相机主要是采用基于特征点的深度恢复，后面会介绍相应的基于块匹配的深度恢复。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/image-20220329164608300.png">
+<meta property="article:published_time" content="2022-03-29T08:19:56.968Z">
+<meta property="article:modified_time" content="2022-03-29T11:05:13.949Z">
 <meta property="article:author" content="上善若水">
+<meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/image-20220329164608300.png">
 
-<link rel="canonical" href="http://lukeyalvin.top/tags/eigen/">
+<link rel="canonical" href="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/">
 
 
 <script id="page-configurations">
@@ -40,12 +45,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: eigen | Robot Go!</title>
+  <title>RGB-D直接法实践 | Robot Go!</title>
   
 
 
@@ -185,57 +190,220 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RGB-D直接法实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-29 16:19:56 / 修改时间：19:05:13" itemprop="dateCreated datePublished" datetime="2022-03-29T16:19:56+08:00">2022-03-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">eigen
-          <small>标签</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>990</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>此次实践使用RGB-D相机主要是因为它省略掉了深度的恢复部分，如果使用单目相机，则需要进行深度的恢复，在之前的实践内容中，我们使用单目相机主要是采用基于特征点的深度恢复，后面会介绍相应的基于块匹配的深度恢复。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="直接法"><a href="#直接法" class="headerlink" title="直接法"></a>直接法</h1><p>直接法根据空间点$P$的来源不同，对应不同的直接法。</p>
+<ul>
+<li>稀疏直接法</li>
+</ul>
+<p>若$P$来自于稀疏关键点，我们称之为稀疏直接法。通常我们使用数百个至上千个关键点，并且像 L-K 光流那样，假设它周围像素也是不变的。这种稀疏直接法不必计算描述子，并且只使用数百个像素，因此速度最快，但只能计算稀疏的重构。</p>
+<ul>
+<li>半稠密（Semi-Dense）的直接法</li>
+</ul>
+<p>如果像素梯度为零，整一项雅可比就为零，不会对计算运动增量有任何贡献。因此，可以考虑只使用带有梯度的像素点，舍弃像素梯度不明显的地方。</p>
+<script type="math/tex; mode=display">
+J=-\frac{\partial I_2}{\partial u}
+\frac{\partial u}{\partial \delta \xi}</script><ul>
+<li>稠密直接法</li>
+</ul>
+<p>稠密重构需要计算所有像素（一般几十万至几百万个），因此多数不能在现有的 CPU 上实时计算，需要 GPU 的加速。但是，如前面所讨论的，梯度不明显的点，在运动估计中不会有太大贡献，在重构时也会难以估计位置。</p>
+<blockquote>
+<p>稀疏到稠密重构，都可以用直接法来计算。它们的计算量是逐渐增长的。<strong>稀疏方法可以快速地求解相机位姿，而稠密方法可以建立完整地图。</strong>具体使用哪种方法，需要视机器人的应用环境而定。特别地，在低端的计算平台上，稀疏直接法可以做到非常快速的效果，适用于实时性较高且计算资源有限的场合</p>
+</blockquote>
+<h1 id="稀疏直接法"><a href="#稀疏直接法" class="headerlink" title="稀疏直接法"></a>稀疏直接法</h1><p>由于求解直接法最后等价于求解一个优化问题，因此我们可以使用$ g2o$ 或$ Ceres $这些优化库帮助我们求解。本节以 $g2o $为例设计实验，在使用 $g2o$之前，需要把直接法抽象成一个图优化问题。显然，直接法是由以下顶点和边组成的：</p>
+<ul>
+<li>优化变量</li>
+</ul>
+<p>优化变量为<strong>一个相机位姿</strong>，因此需要一个位姿顶点。由于我们在推导中使用了李代数，故程序中使用李代数表达的 $SE(3) $位姿顶点。可以使用“Ver-texSE3Expmap”作为相机位姿。</p>
+<ul>
+<li>误差项</li>
+</ul>
+<p>误差项为单个像素的光度误差。由于整个优化过程中 $I_1 (p_1 ) $保持不变，我们可以把它当成一个固定的预设值，然后调整相机位姿，使 $I_2 (p_2 )$ 接近这个值。于是，这种边只连接一个顶点，为一元边。由于 $g2o $中本身没有计算光度误差的边，我们需要自己定义一种新的边。</p>
+<p><img src="/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/image-20220329164608300.png" alt="image-20220329164608300"></p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-13T10:29:52+08:00"
-              content="2021-11-13">
-          11-13
-        </time>
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="上善若水 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="上善若水 支付宝">
+        <p>支付宝</p>
       </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/13/eigen%E6%8A%A5%E9%94%99/" itemprop="url">
-            <span itemprop="name">fatal error Eigen/Core No such file or directory</span>
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>上善若水
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/" title="RGB-D直接法实践">http://lukeyalvin.top/2022/03/29/RGB-D直接法实践/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
           </a>
-      </div>
-
-    </header>
-  </article>
-
+        </div>
     </div>
   </div>
-  
-  
-  
 
-  
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/29/%E7%9B%B4%E6%8E%A5%E6%B3%95%E7%9A%84%E6%8E%A8%E5%AF%BC/" rel="prev" title="直接法的推导">
+      <i class="fa fa-chevron-left"></i> 直接法的推导
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -282,6 +450,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E6%B3%95"><span class="nav-text">直接法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A8%80%E7%96%8F%E7%9B%B4%E6%8E%A5%E6%B3%95"><span class="nav-text">稀疏直接法</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -802,6 +971,61 @@ window.addEventListener('pjax:success', () => {
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

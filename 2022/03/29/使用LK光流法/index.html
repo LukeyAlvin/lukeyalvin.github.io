@@ -22,23 +22,23 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三">
+  <meta name="description" content="光流是一种描述像素随着时间，在图像之间运动的方法。随着时间的经过，同一个像素会在图像中运动，而我们希望追踪它的运动过程。计算部分像素运动的称为稀疏光流，计算所有像素的称为稠密光流。稀疏光流以$ Lucas-Kanade$ 光流为代表，并可以在 SLAM 中用于跟踪特征点位置。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="PnP中的BA问题">
-<meta property="og:url" content="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/index.html">
+<meta property="og:title" content="使用LK光流法">
+<meta property="og:url" content="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三">
+<meta property="og:description" content="光流是一种描述像素随着时间，在图像之间运动的方法。随着时间的经过，同一个像素会在图像中运动，而我们希望追踪它的运动过程。计算部分像素运动的称为稀疏光流，计算所有像素的称为稠密光流。稀疏光流以$ Lucas-Kanade$ 光流为代表，并可以在 SLAM 中用于跟踪特征点位置。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325170738748.png">
-<meta property="og:image" content="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325192454090.png">
-<meta property="article:published_time" content="2022-03-25T13:30:37.875Z">
-<meta property="article:modified_time" content="2022-03-29T08:03:44.082Z">
+<meta property="og:image" content="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/image-20220329104428515.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/image-20220329144916230.png">
+<meta property="article:published_time" content="2022-03-29T02:32:32.151Z">
+<meta property="article:modified_time" content="2022-03-29T06:53:47.214Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325170738748.png">
+<meta name="twitter:image" content="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/image-20220329104428515.png">
 
-<link rel="canonical" href="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/">
+<link rel="canonical" href="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/">
 
 
 <script id="page-configurations">
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>PnP中的BA问题 | Robot Go!</title>
+  <title>使用LK光流法 | Robot Go!</title>
   
 
 
@@ -198,7 +198,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/R-C.jpeg">
@@ -211,7 +211,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          PnP中的BA问题
+          使用LK光流法
         </h1>
 
         <div class="post-meta">
@@ -220,16 +220,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-03-25 21:30:37" itemprop="dateCreated datePublished" datetime="2022-03-25T21:30:37+08:00">2022-03-25</time>
+              <time title="创建时间：2022-03-29 10:32:32 / 修改时间：14:53:47" itemprop="dateCreated datePublished" datetime="2022-03-29T10:32:32+08:00">2022-03-29</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 16:03:44" itemprop="dateModified" datetime="2022-03-29T16:03:44+08:00">2022-03-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -256,8 +250,8 @@
       </span>
       <span class="post-meta-item-text">Valine：</span>
     
-    <a title="valine" href="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/" itemprop="commentCount"></span>
+    <a title="valine" href="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -267,14 +261,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4.2k</span>
+              <span>6.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -288,147 +282,112 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三角化，或者由 $RGB-D$ 相机的深度图确定。因此，在双目或$ RGB-D$ 的视觉里程计中，我们可以直接使用$ PnP$ 估计相机运动。而在单目视觉里程计中，必须先进行初始化，然后才能使用 $PnP$。</p>
+            <p>光流是一种描述像素随着时间，在图像之间运动的方法。随着时间的经过，同一个像素会在图像中运动，而我们希望追踪它的运动过程。计算部分像素运动的称为稀疏光流，计算所有像素的称为稠密光流。稀疏光流以$ Lucas-Kanade$ 光流为代表，并可以在 SLAM 中用于跟踪特征点位置。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325170738748.png" alt="image-20220325170738748"></p>
-<p>$PnP $问题有很多种求解方法，例如用三对点估计位姿的 $P3P$，直接线性变换$(DLT)$，$EPnP(Efficient PnP)$，$UPnP$等等。此外，还能用非线性优化的方式，构建最小二乘问题并迭代求解，也就是万金油式的$ Bundle Adjustment$。</p>
-<p>其中$P3P$利用了三角形相似性质，求解投影点 $a, b, c$ 在相机坐标系下的 3D 坐标，最后把问题转换成一个 3D 到 3D 的位姿估计问题($ICP$问题)。但是，$P3P$ 只利用三个点的信息。当给定的配对点多于 3 组时，难以利用更多的信息；而且，如果 3D 点或 2D 点受噪声影响，或者存在误匹配，则算法失效。</p>
-<p>在 $SLAM$ 当中，通常的做法是先使用 $P3P/EPnP$ 等方法估计相机位姿，然后构建最小二乘优化问题对估计值进行调整$（Bundle Adjustment）$。</p>
-<h2 id="Bundle-Adjustment"><a href="#Bundle-Adjustment" class="headerlink" title="Bundle Adjustment"></a>Bundle Adjustment</h2><p>我们可以把 $PnP $问题构建成一个定义于李代数上的非线性最小二乘问题。前面说的线性方法，往往是<strong>先求相</strong><br><strong>机位姿，再求空间点位置</strong>，而非线性优化则是把它们都看成优化变量，放在一起优化。这是一种非常通用的求解方式，我们可以用它对$ PnP $或$ ICP $给出的结果进行优化。</p>
-<h3 id="PnP中的BA问题"><a href="#PnP中的BA问题" class="headerlink" title="PnP中的BA问题"></a>PnP中的BA问题</h3><p>在 $PnP $中，这个$ Bundle Adjustment $问题，是一个最小化重投影误差（Reprojection error）的问题。</p>
-<p><img src="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/image-20220325192454090.png" alt="image-20220325192454090"></p>
-<p>该问题的误差项，是将像素坐标（观测到的投影位置）与 3D 点按照当前估计的位姿进行投影得到的位置相比较得到的误差，所以称之为重投影误差。如图，我们通过特征匹配，知道了 $p_1$和 $p_2$是同一个空间点$P$ 的投影，但是我们不知道相机的位姿。在初始值中，$P $的投影$\hat{p_2}$与实际的$ p_2$之间有一定的距离。于是我们调整相机的位姿，使得这个距离变小。不过，由于这个调整需要考虑很多个点，所以最后每个点的误差通常都不会精确为零。</p>
-<p>考虑 $n$ 个三维空间点 $P $和它们的投影$ p$，我们希望计算相机的位姿 $R, t，$它的李代数表示为 $ξ$。假设某空间点坐标为$ P_i = [X_i , Y_i , Z_i ]^{T} $，其投影的像素坐标为 $u_i = [u_i , v_i ]^{T} $。<br>像素位置与空间点位置的关系如下：</p>
+<p><img src="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/image-20220329104428515.png" alt="image-20220329104428515"></p>
+<h1 id="LK光流法原理"><a href="#LK光流法原理" class="headerlink" title="LK光流法原理"></a>LK光流法原理</h1><p>在$ LK $光流中，我们认为来自相机的图像是随时间变化的。图像可以看作时间的函数：$I(t)$。那么，一个在$ t $时刻，位于$ (x, y)$ 处的像素，它的灰度可以写成</p>
 <script type="math/tex; mode=display">
-s_i
-\left[
-\begin{matrix}
-u_i\\v_i\\1
-\end{matrix}
-\right]=
-Kexp(ξ^{\land})
-\left[
-\begin{matrix}
-X_i\\Y_i\\Z_i\\1
-\end{matrix}
-\right]</script><p>写成矩阵形式：</p>
+I(x, y, t).</script><p>灰度不变假设：</p>
 <script type="math/tex; mode=display">
-s_iu_i=Kexp(ξ^{\land})P_i</script><p>由于相机位姿未知以及观测点的噪声，该等式存在一个误差，把误差求和，构建最小二乘问题，然后寻找最好的相机位姿，使它最小化:</p>
+I(x+d_x,y+d_y,t+d_t)=I(x, y, t)</script><p>对左边进行泰勒展开，保留一阶项，得：</p>
 <script type="math/tex; mode=display">
-ξ^{*}=arg \underset{ξ}{min}\frac{1}{2}\sum^n_{i=1}\parallel u_i-\frac{1} {s_i}Kexp(ξ^{\land})P_i\parallel^2_2</script><p>求每个误差项关于优化变量的导数，也就是线性化：</p>
+I (x + dx, y + dy, t + dt) \approx I (x, y, t)
++\frac{\partial I}{\partial x}d_x
++\frac{\partial I}{\partial y}d_y
++\frac{\partial I}{\partial t}d_t</script><p>假设了灰度不变:</p>
 <script type="math/tex; mode=display">
-e(x+\Delta x)\approx e(x)+J\Delta x</script><p>$e $为像素坐标误差（2 维），$x$ 为相机位姿（6 维）时，$J$ 将是一个 2 × 6 的矩阵。</p>
-<h3 id="优化位姿"><a href="#优化位姿" class="headerlink" title="优化位姿"></a>优化位姿</h3><p>记变换到相机坐标系下的空间点坐标为 $P^′$:</p>
+\frac{\partial I}{\partial x}d_x
++\frac{\partial I}{\partial y}d_y
++\frac{\partial I}{\partial t}d_t=0</script><p>两边除以 $dt$:</p>
 <script type="math/tex; mode=display">
-s
-\left[
-\begin{matrix}
-u\\v\\1
-\end{matrix}
-\right]=
-\left[
-\begin{matrix}
-f_x &0 &c_x\\0 &f_y &c_y\\0&0 &1
-\end{matrix}
-\right]
-\left[
-\begin{matrix}
-X^{′}\\Y^{′}\\Z^{′}
-\end{matrix}
-\right]</script><p>利用第 3 行消去 $s$（实际上就是$ P^{′ }$的距离），得：</p>
+\frac{\partial I}{\partial x}\frac{d_x}{d_t}
++\frac{\partial I}{\partial y}\frac{d_y}{d_t}
+=-\frac{\partial I}{\partial t}</script><p>其中: $dx/dt $为像素在 $x $轴上运动速度，记为$u$， $dy/dt $为像素在 $y$轴上运动速度，记为$v$</p>
+<p>$\partial I/\partial x$为图像在该点处 $x$ 方向的梯度，记为$I_x$，$\partial I/\partial y$为图像在该点处 $y$ 方向的梯度，记为$I_y$</p>
+<p>图像灰度对时间的变化量记为 $I_t$</p>
 <script type="math/tex; mode=display">
-u=f_x\frac{X^′}{Z^′}+c_x\\
-v=f_y\frac{Y^′}{Z^′}+c_y</script><p>对 $ξ^{\land} $左乘扰动量$ δξ$，然后考虑 $e$ 的变化关于扰动量的导数。利用链式法则:</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial \delta \xi}=
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{e(\delta \xi⊕\xi)}{\delta \xi}=
-\frac{\partial e}{\partial P^′}
-\frac{\partial P^′}{\partial \delta \xi}</script><p>其中：$\frac{\partial e}{\partial P^′}$</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P^′}=-
 \begin{bmatrix}
-\frac{\partial u}{\partial X^′}&
-\frac{\partial u}{\partial Y^′}&
-\frac{\partial u}{\partial Z^′}            \\ 
-\frac{\partial v}{\partial X^′}&
-\frac{\partial v}{\partial Y^′}&
-\frac{\partial v}{\partial Z^′}
-\end{bmatrix}=-
-\begin{bmatrix}
-\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
-0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
-\end{bmatrix}</script><p>$\frac{\partial P^′}{\partial \delta \xi}$为变换后的点关于李代数的导数：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-\frac{\partial P^′}{\partial \delta \xi}&=
-\frac{\partial(TP)}{\partial \delta \xi} \\ &=
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{exp(\delta \xi ^{\land})exp(\xi ^{\land})p-exp(\xi ^{\land})p}{\delta \xi}\\&\approx
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{(I+\delta \xi ^{\land})exp(\xi ^{\land})p-exp(\xi ^{\land})p}{\delta \xi}\\&=
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{\delta \xi ^{\land}exp(\xi ^{\land})p}{\delta \xi}\\&=
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{\begin{bmatrix}
-\delta \phi^{\land}&\delta \rho \\
-0^T&0
+I_x & I_y
 \end{bmatrix}
 \begin{bmatrix}
-Rp+t \\
-1
+u \\ v
 \end{bmatrix}
-}{\delta \xi}\\&=
-\underset{\delta \xi \rightarrow0}{lim}
-\frac{\begin{bmatrix}
-\delta \phi^{\land}(Rp+t)+\delta \rho  \\
-0
+= - I_t</script><p>我们想计算的是像素的运动$ u, v$，但是该式是带有两个变量的一次方程，仅凭它无法计算出$ u, v$。因此，必须引入额外的约束来计算$ u, v$。在$ LK $光流中，我们假设某一个窗口内的像素具有相同的运动。</p>
+<p>考虑一个大小为 $w × w$ 大小的窗口，它含有 $w^2 $数量的像素。由于该窗口内像素具有同样的运动，因此我们共有 $w^2 $个方程：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+I_x & I_y
+\end{bmatrix}_k
+\begin{bmatrix}
+u \\ v
 \end{bmatrix}
-}
-{\delta \xi}\\&=
-\begin{bmatrix}
-I &-(RP+t)^{\land}\\
-0^{T}&0^{T}
-\end{bmatrix}\\&=
-\begin{bmatrix}
-I &-P^{′\land}\\
-0^{T}&0^{T}
-\end{bmatrix}\\&=
-(TP)^⊙
-\end{align}</script><p>两项相乘：</p>
+= - I_{tk},k=1,....,w^2</script><p>即为：</p>
 <script type="math/tex; mode=display">
-\begin{align}
-\frac{\partial e}{\partial \delta \xi}&=
-\frac{\partial e}{\partial P^′}
-\frac{\partial P^′}{\partial \delta \xi}\\&=-
+A = 
 \begin{bmatrix}
-\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
-&-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
-\\
-0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
-&-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&-\frac{f_yX^′}{Z^{′}}
-\end{bmatrix}\\&=
-J
-\end{align}</script><p>这个雅可比矩阵描述了重投影误差关于相机位姿李代数的一阶变化关系</p>
-<h3 id="优化空间点位置"><a href="#优化空间点位置" class="headerlink" title="优化空间点位置"></a>优化空间点位置</h3><p>讨论 $e$关于空间点 $P $的导数</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P}=
-\frac{\partial e}{\partial P^′}
-\frac{\partial P^′}{\partial P}</script><p>由于：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-P^′&=exp(\xi ^{\land})P=RP+t\\
-\frac{\partial P^′}{\partial P}&=R
-\end{align}</script><p>所以：</p>
-<script type="math/tex; mode=display">
-\frac{\partial e}{\partial P}=-
 \begin{bmatrix}
-\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
-0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
-\end{bmatrix}R</script><p><strong>我们推导了观测相机方程关于相机位姿与特征点的两个导数矩阵。它们十分重要，能够在优化过程中提供重要的梯度方向，指导优化的迭代。</strong></p>
+I_x & I_y
+\end{bmatrix}_1\\.\\.\\
+\begin{bmatrix}
+I_x & I_y
+\end{bmatrix}_k
+\end{bmatrix},
+b=\begin{bmatrix}
+I_{t1} \\.\\.\\I_{tk} 
+\end{bmatrix}</script><p>于是整个方程为：</p>
+<script type="math/tex; mode=display">
+A\begin{bmatrix}
+u\\u
+\end{bmatrix}=-b</script><p>这是一个关于 u, v 的超定线性方程，传统解法是求最小二乘解。最小二乘在很多时候都用到过：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+u\\u
+\end{bmatrix}^*
+=-(A^TA)^{-1}A^Tb</script><p>这样就得到了像素在图像间的运动速度 $u, v$</p>
+<h1 id="使用LK光流法"><a href="#使用LK光流法" class="headerlink" title="使用LK光流法"></a>使用LK光流法</h1><p>在使用数据之前，需要根据采集时间，对数据进行一次时间上的对齐，以便对彩色图和深度图进行配对。TUM 提供了一个 python 脚本“asso-ciate.py”帮我们完成这件事。请把此文件放到数据集目录下，运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python associate.py rgb.txt depth.txt &gt; associate.txt</span><br></pre></td></tr></table></figure>
+<h2 id="光流追踪的原理"><a href="#光流追踪的原理" class="headerlink" title="光流追踪的原理"></a>光流追踪的原理</h2><ul>
+<li><p>cv2.FastFeatureDetector()：Fast角点检测器确定要追踪的特征点</p>
+</li>
+<li><p>cv2.calcOpticalFlowPyrLK()： 追踪视频中的稀疏特征点</p>
+</li>
+<li><p>cv2.calcOpticalFlowFarneback()： 追踪视频中的密集特征点</p>
+</li>
+</ul>
+<p>取第一帧，检测其中的一些 Fast角点，使用 Lucas-Kanade 光流迭代跟踪这些点。对于函数 cv2.calcOpticalFlowPyrLK() 传递前一帧、前一个点和下一帧。它返回下一个点以及一些状态编号，如果找到下一个点，则值为 1，否则为零。然后在下一步中迭代地将这些下一个点作为前一个点传递。</p>
+<h2 id="光流的两种方法"><a href="#光流的两种方法" class="headerlink" title="光流的两种方法"></a>光流的两种方法</h2><p>OpenCV提供了俩种算法计算光流，分别通过：cv2.calcOpticalFlowPyrLK()、cv2.calcOpticalFlowFarneback实现；</p>
+<ul>
+<li>稀疏光流： 通过 Lucas-Kanade 方法计算稀疏特征集的光流（使用 角点检测算法检测到的角点）。</li>
+</ul>
+<p>参数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">cv::calcOpticalFlowPyrLK</span>	<span class="params">(	</span></span></span><br><span class="line"><span class="params"><span class="function">        InputArray 	prevImg, <span class="comment">//上一帧单通道灰度图</span></span></span></span><br><span class="line"><span class="params"><span class="function">        InputArray 	nextImg, <span class="comment">//下一帧单通道灰度图</span></span></span></span><br><span class="line"><span class="params"><span class="function">        InputArray 	prevPts, <span class="comment">//像素点上一帧二维坐标pts</span></span></span></span><br><span class="line"><span class="params"><span class="function">        InputOutputArray 	nextPts,<span class="comment">//像素点上一帧二维坐标pts</span></span></span></span><br><span class="line"><span class="params"><span class="function">        OutputArray 	status,<span class="comment">// 输出状态向量,（无符号字符）;如果找到相应特征的流，则向量的每个元素设置为1，否则设置为0。</span></span></span></span><br><span class="line"><span class="params"><span class="function">        OutputArray 	err, <span class="comment">//输出错误的矢量;如果未找到流，则未定义错误（使用status参数查找此类情况）。</span></span></span></span><br><span class="line"><span class="params"><span class="function">        Size 	winSize = Size(<span class="number">21</span>, <span class="number">21</span>),<span class="comment">//每个金字塔等级的搜索窗口的winSize大小。</span></span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">int</span> 	maxLevel = <span class="number">3</span>,<span class="comment">// 基于0的最大金字塔等级数;如果设置为0，则不使用金字塔（单级），如果设置为1，则使用两个级别，依此类推;</span></span></span></span><br><span class="line"><span class="params"><span class="function">        TermCriteria 	criteria = TermCriteria(TermCriteria::COUNT+TermCriteria::EPS, <span class="number">30</span>, <span class="number">0.01</span>),<span class="comment">//参数，指定迭代搜索算法的终止条件</span></span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">int</span> 	flags = <span class="number">0</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">double</span> 	minEigThreshold = <span class="number">1e-4</span> <span class="comment">//算法计算光流方程的2x2正常矩阵的最小特征值，除以窗口中的像素数;</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span>	</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>密集光流： 通过 Gunner Farneback 来寻找密集光流。它计算帧中所有点的光流。</li>
+</ul>
+<h2 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;输入数据集所在的路径！&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    string path_to_dataset = argv[<span class="number">1</span>];</span><br><span class="line">    string associate_file = path_to_dataset + <span class="string">&quot;/associate.txt&quot;</span>;</span><br><span class="line">    <span class="function">ifstream <span class="title">fin</span><span class="params">(associate_file)</span></span>;</span><br><span class="line">    <span class="keyword">if</span> (!fin)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;associate.txt文件不存在！&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    string rgb_file, depth_file, time_rgb, time_depth;</span><br><span class="line">    list&lt;cv::Point2f&gt; keypoints; <span class="comment">// 因为要删除跟踪失败的点，使用list</span></span><br><span class="line">    cv::Mat color, depth, last_color;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> index = <span class="number">0</span>; index &lt; <span class="number">100</span>; index++)</span><br><span class="line">    &#123;</span><br><span class="line">        fin &gt;&gt; time_rgb &gt;&gt; rgb_file &gt;&gt; time_depth &gt;&gt; depth_file;</span><br><span class="line">        color = cv::<span class="built_in">imread</span>(path_to_dataset + <span class="string">&quot;/&quot;</span> + rgb_file);       <span class="comment">// 读入彩色图</span></span><br><span class="line">        depth = cv::<span class="built_in">imread</span>(path_to_dataset + <span class="string">&quot;/&quot;</span> + depth_file, <span class="number">-1</span>); <span class="comment">// 读入深度图</span></span><br><span class="line">        <span class="comment">// 1.对第一帧提取FAST特征点</span></span><br><span class="line">        <span class="keyword">if</span> (index == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            vector&lt;cv::KeyPoint&gt; kps;</span><br><span class="line">            cv::Ptr&lt;cv::FastFeatureDetector&gt; detector = cv::FastFeatureDetector::<span class="built_in">create</span>();</span><br><span class="line">            detector-&gt;<span class="built_in">detect</span>(color, kps); <span class="comment">// 提取FAST特征点</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">auto</span> kp : kps)           <span class="comment">// 把提取的特征点存入list</span></span><br><span class="line">                keypoints.<span class="built_in">push_back</span>(kp.pt);</span><br><span class="line">            last_color = color;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 2.对其他帧使用LK跟踪特征点</span></span><br><span class="line">        <span class="keyword">if</span> (color.data == <span class="literal">nullptr</span> &amp;&amp; depth.data == <span class="literal">nullptr</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        vector&lt;cv::Point2f&gt; next_keypoints;</span><br><span class="line">        vector&lt;cv::Point2f&gt; prev_keypoints;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> kp : keypoints)</span><br><span class="line">            prev_keypoints.<span class="built_in">push_back</span>(kp); <span class="comment">// 讲list中的数据赋给prev_keypoints</span></span><br><span class="line">        vector&lt;<span class="keyword">unsigned</span> <span class="keyword">char</span>&gt; status;</span><br><span class="line">        vector&lt;<span class="keyword">float</span>&gt; error;</span><br><span class="line"></span><br><span class="line">        chrono::steady_clock::time_point t1 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line"></span><br><span class="line">        cv::<span class="built_in">calcOpticalFlowPyrLK</span>(last_color, color, prev_keypoints, next_keypoints, status, error);</span><br><span class="line"></span><br><span class="line">        chrono::steady_clock::time_point t2 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line">        chrono::duration&lt;<span class="keyword">double</span>&gt; time_used = chrono::duration_cast&lt;chrono::duration&lt;<span class="keyword">double</span>&gt;&gt;(t2 - t1);</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;LK Flow use time：&quot;</span> &lt;&lt; time_used.<span class="built_in">count</span>() &lt;&lt; <span class="string">&quot; seconds.&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 把跟丢的点删掉</span></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> iter = keypoints.<span class="built_in">begin</span>(); iter != keypoints.<span class="built_in">end</span>(); i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (status[i] == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                iter = keypoints.<span class="built_in">erase</span>(iter);</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            *iter = next_keypoints[i];</span><br><span class="line">            iter++;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;跟踪到的点个数为： &quot;</span> &lt;&lt; keypoints.<span class="built_in">size</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">if</span> (keypoints.<span class="built_in">size</span>() == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;all keypoints are lost.&quot;</span> &lt;&lt; endl;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 画出 keypoints</span></span><br><span class="line">        cv::Mat img_show = color.<span class="built_in">clone</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> kp : keypoints)</span><br><span class="line">        &#123;</span><br><span class="line">            cv::<span class="built_in">circle</span>(img_show, kp, <span class="number">10</span>, cv::<span class="built_in">Scalar</span>(<span class="number">0</span>, <span class="number">240</span>, <span class="number">0</span>), <span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        cv::<span class="built_in">imshow</span>(<span class="string">&quot;corners&quot;</span>, img_show);</span><br><span class="line">        cv::<span class="built_in">waitKey</span>(<span class="number">0</span>);</span><br><span class="line">        last_color = color;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因为要删除跟踪失败的点，使用list,原因如下：</p>
+<p>由于链表的存储方式并不是连续的内存空间，因此链表list中的迭代器只支持前移和后移，属于双向迭代器</p>
+<p>list的优点：</p>
+<blockquote>
+<p>采用动态存储分配，不会造成内存浪费和溢出<br>链表执行插入和删除操作十分方便，修改指针即可，不需要移动大量元素</p>
+</blockquote>
+</blockquote>
+<p>打印：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">LK Flow use time：0.0157339 seconds.</span><br><span class="line">跟踪到的点个数为： 1749</span><br><span class="line">LK Flow use time：0.0144717 seconds.</span><br><span class="line">跟踪到的点个数为： 1742</span><br><span class="line">LK Flow use time：0.0186928 seconds.</span><br><span class="line">跟踪到的点个数为： 1703</span><br><span class="line">LK Flow use time：0.0153624 seconds.</span><br><span class="line">跟踪到的点个数为： 1676</span><br><span class="line">LK Flow use time：0.019426 seconds.</span><br><span class="line">跟踪到的点个数为： 1664</span><br><span class="line">LK Flow use time：0.0140176 seconds.</span><br><span class="line">跟踪到的点个数为： 1656</span><br><span class="line">LK Flow use time：0.0187153 seconds.</span><br><span class="line">跟踪到的点个数为： 1641</span><br><span class="line">LK Flow use time：0.0187284 seconds.</span><br><span class="line">跟踪到的点个数为： 1634</span><br></pre></td></tr></table></figure>
+<p>CMakeLists.txt</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( useLK )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>( CMAKE_BUILD_TYPE Release )</span><br><span class="line"><span class="keyword">set</span>( CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++11 -O3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>( OpenCV )</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;OpenCV_INCLUDE_DIRS&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>( useLK useLK.cpp )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( useLK <span class="variable">$&#123;OpenCV_LIBS&#125;</span> )</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><img src="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/image-20220329144916230.png" alt="image-20220329144916230"></p>
+<p>LK 光流跟踪能够直接得到特征点的对应关系。这个对应关系就像是描述子的匹配，但实际上我们大多数时候只会碰到特征点跟丢的情况，而不太会遇到误匹配，这应该是光流相对于描述子的一点优势。但是，匹配描述子的方法在相机运动较大时仍能成功，而光流必须要求相机运动是微小的。从这方面来说，光流的鲁棒性比描述子差一些。</p>
+<p>光流法参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.shouxicto.com/article/1871.html">OpenCV中的光流及视频特征点追踪</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/3.4.6/dc/d6b/group__video__track.html#ga473e4b886d0bcc6b65831eb88ed93323"> calcOpticalFlowPyrLK()</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.opencv.org/3.4.6/dc/d6b/group__video__track.html#ga5d10ebbd59fe09c5f650289ec0ece5af">calcOpticalFlowFarneback()</a></li>
+</ul>
 
     </div>
 
@@ -464,7 +423,7 @@ P^′&=exp(\xi ^{\land})P=RP+t\\
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/" title="PnP中的BA问题">http://lukeyalvin.top/2022/03/25/PnP中的BA问题-md/</a>
+    <a href="http://lukeyalvin.top/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/" title="使用LK光流法">http://lukeyalvin.top/2022/03/29/使用LK光流法/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -503,12 +462,12 @@ P^′&=exp(\xi ^{\land})P=RP+t\\
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" rel="prev" title="求解PnP并使用BA优化">
-      <i class="fa fa-chevron-left"></i> 求解PnP并使用BA优化
+    <a href="/2022/03/28/g2o%E4%B8%AD%E5%85%B3%E4%BA%8EBA%E7%9A%84%E8%8A%82%E7%82%B9%E4%B8%8E%E8%BE%B9/" rel="prev" title="g2o中关于BA的节点与边">
+      <i class="fa fa-chevron-left"></i> g2o中关于BA的节点与边
     </a></div>
       <div class="post-nav-item">
-    <a href="/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" rel="next" title="求解ICP并使用BA优化">
-      求解ICP并使用BA优化 <i class="fa fa-chevron-right"></i>
+    <a href="/2022/03/29/%E7%9B%B4%E6%8E%A5%E6%B3%95%E7%9A%84%E6%8E%A8%E5%AF%BC/" rel="next" title="直接法的推导">
+      直接法的推导 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -568,7 +527,7 @@ P^′&=exp(\xi ^{\land})P=RP+t\\
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bundle-Adjustment"><span class="nav-text">Bundle Adjustment</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98"><span class="nav-text">PnP中的BA问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E4%BD%8D%E5%A7%BF"><span class="nav-text">优化位姿</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E7%A9%BA%E9%97%B4%E7%82%B9%E4%BD%8D%E7%BD%AE"><span class="nav-text">优化空间点位置</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LK%E5%85%89%E6%B5%81%E6%B3%95%E5%8E%9F%E7%90%86"><span class="nav-text">LK光流法原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95"><span class="nav-text">使用LK光流法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E6%B5%81%E8%BF%BD%E8%B8%AA%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-text">光流追踪的原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%89%E6%B5%81%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E6%B3%95"><span class="nav-text">光流的两种方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81"><span class="nav-text">代码</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
