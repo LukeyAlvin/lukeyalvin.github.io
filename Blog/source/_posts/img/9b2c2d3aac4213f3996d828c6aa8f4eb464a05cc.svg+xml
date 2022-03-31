@@ -1,0 +1,9 @@
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1.318ex" height="1.676ex" style="vertical-align: -0.338ex;" viewBox="0 -576.1 567.5 721.6" role="img" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-labelledby="MathJax-SVG-1-Title">
+<title id="MathJax-SVG-1-Title">{\displaystyle {\boldsymbol {v}}}</title>
+<defs aria-hidden="true">
+<path stroke-width="1" id="E1-MJMATHBI-76" d="M380 367Q380 397 406 425T465 453Q493 453 516 430T540 357Q540 314 524 250T467 115T373 13Q338 -8 292 -8Q218 -8 167 23T116 129Q116 178 152 275T189 388Q189 396 187 398T176 401Q148 398 125 372T89 304Q84 288 81 285T61 282H55H44Q24 282 24 296Q24 306 34 330T64 382T116 431T189 452Q231 452 269 429T308 362Q308 346 273 255T238 114Q238 43 306 43Q336 43 363 65T407 118T437 182T456 239T462 268Q462 290 417 315Q380 335 380 367Z"></path>
+</defs>
+<g stroke="currentColor" fill="currentColor" stroke-width="0" transform="matrix(1 0 0 -1 0 0)" aria-hidden="true">
+ <use xlink:href="#E1-MJMATHBI-76" x="0" y="0"></use>
+</g>
+</svg>

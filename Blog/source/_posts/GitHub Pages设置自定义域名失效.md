@@ -2,6 +2,7 @@
 title: GitHub Pages设置自定义域名失效
 tags: [GitHub,Hexo]
 comments: true
+mathjax: true
 data: 2021-10-30 10:44:42
 categories: 经验
 ---

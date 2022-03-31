@@ -4,6 +4,7 @@ date: {{ date }}
 permalink:
 categories: 文献阅读
 tags: [文献阅读]
+mathjax: true
 comments: true
 ---
 {%cq%}

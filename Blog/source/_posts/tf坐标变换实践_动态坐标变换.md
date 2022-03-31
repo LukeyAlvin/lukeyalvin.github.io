@@ -1,8 +1,9 @@
 ---
 title: tf坐标变换实践_动态坐标变换
-tags: [ros,tf坐标变换]
-date: {{data}}
+tags: [ros,tf坐标变换,turtlesim]
+date: 2021-11-01 10:44:42
 comments: true
+mathjax: true
 categories: ROS
 ---
 
