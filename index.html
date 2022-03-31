@@ -191,6 +191,220 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/30/%E6%8C%87%E9%92%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/30/%E6%8C%87%E9%92%88/" class="post-title-link" itemprop="url">未命名</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-30 20:54:30" itemprop="dateCreated datePublished" datetime="2022-03-30T20:54:30+08:00">2022-03-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-31 16:26:05" itemprop="dateModified" datetime="2022-03-31T16:26:05+08:00">2022-03-31</time>
+              </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/30/%E6%8C%87%E9%92%88/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/30/%E6%8C%87%E9%92%88/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>380</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="智能指针的实现与使用"><a href="#智能指针的实现与使用" class="headerlink" title="智能指针的实现与使用"></a>智能指针的实现与使用</h1><p>普通指针的缺点：</p>
+<ul>
+<li>分配内存忘记释放，导致内存泄漏</li>
+<li>有指针引用时释放内存，导致非法访问异常</li>
+<li>一些对象的生命周期难以确定</li>
+</ul>
+<p>智能指针和普通指针的区别在于智能指针实际上是对普通指针加了一层封装机制，这样的一层封装机制的目的是为了使得智能指针可以方便的管理一个对象的生命期。</p>
+<p><code>std::shared_ptr</code> 是一种智能指针，它能够记录多少个 <code>shared_ptr</code> 共同指向一个对象，从而消除显式的调用 <code>delete</code>，当引用计数变为零的时候就会将对象自动删除。</p>
+<p>但还不够，因为使用 <code>std::shared_ptr</code> 仍然需要使用 <code>new</code> 来调用，这使得代码出现了某种程度上的不对称。</p>
+<p><code>std::make_shared</code> 就能够用来消除显式的使用 <code>new</code>，所以<code>std::make_shared</code> 会分配创建传入参数中的对象， 并返回这个对象类型的<code>std::shared_ptr</code>指针。</p>
+<h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><h2 id="内联函数"><a href="#内联函数" class="headerlink" title="内联函数"></a>内联函数</h2>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/" class="post-title-link" itemprop="url">ch9_设计前端</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-30 19:33:12" itemprop="dateCreated datePublished" datetime="2022-03-30T19:33:12+08:00">2022-03-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-31 15:26:59" itemprop="dateModified" datetime="2022-03-31T15:26:59+08:00">2022-03-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>本次实践将前几章内容结合进来，实际书写一个视觉里程计程序，由于单目相机存在初始化问题以及尺度问题，因此本实践采用的是最简单的RGB-D相机，但是使用的也只是RGB-D数据集，而非真正的RGB-D相机。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -205,7 +419,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">RGB-D直接法实践</a>
+            <a href="/2022/03/29/RGB-D%E7%9B%B4%E6%8E%A5%E6%B3%95%E5%AE%9E%E8%B7%B5/" class="post-title-link" itemprop="url">ch8_RGB-D直接法实践</a>
         </h2>
 
         <div class="post-meta">
@@ -214,10 +428,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-29 16:19:56 / 修改时间：19:05:13" itemprop="dateCreated datePublished" datetime="2022-03-29T16:19:56+08:00">2022-03-29</time>
+              <time title="创建时间：2022-03-29 16:19:56" itemprop="dateCreated datePublished" datetime="2022-03-29T16:19:56+08:00">2022-03-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-30 16:57:10" itemprop="dateModified" datetime="2022-03-30T16:57:10+08:00">2022-03-30</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -248,14 +468,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>990</span>
+              <span>17k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>16 分钟</span>
             </span>
 
         </div>
@@ -312,7 +532,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/29/%E7%9B%B4%E6%8E%A5%E6%B3%95%E7%9A%84%E6%8E%A8%E5%AF%BC/" class="post-title-link" itemprop="url">直接法的推导</a>
+            <a href="/2022/03/29/%E7%9B%B4%E6%8E%A5%E6%B3%95%E7%9A%84%E6%8E%A8%E5%AF%BC/" class="post-title-link" itemprop="url">ch8_直接法的推导</a>
         </h2>
 
         <div class="post-meta">
@@ -321,10 +541,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-29 15:04:31 / 修改时间：16:16:36" itemprop="dateCreated datePublished" datetime="2022-03-29T15:04:31+08:00">2022-03-29</time>
+              <time title="创建时间：2022-03-29 15:04:31" itemprop="dateCreated datePublished" datetime="2022-03-29T15:04:31+08:00">2022-03-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-30 10:53:53" itemprop="dateModified" datetime="2022-03-30T10:53:53+08:00">2022-03-30</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -419,7 +645,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/" class="post-title-link" itemprop="url">使用LK光流法</a>
+            <a href="/2022/03/29/%E4%BD%BF%E7%94%A8LK%E5%85%89%E6%B5%81%E6%B3%95/" class="post-title-link" itemprop="url">ch8_使用LK光流法</a>
         </h2>
 
         <div class="post-meta">
@@ -428,10 +654,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-29 10:32:32 / 修改时间：14:53:47" itemprop="dateCreated datePublished" datetime="2022-03-29T10:32:32+08:00">2022-03-29</time>
+              <time title="创建时间：2022-03-29 10:32:32" itemprop="dateCreated datePublished" datetime="2022-03-29T10:32:32+08:00">2022-03-29</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-30 10:12:24" itemprop="dateModified" datetime="2022-03-30T10:12:24+08:00">2022-03-30</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -526,7 +758,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/28/g2o%E4%B8%AD%E5%85%B3%E4%BA%8EBA%E7%9A%84%E8%8A%82%E7%82%B9%E4%B8%8E%E8%BE%B9/" class="post-title-link" itemprop="url">g2o中关于BA的节点与边</a>
+            <a href="/2022/03/28/g2o%E4%B8%AD%E5%85%B3%E4%BA%8EBA%E7%9A%84%E8%8A%82%E7%82%B9%E4%B8%8E%E8%BE%B9/" class="post-title-link" itemprop="url">g2o的结构以及BA节点与边的定义</a>
         </h2>
 
         <div class="post-meta">
@@ -543,7 +775,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 10:16:12" itemprop="dateModified" datetime="2022-03-29T10:16:12+08:00">2022-03-29</time>
+                <time title="修改时间：2022-03-30 10:08:03" itemprop="dateModified" datetime="2022-03-30T10:08:03+08:00">2022-03-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -639,7 +871,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">求解ICP并使用BA优化</a>
+            <a href="/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">ch7_求解ICP并使用BA优化</a>
         </h2>
 
         <div class="post-meta">
@@ -656,7 +888,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 09:51:12" itemprop="dateModified" datetime="2022-03-29T09:51:12+08:00">2022-03-29</time>
+                <time title="修改时间：2022-03-30 10:03:37" itemprop="dateModified" datetime="2022-03-30T10:03:37+08:00">2022-03-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -738,119 +970,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/R-C.jpeg">
-      <meta itemprop="name" content="上善若水">
-      <meta itemprop="description" content="东北大学控制工程研究生">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Robot Go!">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/" class="post-title-link" itemprop="url">PnP中的BA问题</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-03-25 21:30:37" itemprop="dateCreated datePublished" datetime="2022-03-25T21:30:37+08:00">2022-03-25</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 16:03:44" itemprop="dateModified" datetime="2022-03-29T16:03:44+08:00">2022-03-29</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三角化，或者由 $RGB-D$ 相机的深度图确定。因此，在双目或$ RGB-D$ 的视觉里程计中，我们可以直接使用$ PnP$ 估计相机运动。而在单目视觉里程计中，必须先进行初始化，然后才能使用 $PnP$。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -865,7 +984,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">求解PnP并使用BA优化</a>
+            <a href="/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" class="post-title-link" itemprop="url">ch7_求解PnP并使用BA优化</a>
         </h2>
 
         <div class="post-meta">
@@ -882,7 +1001,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-28 11:42:49" itemprop="dateModified" datetime="2022-03-28T11:42:49+08:00">2022-03-28</time>
+                <time title="修改时间：2022-03-30 10:53:23" itemprop="dateModified" datetime="2022-03-30T10:53:23+08:00">2022-03-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -914,14 +1033,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>11k</span>
+              <span>15k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>10 分钟</span>
+              <span>14 分钟</span>
             </span>
 
         </div>
@@ -935,7 +1054,7 @@
       
           <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>我们用 $OpenCV $提供的$ EPnP $求解 $PnP $问题，然后通过 $g2o $对结果进行优化。由于 $PnP$ 需要使用 $3D$ 点，为了避免初始化带来的麻烦，我们使用了 $RGB-D $相机中的深度图，作为特征点的 3D位置。</p>
+            <p>$PnP（Perspective-n-Point）$是求解 $3D $到$ 2D $点对运动的方法。它描述了当我们知道$n $个$ 3D$ 空间点以及它们的投影位置时，如何估计相机所在的位姿。如果两张图像中，其中一张特征点的 $3D$ 位置已知，那么最少只需三个点对（需要至少一个额外点验证结果）就可以估计相机运动。特征点的$ 3D $位置可以由三角化，或者由 $RGB-D$ 相机的深度图确定。因此，在双目或$ RGB-D$ 的视觉里程计中，我们可以直接使用$ PnP$ 估计相机运动。而在单目视觉里程计中，必须先进行初始化，然后才能使用 $PnP$。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -1091,7 +1210,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/" class="post-title-link" itemprop="url">对极约束求解相机运动</a>
+            <a href="/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/" class="post-title-link" itemprop="url">ch7_对极约束求解相机运动</a>
         </h2>
 
         <div class="post-meta">
@@ -1108,7 +1227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-25 16:59:31" itemprop="dateModified" datetime="2022-03-25T16:59:31+08:00">2022-03-25</time>
+                <time title="修改时间：2022-03-29 21:49:31" itemprop="dateModified" datetime="2022-03-29T21:49:31+08:00">2022-03-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1168,119 +1287,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/R-C.jpeg">
-      <meta itemprop="name" content="上善若水">
-      <meta itemprop="description" content="东北大学控制工程研究生">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Robot Go!">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" class="post-title-link" itemprop="url">特征提取与匹配</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-03-24 14:14:22" itemprop="dateCreated datePublished" datetime="2022-03-24T14:14:22+08:00">2022-03-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-25 16:59:23" itemprop="dateModified" datetime="2022-03-25T16:59:23+08:00">2022-03-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>3.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>目前主流的几种图像特征在 OpenCV 开源图像库中都已经集成完毕，我们可以很方便地进行调用。下面我们来实际练习一下 OpenCV 的图像特征提取、计算和匹配的过程。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1370,7 +1376,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1696,12 +1702,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">203k</span>
+    <span title="站点总字数">225k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:05</span>
+    <span title="站点阅读时长">3:24</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

@@ -24,7 +24,7 @@
 
   <meta name="description" content="g2o（General Graphic Optimization，G2O）。它是一个基于图优化的库。图优化，是把优化问题表现成图（Graph）的一种方式。这里的图是图论意义上的图。一个图由若干个顶点（Vertex），以及连接着这些节点的边（Edge）组成。进而，用顶点表示优化变量，用边表示误差项。最基本的图优化，是用图模型来表达一个非线性最小二乘">
 <meta property="og:type" content="article">
-<meta property="og:title" content="使用g2o拟合曲线">
+<meta property="og:title" content="ch6_使用g2o拟合曲线">
 <meta property="og:url" content="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/index.html">
 <meta property="og:site_name" content="Robot Go!">
 <meta property="og:description" content="g2o（General Graphic Optimization，G2O）。它是一个基于图优化的库。图优化，是把优化问题表现成图（Graph）的一种方式。这里的图是图论意义上的图。一个图由若干个顶点（Vertex），以及连接着这些节点的边（Edge）组成。进而，用顶点表示优化变量，用边表示误差项。最基本的图优化，是用图模型来表达一个非线性最小二乘">
@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/1855613-20200414153348238-1860777008.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/image-20220326161220343.png">
 <meta property="article:published_time" content="2022-03-23T08:15:57.783Z">
-<meta property="article:modified_time" content="2022-03-28T05:20:27.666Z">
+<meta property="article:modified_time" content="2022-03-29T13:10:11.603Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>使用g2o拟合曲线 | Robot Go!</title>
+  <title>ch6_使用g2o拟合曲线 | Robot Go!</title>
   
 
 
@@ -211,7 +211,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          使用g2o拟合曲线
+          ch6_使用g2o拟合曲线
         </h1>
 
         <div class="post-meta">
@@ -228,7 +228,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-28 13:20:27" itemprop="dateModified" datetime="2022-03-28T13:20:27+08:00">2022-03-28</time>
+                <time title="修改时间：2022-03-29 21:10:11" itemprop="dateModified" datetime="2022-03-29T21:10:11+08:00">2022-03-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -296,7 +296,7 @@
 <p>编译与安装</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/RainerKuemmerle/g2o</span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">sudo apt-get install libqt4-dev qt4-qmake libqglviewer-dev libsuitesparse-dev libcxsparse3.1.2 libcholmod-dev</span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line"><span class="built_in">cd</span> g2o</span><br><span class="line">mkdir build</span><br><span class="line"><span class="built_in">cd</span> build </span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
 <h2 id="使用G2O的步骤："><a href="#使用G2O的步骤：" class="headerlink" title="使用G2O的步骤："></a>使用G2O的步骤：</h2><p><img src="/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/1855613-20200414153348238-1860777008.png" alt="img"></p>
-<h4 id="1、创建线性求解器"><a href="#1、创建线性求解器" class="headerlink" title="1、创建线性求解器"></a>1、创建线性求解器</h4><p>这里的线性求解器<code>LinearSolver</code>创建的是<code>LinearSolverCSparse</code>：</p>
+<h3 id="1、创建线性求解器"><a href="#1、创建线性求解器" class="headerlink" title="1、创建线性求解器"></a>1、创建线性求解器</h3><p>这里的线性求解器<code>LinearSolver</code>创建的是<code>LinearSolverCSparse</code>：</p>
 <ul>
 <li><strong>LinearSolverCholmod ：</strong>使用sparse cholesky分解法。继承自LinearSolverCCS</li>
 <li><strong>LinearSolverCSparse：</strong>使用CSparse法。继承自LinearSolverCCS</li>
@@ -304,26 +304,26 @@
 <li><strong>LinearSolverEigen：</strong> 依赖项只有eigen，使用eigen中sparse Cholesky 求解，因此编译好后可以方便的在其他地方使用，性能和CSparse差不多。继承自LinearSolver</li>
 <li><strong>LinearSolverPCG ：</strong>使用preconditioned conjugate gradient 法，继承自LinearSolver</li>
 </ul>
-<h4 id="2、矩阵块求解器"><a href="#2、矩阵块求解器" class="headerlink" title="2、矩阵块求解器"></a>2、矩阵块求解器</h4><p>BlockSolver 内部包含 LinearSolver，用上面我们定义的线性求解器LinearSolver来初始化。 </p>
+<h3 id="2、矩阵块求解器"><a href="#2、矩阵块求解器" class="headerlink" title="2、矩阵块求解器"></a>2、矩阵块求解器</h3><p>BlockSolver 内部包含 LinearSolver，用上面我们定义的线性求解器LinearSolver来初始化。 </p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Block *solver_ptr = <span class="keyword">new</span> <span class="built_in">Block</span>(unique_ptr&lt;Block::LinearSolverType&gt;(linearSolver));</span><br></pre></td></tr></table></figure>
-<h4 id="3、创建总求解器solver。"><a href="#3、创建总求解器solver。" class="headerlink" title="3、创建总求解器solver。"></a>3、创建总求解器solver。</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 梯度下降方法，从GN(高斯牛顿), LM（列文伯格）, DogLeg 中选</span></span><br><span class="line">g2o::OptimizationAlgorithmGaussNewton *solver_gn = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmGaussNewton</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">g2o::OptimizationAlgorithmLevenberg *solver_lm = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmLevenberg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">g2o::OptimizationAlgorithmDogleg *solver_dog = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmDogleg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br></pre></td></tr></table></figure>
-<h4 id="4、创建稀疏优化器"><a href="#4、创建稀疏优化器" class="headerlink" title="4、创建稀疏优化器"></a>4、创建稀疏优化器</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">g2o::SparseOptimizer optimizer;    <span class="comment">// 创建稀疏优化器</span></span><br><span class="line">optimizer.<span class="built_in">setAlgorithm</span>(solver_lm); <span class="comment">// 用前面定义好的求解器作为求解方法：（使用LM方法）</span></span><br><span class="line">optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);        <span class="comment">// setVerbose是设置优化过程输出信息用</span></span><br></pre></td></tr></table></figure>
-<h4 id="5、定义图的顶点和边"><a href="#5、定义图的顶点和边" class="headerlink" title="5、定义图的顶点和边"></a>5、定义图的顶点和边</h4><p>定义图的顶点和边。并添加到SparseOptimizer中。</p>
-<p>节点的定义比较简单，只需要继承 G2O 的基础节点类型，并且给出几个关键虚函数的实现即可：</p>
+<h3 id="3、创建总求解器solver。"><a href="#3、创建总求解器solver。" class="headerlink" title="3、创建总求解器solver。"></a>3、创建总求解器solver。</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 梯度下降方法，从GN(高斯牛顿), LM（列文伯格）, DogLeg 中选</span></span><br><span class="line">g2o::OptimizationAlgorithmGaussNewton *solver_gn = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmGaussNewton</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">g2o::OptimizationAlgorithmLevenberg *solver_lm = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmLevenberg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">g2o::OptimizationAlgorithmDogleg *solver_dog = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmDogleg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br></pre></td></tr></table></figure>
+<h3 id="4、创建稀疏优化器"><a href="#4、创建稀疏优化器" class="headerlink" title="4、创建稀疏优化器"></a>4、创建稀疏优化器</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">g2o::SparseOptimizer optimizer;    <span class="comment">// 创建稀疏优化器</span></span><br><span class="line">optimizer.<span class="built_in">setAlgorithm</span>(solver_lm); <span class="comment">// 用前面定义好的求解器作为求解方法：（使用LM方法）</span></span><br><span class="line">optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);        <span class="comment">// setVerbose是设置优化过程输出信息用</span></span><br></pre></td></tr></table></figure>
+<h3 id="5、定义图的顶点和边"><a href="#5、定义图的顶点和边" class="headerlink" title="5、定义图的顶点和边"></a>5、定义图的顶点和边</h3><p>定义图的顶点和边。并添加到SparseOptimizer中。</p>
+<h4 id="顶点的定义"><a href="#顶点的定义" class="headerlink" title="顶点的定义"></a>顶点的定义</h4><p>节点的定义比较简单，只需要继承 G2O 的基础节点类型，并且给出几个关键虚函数的实现即可：</p>
 <ul>
 <li><code>setToOriginImpl()</code>：重置节点的实现，通常情况下各个参数置 0 即可</li>
 <li><code>oplusImpl()</code>：更新节点方法的实现，这里由于我们使用的节点和更新量都是 <code>Eigen::Vector3d</code>，直接相加即可</li>
 <li><code>read(std::istream &amp;in); &amp; write(std::ostream &amp;out);</code>：读盘和写盘，还没有深入了解，不过大部分时间不需要</li>
 </ul>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingVertex</span> :</span> <span class="keyword">public</span> g2o::BaseVertex&lt;<span class="number">3</span>, Eigen::Vector3d&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 结构体包含eigen成员必须进行宏定义 EIGEN_MAKE_ALIGNED_OPERATOR_NEW, 保证内存对齐</span></span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function">    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span> <span class="comment">// 顶点重置函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate &lt;&lt; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> *update)</span> <span class="comment">// 顶点更新函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate += Eigen::<span class="built_in">Vector3d</span>(update);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<p>边的定义需要继承 G2O 中的一个基础边类型，并给出几个关键函数的实现：</p>
+<h4 id="边的定义"><a href="#边的定义" class="headerlink" title="边的定义"></a>边的定义</h4><p>边的定义需要继承 G2O 中的一个基础边类型，并给出几个关键函数的实现：</p>
 <ul>
 <li><code>computeError()</code>： 在添加边之前需要设定好该边连接的节点的索引以及观测值和信息矩阵，这个函数则是使用该边连接的节点和观测值来计算误差。最后要更新变量 <code>_error</code></li>
 <li><code>linearizeOplus()</code>：计算雅克比矩阵，这个函数是可选的，如果给出了则进行解析求导，不给则进行数值求导</li>
 <li><code>read(std::istream &amp;in); &amp; write(std::ostream &amp;out);</code>：读盘和写盘</li>
 </ul>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 误差模型 模板参数：观测值维度，类型，连接顶点类型   (边为误差项)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingEdge</span> :</span> <span class="keyword">public</span> g2o::BaseUnaryEdge&lt;<span class="number">1</span>, <span class="keyword">double</span>, CurveFittingVertex&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">CurveFittingEdge</span>(<span class="keyword">double</span> x) : <span class="built_in">BaseUnaryEdge</span>(), _x(x) &#123;&#125; <span class="comment">// 初始化列表</span></span><br><span class="line">    <span class="comment">// 计算曲线模型误差</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> CurveFittingVertex *v = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> CurveFittingVertex *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">const</span> Eigen::Vector3d abc = v-&gt;<span class="built_in">estimate</span>();</span><br><span class="line">        _error(<span class="number">0</span>, <span class="number">0</span>) = _measurement - std::<span class="built_in">exp</span>(<span class="built_in">abc</span>(<span class="number">0</span>, <span class="number">0</span>) * _x * _x + <span class="built_in">abc</span>(<span class="number">1</span>, <span class="number">0</span>) * _x + <span class="built_in">abc</span>(<span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">double</span> _x; <span class="comment">// x 值， y 值为 _measurement</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h4 id="6、设置优化参数，开始执行优化"><a href="#6、设置优化参数，开始执行优化" class="headerlink" title="6、设置优化参数，开始执行优化"></a>6、设置优化参数，开始执行优化</h4><p>设置SparseOptimizer的初始化、迭代次数、保存结果等</p>
+<h3 id="6、设置优化参数，开始执行优化"><a href="#6、设置优化参数，开始执行优化" class="headerlink" title="6、设置优化参数，开始执行优化"></a>6、设置优化参数，开始执行优化</h3><p>设置SparseOptimizer的初始化、迭代次数、保存结果等</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">optimizer.<span class="built_in">initializeOptimization</span>(); <span class="comment">// 设置优化初始值</span></span><br><span class="line">optimizer.<span class="built_in">optimize</span>(<span class="number">100</span>);            <span class="comment">// 设置优化次数</span></span><br></pre></td></tr></table></figure>
 <h2 id="非线性拟合案例"><a href="#非线性拟合案例" class="headerlink" title="非线性拟合案例"></a>非线性拟合案例</h2><p>假设有一条满足以下方程的曲线：</p>
 <script type="math/tex; mode=display">
@@ -372,7 +372,7 @@ y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高�
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" title="使用g2o拟合曲线">http://lukeyalvin.top/2022/03/23/使用g2o拟合曲线/</a>
+    <a href="http://lukeyalvin.top/2022/03/23/%E4%BD%BF%E7%94%A8g2o%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" title="ch6_使用g2o拟合曲线">http://lukeyalvin.top/2022/03/23/使用g2o拟合曲线/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -411,12 +411,12 @@ y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高�
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" rel="prev" title="使用Ceres拟合曲线">
-      <i class="fa fa-chevron-left"></i> 使用Ceres拟合曲线
+    <a href="/2022/03/23/%E4%BD%BF%E7%94%A8Ceres%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF/" rel="prev" title="ch6_使用Ceres拟合曲线">
+      <i class="fa fa-chevron-left"></i> ch6_使用Ceres拟合曲线
     </a></div>
       <div class="post-nav-item">
-    <a href="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" rel="next" title="特征提取与匹配">
-      特征提取与匹配 <i class="fa fa-chevron-right"></i>
+    <a href="/2022/03/24/%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96/" rel="next" title="ch7_特征提取与匹配">
+      ch7_特征提取与匹配 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -476,7 +476,7 @@ y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高�
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8G2O%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="nav-text">使用G2O的步骤：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BA%E7%BA%BF%E6%80%A7%E6%B1%82%E8%A7%A3%E5%99%A8"><span class="nav-text">1、创建线性求解器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81%E7%9F%A9%E9%98%B5%E5%9D%97%E6%B1%82%E8%A7%A3%E5%99%A8"><span class="nav-text">2、矩阵块求解器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA%E6%80%BB%E6%B1%82%E8%A7%A3%E5%99%A8solver%E3%80%82"><span class="nav-text">3、创建总求解器solver。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4%E3%80%81%E5%88%9B%E5%BB%BA%E7%A8%80%E7%96%8F%E4%BC%98%E5%8C%96%E5%99%A8"><span class="nav-text">4、创建稀疏优化器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5%E3%80%81%E5%AE%9A%E4%B9%89%E5%9B%BE%E7%9A%84%E9%A1%B6%E7%82%B9%E5%92%8C%E8%BE%B9"><span class="nav-text">5、定义图的顶点和边</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6%E3%80%81%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96%E5%8F%82%E6%95%B0%EF%BC%8C%E5%BC%80%E5%A7%8B%E6%89%A7%E8%A1%8C%E4%BC%98%E5%8C%96"><span class="nav-text">6、设置优化参数，开始执行优化</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%8B%9F%E5%90%88%E6%A1%88%E4%BE%8B"><span class="nav-text">非线性拟合案例</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8G2O%E7%9A%84%E6%AD%A5%E9%AA%A4%EF%BC%9A"><span class="nav-text">使用G2O的步骤：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BA%E7%BA%BF%E6%80%A7%E6%B1%82%E8%A7%A3%E5%99%A8"><span class="nav-text">1、创建线性求解器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%9F%A9%E9%98%B5%E5%9D%97%E6%B1%82%E8%A7%A3%E5%99%A8"><span class="nav-text">2、矩阵块求解器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA%E6%80%BB%E6%B1%82%E8%A7%A3%E5%99%A8solver%E3%80%82"><span class="nav-text">3、创建总求解器solver。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E5%88%9B%E5%BB%BA%E7%A8%80%E7%96%8F%E4%BC%98%E5%8C%96%E5%99%A8"><span class="nav-text">4、创建稀疏优化器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E5%AE%9A%E4%B9%89%E5%9B%BE%E7%9A%84%E9%A1%B6%E7%82%B9%E5%92%8C%E8%BE%B9"><span class="nav-text">5、定义图的顶点和边</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A1%B6%E7%82%B9%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">顶点的定义</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BE%B9%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">边的定义</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6%E3%80%81%E8%AE%BE%E7%BD%AE%E4%BC%98%E5%8C%96%E5%8F%82%E6%95%B0%EF%BC%8C%E5%BC%80%E5%A7%8B%E6%89%A7%E8%A1%8C%E4%BC%98%E5%8C%96"><span class="nav-text">6、设置优化参数，开始执行优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%8B%9F%E5%90%88%E6%A1%88%E4%BE%8B"><span class="nav-text">非线性拟合案例</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -492,7 +492,7 @@ y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -818,12 +818,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">203k</span>
+    <span title="站点总字数">225k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:05</span>
+    <span title="站点阅读时长">3:24</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

@@ -24,13 +24,13 @@
 
   <meta name="description" content="$ICP:$迭代最近点$（Iterative Closest Point）$求解。读者应该注意到，$3D-3D $位姿估计问题中，并没有出现相机模型，也就是说，仅考虑两组 $3D $点之间的变换时，和相机并没有关系。因此，在激光 $SLAM $中也会碰到 $ICP$，不过由于激光数据特征不够丰富，我们无从知道两个点集之间的匹配关系，只能认为距离最">
 <meta property="og:type" content="article">
-<meta property="og:title" content="求解ICP并使用BA优化">
+<meta property="og:title" content="ch7_求解ICP并使用BA优化">
 <meta property="og:url" content="http://lukeyalvin.top/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/index.html">
 <meta property="og:site_name" content="Robot Go!">
 <meta property="og:description" content="$ICP:$迭代最近点$（Iterative Closest Point）$求解。读者应该注意到，$3D-3D $位姿估计问题中，并没有出现相机模型，也就是说，仅考虑两组 $3D $点之间的变换时，和相机并没有关系。因此，在激光 $SLAM $中也会碰到 $ICP$，不过由于激光数据特征不够丰富，我们无从知道两个点集之间的匹配关系，只能认为距离最">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-03-26T08:31:15.472Z">
-<meta property="article:modified_time" content="2022-03-29T01:51:12.883Z">
+<meta property="article:modified_time" content="2022-03-30T02:03:37.391Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -48,7 +48,7 @@
   };
 </script>
 
-  <title>求解ICP并使用BA优化 | Robot Go!</title>
+  <title>ch7_求解ICP并使用BA优化 | Robot Go!</title>
   
 
 
@@ -208,7 +208,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          求解ICP并使用BA优化
+          ch7_求解ICP并使用BA优化
         </h1>
 
         <div class="post-meta">
@@ -225,7 +225,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 09:51:12" itemprop="dateModified" datetime="2022-03-29T09:51:12+08:00">2022-03-29</time>
+                <time title="修改时间：2022-03-30 10:03:37" itemprop="dateModified" datetime="2022-03-30T10:03:37+08:00">2022-03-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -293,7 +293,7 @@
 <p>和 $PnP$ 类似，$ICP $的求解也分为两种方式：利用线性代数的求解（主要是$ SVD$），以及利用非线性优化方式的求解（类似于 $Bundle Adjustment$）。</p>
 <h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
 <script type="math/tex; mode=display">
-P = {p_1 , . . . , p_n }\\P^′= {p^′_1 , . . . , p^′_n }</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
+P = {p_1 , . . . , p_n } \\ P^′= {p^′_1 , . . . , p^′_n }</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
 <script type="math/tex; mode=display">
 ∀i, p_i = Rp^′_i + t.</script><p>定义第 $i$对点的误差项：</p>
 <script type="math/tex; mode=display">
@@ -403,7 +403,7 @@ z     &0     &-x &0     &-1 &0 \\
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://lukeyalvin.top/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" title="求解ICP并使用BA优化">http://lukeyalvin.top/2022/03/26/求解ICP并使用BA优化/</a>
+    <a href="http://lukeyalvin.top/2022/03/26/%E6%B1%82%E8%A7%A3ICP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" title="ch7_求解ICP并使用BA优化">http://lukeyalvin.top/2022/03/26/求解ICP并使用BA优化/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -442,12 +442,12 @@ z     &0     &-x &0     &-1 &0 \\
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/03/25/PnP%E4%B8%AD%E7%9A%84BA%E9%97%AE%E9%A2%98-md/" rel="prev" title="PnP中的BA问题">
-      <i class="fa fa-chevron-left"></i> PnP中的BA问题
+    <a href="/2022/03/25/%E6%B1%82%E8%A7%A3PnP%E5%B9%B6%E4%BD%BF%E7%94%A8BA%E4%BC%98%E5%8C%96/" rel="prev" title="ch7_求解PnP并使用BA优化">
+      <i class="fa fa-chevron-left"></i> ch7_求解PnP并使用BA优化
     </a></div>
       <div class="post-nav-item">
-    <a href="/2022/03/28/g2o%E4%B8%AD%E5%85%B3%E4%BA%8EBA%E7%9A%84%E8%8A%82%E7%82%B9%E4%B8%8E%E8%BE%B9/" rel="next" title="g2o中关于BA的节点与边">
-      g2o中关于BA的节点与边 <i class="fa fa-chevron-right"></i>
+    <a href="/2022/03/28/g2o%E4%B8%AD%E5%85%B3%E4%BA%8EBA%E7%9A%84%E8%8A%82%E7%82%B9%E4%B8%8E%E8%BE%B9/" rel="next" title="g2o的结构以及BA节点与边的定义">
+      g2o的结构以及BA节点与边的定义 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -523,7 +523,7 @@ z     &0     &-x &0     &-1 &0 \\
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">37</span>
+          <span class="site-state-item-count">38</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -849,12 +849,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">203k</span>
+    <span title="站点总字数">225k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:05</span>
+    <span title="站点阅读时长">3:24</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
