@@ -1,21 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title></title>
-    <url>/2022/03/30/%E6%8C%87%E9%92%88/</url>
-    <content><![CDATA[<h1 id="智能指针的实现与使用"><a href="#智能指针的实现与使用" class="headerlink" title="智能指针的实现与使用"></a>智能指针的实现与使用</h1><p>普通指针的缺点：</p>
-<ul>
-<li>分配内存忘记释放，导致内存泄漏</li>
-<li>有指针引用时释放内存，导致非法访问异常</li>
-<li>一些对象的生命周期难以确定</li>
-</ul>
-<p>智能指针和普通指针的区别在于智能指针实际上是对普通指针加了一层封装机制，这样的一层封装机制的目的是为了使得智能指针可以方便的管理一个对象的生命期。</p>
-<p><code>std::shared_ptr</code> 是一种智能指针，它能够记录多少个 <code>shared_ptr</code> 共同指向一个对象，从而消除显式的调用 <code>delete</code>，当引用计数变为零的时候就会将对象自动删除。</p>
-<p>但还不够，因为使用 <code>std::shared_ptr</code> 仍然需要使用 <code>new</code> 来调用，这使得代码出现了某种程度上的不对称。</p>
-<p><code>std::make_shared</code> 就能够用来消除显式的使用 <code>new</code>，所以<code>std::make_shared</code> 会分配创建传入参数中的对象， 并返回这个对象类型的<code>std::shared_ptr</code>指针。</p>
-<h2 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h2><h2 id="内联函数"><a href="#内联函数" class="headerlink" title="内联函数"></a>内联函数</h2>]]></content>
-  </entry>
-  <entry>
     <title>ch9_设计前端</title>
     <url>/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
