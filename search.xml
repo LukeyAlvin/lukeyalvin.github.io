@@ -1,6 +1,422 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>卡尔曼滤波器</title>
+    <url>/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>卡尔曼滤波（Kalman filter）是一种高效率的<strong>递归滤波器</strong>（自回归滤波器），它能够从一系列的不完全及包含噪声的测量中，估计动态系统的状态。卡尔曼滤波会根据各测量量在不同时间下的值，考虑各时间下的联合分布，再产生对未知变数的估计，因此会比只以单一测量量为基础的估计方式要准。卡尔曼滤波得名自主要贡献者之一的鲁道夫·卡尔曼。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="数学基础"><a href="#数学基础" class="headerlink" title="数学基础"></a>数学基础</h1><h2 id="递归算法"><a href="#递归算法" class="headerlink" title="递归算法"></a>递归算法</h2><p>卡尔曼滤波器(Kalman Filter)，它是一种最优化的递归的数字处理算法(Optimal Recursive Data Processing Algorithm)。</p>
+<p><strong>为什么使用卡尔曼滤波？</strong></p>
+<p>因为显示生活中充满了不确定性，而这些不确定性主要体现在以下几个方面：</p>
+<ul>
+<li>不存在完美的数学模型</li>
+<li>系统的扰动不可控，也很难建模</li>
+<li>测量传感器存在误差</li>
+</ul>
+<hr>
+<p>【例】测量硬币的例子</p>
+<p>如图所示，不同的人去测量一个硬币的直径，一共测量$k$次，得到的测量值为$z_1,……z_k$，估计硬币的真实直径是多少？</p>
+<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/image-20220401093317316.png" alt="image-20220401093317316"></p>
+<p><strong>取平均值</strong></p>
+<p>设我们的平均值即对真实值的估计值(Estimate)为$\hat{x}$</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\hat{x}_k&=\frac{1}{k}(z_1+z_2+...+z_k)\\
+&=\frac{1}{k}(z_1+z_2+...+z_{k-1})+\frac{1}{k}z_k\\
+&=\frac{1}{k} \frac{k-1}{k-1}(z_1+z_2+...+z_{k-1})+\frac{1}{k}z_k\\
+&=\frac{k-1}{k}  \hat{x}_{k-1}+\frac{1}{k}z_k\\
+&=\hat{x}_{k-1}-\frac{1}{k}\hat{x}_{k-1}  +\frac{1}{k}z_k
+\end{align}</script><p>整理得：</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}_{k-1} +\frac{1}{k}(z_k-\hat{x}_{k-1} )</script><p>令$K_k=1/k$</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}_{k-1} +K_k(z_k-\hat{x}_{k-1} )</script><p>即为：当前的估计值=上一时刻的估计值+$K_k$(当前测量值-上一时刻的估计值)</p>
+<p><strong>分析：</strong></p>
+<ul>
+<li>随着$k$的增加，$K_k$趋近于0，可以得到$\hat{x}_k=\hat{x}_{k-1}$，测量的结果$z_k$不再重要</li>
+<li>当$k$比较小的时候，$K_k$很大，则说明测量结果是非常重要的</li>
+<li>$K_k$就是<strong>卡尔曼增益</strong>，或叫做卡尔曼因数。</li>
+</ul>
+<p><strong>求解卡尔曼增益$K_k$:</strong></p>
+<p>设估计误差：$e_{EST}$，测量误差：$e_{MEA}$</p>
+<script type="math/tex; mode=display">
+K_k=\frac{ {e_{EST} }_{k-1} }{ {e_{EST} }_{k-1}+{e_{MEA} }_{k} }</script><p><strong>分析：</strong></p>
+<ul>
+<li>$e_{EST}&gt;&gt;e_{MEA}：$$K_k$趋近于1，则$\hat{x}_k=\hat{x}_{k-1} +z_k-\hat{x}_{k-1} =z_k$，即估计误差大相信测量值</li>
+<li>$e_{EST}&lt;&lt;e_{MEA}：$$K_k$趋近于0，则$\hat{x}_k=\hat{x}_{k-1} $，测量误差大相信估计值</li>
+</ul>
+<hr>
+<p>【例】卡尔曼滤波的应用举例：</p>
+<ul>
+<li><strong>一般计算卡尔曼滤波分为三步：</strong><ul>
+<li>计算卡尔曼增益：$K_k=\frac{ {e_{EST} }_{k-1} }{ {e_{EST} }_{k-1}+{e_{MEA} }_{k} }$</li>
+<li>计算$\hat{x}_k=\hat{x}_{k-1} +K_k(z_k-\hat{x}_{k-1} )$</li>
+<li>更新${ e_{EST} }_{k}=(1-K_k){e_{EST} }_{k-1}$</li>
+</ul>
+</li>
+</ul>
+<p>已知物体的实际长度为$50mm$，测量误差$e_{MEA}=3mm$，估计误差$e_{MEA}=5mm$，$\hat{x}_0=40mm$，一共测量了13次，根据上面的三个步骤，我们可以计算并画出折线图。</p>
+<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/image-20220401102705574.png" alt="image-20220401102705574"></p>
+<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/image-20220401102555645.png" alt="image-20220401102555645"></p>
+<p>很明显，经过测量次数的增加，最终的估计值是接近真实值的，这就是卡尔曼滤波递归的作用。</p>
+<h2 id="数据融合"><a href="#数据融合" class="headerlink" title="数据融合"></a>数据融合</h2><p>数据融合(Data Fusion)</p>
+<p>【例】现有两个称，已知它们称的结果都符合正态分布，现去称同一个物体，已知称$A$称得物体重量为$z_1=30g$，并且已知它的标准差为$\sigma_1=2g$；称$B$称得物体重量为$z_2=32g$，并且已知它的标准差为$\sigma_2=4g$；估计该物体的真实重量$\hat{z}_k=?$。</p>
+<p>根据递归的思想：</p>
+<script type="math/tex; mode=display">
+\hat{z}_k=z_1+K_k(z_2-z_1)，K_k\in[0,1]</script><p>为了求解最接近真实值的$\hat{z}_k$，即求解最优的$K_k$值，使得方差$Var(\hat{z}_k)$最小。</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\sigma^2_{\hat{z}_k }&=Var(z_1+K_k(z_2-z_1))\\
+&=Var(z_1+K_kz_2-K_kz_1)\\
+&=Var((1-K_k)z_1+K_kz_2)\\
+&=Var((1-K_k)z_1)+Var(K_kz_2)\\
+&=(1-K_k)^2Var(z_1)+K_k^2Var(z_2)\\
+&=(1-K_k)^2\sigma_1^2+K_k^2\sigma_2^2\\
+\end{align}</script><p>对$K_k$求导：</p>
+<script type="math/tex; mode=display">
+\frac{d\sigma^2_{\hat{z}_k } }{dK_k}=0\\
+-2(1-K_k)\sigma_1^2+2K_k\sigma_2^2=0\\
+K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}</script><p>已知$\sigma_1=2,\sigma_2=4$:</p>
+<script type="math/tex; mode=display">
+K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带入：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\hat{z}_k&=z_1+K_k(z_2-z_1)\\
+&=30+0.2(32-20)\\
+&=30.4g
+\end{align}</script><p>对应方差：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\sigma^2_{\hat{z}_k }
+&=(1-K_k)^2\sigma_1^2+K_k^2\sigma_2^2\\
+&=(1-0.2)^2*4+0.2^2*16\\
+&=3.2\\
+\sigma_{\hat{z}_k }&=\sqrt{3.2} \\
+&= 1.79
+\end{align}</script><p>因此，我们根据两个称的特性，根据测量值对物体的真实重量进行了预测，预测值为$30.4g$，而且它是最优解。</p>
+<p>这个过程就是数据融合。</p>
+<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112"></p>
+<hr>
+<h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
+<p>【例】</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:center">球员</th>
+<th style="text-align:center">身高x</th>
+<th style="text-align:center">体重y</th>
+<th style="text-align:center">年龄z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">瓦尔迪</td>
+<td style="text-align:center">179</td>
+<td style="text-align:center">74</td>
+<td style="text-align:center">33</td>
+</tr>
+<tr>
+<td style="text-align:center">奥巴梅杨</td>
+<td style="text-align:center">187</td>
+<td style="text-align:center">80</td>
+<td style="text-align:center">31</td>
+</tr>
+<tr>
+<td style="text-align:center">萨拉赫</td>
+<td style="text-align:center">175</td>
+<td style="text-align:center">71</td>
+<td style="text-align:center">28</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>平均值</strong></td>
+<td style="text-align:center"><strong>180.3</strong></td>
+<td style="text-align:center"><strong>75</strong></td>
+<td style="text-align:center"><strong>30.7</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>分别求三者的方差以及相互之间的协方差，</p>
+<script type="math/tex; mode=display">
+Var(x)=\sigma_x^2=\frac{1}{n}\sum^n_{i=1}(x_i-\mu)^2=\frac{1}{n}(\sum^n_{i=1}x_i^2-n\mu^2)</script><p>方差：$\sigma_x^2=24.89, \sigma_y^2=14,\sigma_z^2=4.22$，</p>
+<script type="math/tex; mode=display">
+Cov(X,Y)=E((X-\mu)(Y-v))=E(X·Y)-\mu v</script><p>协方差：$\sigma_x\sigma_y=\sigma_y\sigma_x=18.7,\sigma_x\sigma_z=\sigma_z\sigma_x=4.4,\sigma_y\sigma_z=\sigma_z\sigma_y=3.3$。所以协方差矩阵为：</p>
+<script type="math/tex; mode=display">
+P=\begin{bmatrix}
+\sigma_x^2&\sigma_x\sigma_y&\sigma_x\sigma_z\\
+\sigma_y\sigma_x&\sigma_y^2&\sigma_y\sigma_z\\
+\sigma_z\sigma_x&\sigma_z\sigma_y&\sigma_z^2
+\end{bmatrix}=
+\begin{bmatrix}
+24.89&18.7&4.4\\
+18.7&14&3.3\\
+4.4&3.3&4.22
+\end{bmatrix}</script><p>可以看出运动员的身高与体重相关性比较大，而身高体重和年龄的相关性是比较小的，这种规律，数据越多越明显。</p>
+<p><strong>如何使用矩阵批量计算协方差矩阵？</strong></p>
+<p>一般需要设置一个过渡矩阵：</p>
+<script type="math/tex; mode=display">
+a=\begin{bmatrix}
+x_1&y_1&z_1\\
+x_2&y_2&z_2\\
+x_3&y_3&z_3
+\end{bmatrix}-
+\frac{1}{3}
+\begin{bmatrix}
+1&1&1\\\
+1&1&1\\
+1&1&1
+\end{bmatrix}
+\begin{bmatrix}
+x_1&y_1&z_1\\
+x_2&y_2&z_2\\
+x_3&y_3&z_3
+\end{bmatrix}</script><p>协方差：</p>
+<script type="math/tex; mode=display">
+P=\frac{1}{3}a^Ta</script><h2 id="状态空间表达式"><a href="#状态空间表达式" class="headerlink" title="状态空间表达式"></a>状态空间表达式</h2><p>【例】：有一个弹簧阻尼系统，对质量为$m$的物块施加一个力$F$，弹簧向右的位移量为$x$，已知弹簧的胡克系数为$k$，阻尼系数为$B$</p>
+<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/image-20220401152419675.png" alt="image-20220401152419675"></p>
+<p>定义输入为$u_{(t)}=F_{(t)}$，输出为$x$</p>
+<p>由胡克定律可知，弹簧拉力$f_k$以及阻力$f_B$：</p>
+<script type="math/tex; mode=display">
+f_k=kx\\
+f_B=B\dot{x}</script><p>根据牛顿第二定律$F=ma$：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&m\ddot{x}=F-f_k-f_B\\
+&m\ddot{x}+f_B+f_k=F\\
+&m\ddot{x}+B\dot{x}+kx=F
+\end{align}</script><p>所以系统的动态方程表达式：</p>
+<script type="math/tex; mode=display">
+m\ddot{x}+B\dot{x}+kx=F</script><p>使用经典控制理论可以对上式进行拉普拉斯变换，进而求得系统的传递函数：</p>
+<script type="math/tex; mode=display">
+ms^2X_{(s)}+BsX_{(s)}+kX_{(s)}=F_{(s)}\\
+G_{(s)}=\frac{X_{(s)} }{F_{(s)} }=\frac{1}{ms^2+Bs+K}</script><p>但在现代控制理论中则更多的使用状态空间方程，状态空间方程可以看成一个集合，它包含系统的输入、系统的输出以及状态变量，最终使用一个一阶微分方程的形式表达出来。</p>
+<p>即：</p>
+<script type="math/tex; mode=display">
+m\ddot{x}+B\dot{x}+kx=u</script><p>确定两个合适的状态变量，把二阶项消除：</p>
+<ul>
+<li>位置：$z_1=x=x_1$</li>
+<li>速度：$z_2=\dot{x}=x_2$</li>
+</ul>
+<p>由于$x_1=x，x_2=\dot{x}$，因此可以得到：$\dot{x_1}=x_2，\dot{x_2}=\ddot{x}$，利用上述方程化简：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\dot{x_1}=x_2\\
+\dot{x_2}=\ddot{x}&=\frac{1}{m}\mu-\frac{B}{m}\dot{x}-\frac{k}{m}x\\
+&=\frac{1}{m}\mu-\frac{B}{m}x_2-\frac{k}{m}x_1
+\end{align}</script><p>综合上面的四个方程：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+\dot{x_1}\\
+\dot{x_2}
+\end{bmatrix}
+=\begin{bmatrix}
+0&1\\
+-\frac{K}{m}&-\frac{B}{m}
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\x_2
+\end{bmatrix}
++\begin{bmatrix}
+0\\ \frac{1}{m}
+\end{bmatrix}u</script><script type="math/tex; mode=display">
+\begin{bmatrix}
+z_1\\z_2
+\end{bmatrix}=
+\begin{bmatrix}
+1&0\\0&1
+\end{bmatrix}
+\begin{bmatrix}
+x_1\\x_2
+\end{bmatrix}</script><p>进一步归纳：</p>
+<p>连续型：</p>
+<script type="math/tex; mode=display">
+\dot{X}_{(t)}=AX_{(t)}+Bu_{(t)}\\
+Z_{(t)}=HX_{(t)}</script><p>离散型：</p>
+<script type="math/tex; mode=display">
+{X_k }=AX_{k-1}+Bu_{k}\\
+Z_{k}=HX_{k}</script><p>其中$k$表示采样时间单位。</p>
+<p>由于现实中存在着不确定性，比如存在过程噪声(Process Noise)：$w_{k-1}$，测量噪声(Measurement Noise)：$v_k$</p>
+<script type="math/tex; mode=display">
+\begin{align}
+{X_k }&=AX_{k-1}+Bu_{k}+w_{k-1}\\
+Z_{k}&=HX_{k}+v_k
+\end{align}</script><p>因此，我们的模型和测量都存在误差，导致计算值以及测量值都是不准确的，如何通过两个不确定的值去估计一个准确的值$\hat{x}_k=?$，根据数据融合的例子，我们可以使用这两个不准确的结果进行数据融合，从而得到一个比较准确的估计值。</p>
+<h1 id="卡尔曼滤波的数学推导"><a href="#卡尔曼滤波的数学推导" class="headerlink" title="卡尔曼滤波的数学推导"></a>卡尔曼滤波的数学推导</h1><h2 id="卡尔曼公式"><a href="#卡尔曼公式" class="headerlink" title="卡尔曼公式"></a>卡尔曼公式</h2><p>由之前的状态空间方程：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+{x_k }&=Ax_{k-1}+Bu_{k}+w_{k-1}\\
+z_{k}&=Hx_{k}+v_k
+\end{align}</script><p>其中$w_{k-1}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$P_{(w)}\sim(0,Q)，P_{(v)}\sim(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+Q=E[ww^T]&=E
+\begin{bmatrix}
+\begin{bmatrix}w_1\\w_2\\.\\.\\w_k \end{bmatrix}
+\begin{bmatrix}w_1&w_2&...&w_k \end{bmatrix}
+\end{bmatrix}
+=E
+\begin{bmatrix}w_1^2&w_1w_2&...&w_1w_k\\
+w_2w_1&w_2^2&...&w_2w_k\\
+...&...&...&...\\
+w_kw_1&w_kw_1&...&w_k^2
+\end{bmatrix}\\
+&=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
+Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
+...&...&...&...\\
+Ew_kw_1&Ew_kw_1&...&Ew_k^2
+\end{bmatrix}
+\end{align}</script><p>由于$w$的期望为$0$，由方差等于平方的期望减去期望的平方以及协方差公式：</p>
+<script type="math/tex; mode=display">
+Var(X)=E(X^2)-E^2(X)\\
+Cov(X,Y)=E((X-\mu)(Y-v))</script><p>所以此处平方的期望就等于方差：</p>
+<script type="math/tex; mode=display">
+Var(X)=E(X^2)\\
+Cov(X,Y)=E(X·Y)</script><p>即为：</p>
+<script type="math/tex; mode=display">
+Ew_k^2=\sigma_{w_1}^2,Ew_iw_j=\sigma_i\sigma_j</script><p>所以：</p>
+<script type="math/tex; mode=display">
+Q=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
+Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
+...&...&...&...\\
+Ew_kw_1&Ew_kw_1&...&Ew_k^2
+\end{bmatrix}=
+\begin{bmatrix}
+\sigma_{w_{1} }^2&\sigma_{w_1}\sigma_{w_2}&...&\sigma_{w_1}\sigma_{w_k}\\
+\sigma_{w_2}\sigma_{w_1}&\sigma_{w_{2} }^2&...&\sigma_{w_2}\sigma_{w_k}\\
+...&...&...&...\\
+\sigma_{w_k}\sigma_{w_1}&\sigma_{w_k}\sigma_{w_1}&...&\sigma_{w_{k} }^2
+\end{bmatrix}</script><p>因此$Q$就是之前所提到的协方差矩阵，同样的，测量噪声也有协方差矩阵$R$，满足类似的条件。</p>
+<hr>
+<p>由于存在噪声的影响，所得到的$x_k$并不精确，我们暂且设它为$\hat{x}_k$，表示这是$x_k$的估计值；同样的$x_{k-1}$也是不准确的，设为$\hat{x}_{k-1}$，并且我们设通过下试得到的$x_k$成为先验估计，定义为$\hat{x}^-_k$</p>
+<script type="math/tex; mode=display">
+\hat{x}^-_k=Ax_{k-1}+B\mu_{k-1}</script><p>由于$z_k$是测出的结果，是已知的，由$z_k=Hx_k$可知：</p>
+<script type="math/tex; mode=display">
+\hat{x}_{kmea}=H^-z_k</script><p>对于上面的两个式子，$\hat{x}^-_k$是算出来的，$\hat{x}_{kmea}$是测出来的，因为收到噪声的影响，它们两个都是不准确的，因此这时候卡尔曼滤波的作用就显现出来了，如何利用两个不准确的值去得出一个相对准确的结果？这里就很容易想到之前提到的数据融合的思想。</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+G(H^-z_k-\hat{x}^-_k)，G\in[0,1]</script><p>分析式子很容易理解，当我们的测量数据很少时，$G\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多时，$G\approx1$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+<p>一般教科书上设$G=K_kH$</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p>同样的，当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+<hr>
+<h2 id="推导卡尔曼增益"><a href="#推导卡尔曼增益" class="headerlink" title="推导卡尔曼增益"></a>推导卡尔曼增益</h2><p>因此，我们的目标变得十分明确了，如何选择一个合适的$K_k$值，使得$\hat{x}_k\rightarrow x_k$，其中$x_k$表示真实值。</p>
+<p>此时，我们定义一个误差值$e_k$，以及一个先验误差值$e_k^-$：</p>
+<script type="math/tex; mode=display">
+e_k=x_k-\hat{x}_k\\
+e_k^-=x_k-\hat{x}^-_k</script><p>误差也是符合高斯分布，$p(e_k)\sim(0,P)$，其中协方差矩阵$P=E[ee^T]$，与之前推导的$Q$是类似的。</p>
+<p>因此，最终的目的就是选择一个合适的$K_k$值，使得$e_k$最小，也就是使得它的方差最小，因为方差越小，说明越接近期望值$0$，即$e_k\approx0$。而方差最小就是使得它的协方差矩阵的迹$tr(P)=\sigma^2_{e_{1} }+\sigma^2_{e_{2} }+…+\sigma^2_{e_{k} }$最小。</p>
+<font color="#dd0000">所以，最终的目的为：寻找一个合适的$K_k$使得$tr(P)$最小！</font>
+
+<hr>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]
+\end{align}</script><p>已知：</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k)\\
+z_k=Hx_k+v_k</script><p>带入上式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_k-\hat{x}_k&=x_k-(\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k))\\
+&=x_k-\hat{x}^-_k-K_kz_k+K_kH\hat{x}^-_k\\
+&=x_k-\hat{x}^-_k-K_k(Hx_k+v_k)+K_kH\hat{x}^-_k\\
+&=x_k-\hat{x}^-_k-K_kHx_k-K_kv_k+K_kH\hat{x}^-_k\\
+&=(x_k-\hat{x}^-_k)-K_kH(x_k-\hat{x}^-_k)-K_kv_k\\
+&=(I-K_kH)(x_k-\hat{x}^-_k)-K_kv_k\\
+&=(I-K_kH)e_k^--K_kv_k
+\end{align}</script><p>所以：</p>
+<blockquote>
+<p>可能会用到的公式：</p>
+<p>$(AB)^T=B^TA^T$，$(A+B)^T=A^T+B^T$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]\\
+&=E[[(I-K_kH)e_k^--K_kv_k][(I-K_kH)e_k^--K_kv_k]^T]\\
+&=E[[(I-K_kH)e_k^--K_kv_k][e_k^{-T}(I-K_kH)^T-v_k^TK_k^T]]\\
+&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T-(I-K_kH)e_k^-v_k^TK_k^T\\
+&-K_kv_ke_k^{-T}(I-K_kH)^T+K_kv_kv_k^TK_k^T]\\
+
+\end{align}</script><p>分别求每一项的期望：</p>
+<blockquote>
+<p>可能会用到的已知条件：</p>
+<p>$E[e_k^-]=0,E[e_k^{-T}]=0,E[v_k^T]=0,E[v_k]=0$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&E[-(I-K_kH)e_k^-v_k^TK_k^T]\\
+&=-(I-K_kH)E[e_k^-v_k^T]K_k^T\\
+&=-(I-K_kH)E[e_k^-]E[v_k^T]K_k^T\\
+&=0
+\end{align}</script><p>同理可得：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&E[-K_kv_ke_k^{-T}(I-K_kH)^T]\\
+&=-K_kE[v_k]E[e_k^{-T}](I-K_kH)^T\\
+&=0
+\end{align}</script><p>所以最终：</p>
+<blockquote>
+<p>可能会用到的定义：</p>
+<p>已知协方差矩阵$P=E[ee^T]$，则定义$P_k^-=E[e_k^-e_k^{-T}]$</p>
+<p>$p_{(v)}\sim(0,R)$，所以$R_k=E[v_kv^T_k]$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T]+E[K_kv_kv_k^TK_k^T]\\
+&=(I-K_kH)E[e_k^-e_k^{-T}](I-K_kH)^T+K_kE[v_kv_k^T]K_k^T\\
+&=(P_k^--K_kHP_k^-)(I^T-H^TK_k^T)+K_kR_kK_k^T\\
+&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
+\end{align}</script><blockquote>
+<p>由于，协方差矩阵的转置就是它本身，所以$P_k^{-T}=P_k^-$</p>
+<p>$(P_k^-H^TK_k^T)^T=K_kHP_k^{-T}=K_kHP_k^-$，所以$tr(K_kHP_k^-)=tr(P_k^-H^TK_k^T)$</p>
+</blockquote>
+<p>因此：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=tr(P_k^-)-tr(K_kHP_k^-)-tr(P_k^-H^TK_k^T)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)\\
+&=tr(P_k^-)-2tr(K_kHP_k^-)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)
+\end{align}</script><p>$tr(P)$对$K_k$求导，使得$\frac{dtr(P_k)}{dK_k}=0$：</p>
+<blockquote>
+<p>可能会用到的公式：</p>
+<p>$\frac{dtr(AB)}{dA}=B^T$，$\frac{dtr(ABA^T)}{dA}=2AB$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{dtr(P_k)}{dK_k}&=\frac{tr(P_k^-)}{dK_k}
+-\frac{2tr(K_kHP_k^-)}{dK_k}
++\frac{tr(K_kHP_k^-H^TK_k^T))}{dK_k}
++\frac{tr(K_kR_kK_k^T))}{dK_k}\\
+&=0-2(HP_k^-)^T+2K_kHP_k^-H^T+2K_kR_k\\
+&=0
+\end{align}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+(HP_k^-)^T&=K_k(HP_k^-H^T+R_k)\\
+K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
+\end{align}</script><p>因此，结合我们之前的结论：</p>
+<blockquote>
+<p>当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+</blockquote>
+<p>此处也是相同的：</p>
+<p>$R_k$表示测量噪声，当测量噪声很大时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；</p>
+<p>当测量噪声很小时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+]]></content>
+      <categories>
+        <category>SLAM十四讲</category>
+      </categories>
+      <tags>
+        <tag>SLAM实践</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ch9_设计前端</title>
     <url>/2022/03/30/%E8%AE%BE%E8%AE%A1%E5%89%8D%E7%AB%AF/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -1100,12 +1516,21 @@ e(x+\Delta x)\approx e(x)+J\Delta x</script><h1 id="集合符号"><a href="#集�
 <td>\neq</td>
 <td>$ \neq$</td>
 </tr>
+<tr>
+<td>\dot{x}</td>
+<td>$\dot{x}$</td>
+</tr>
+<tr>
+<td>\ddot{x}</td>
+<td>$\ddot{x}$</td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>极限</p>
 <script type="math/tex; mode=display">
-\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script>]]></content>
+\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script><p>浅红色文字：<font color="#dd0000">浅红色文字：</font><br><br>深红色文字：<font color="#660000">深红色文字</font><br><br>浅绿色文字：<font color="#00dd00">浅绿色文字</font><br><br>深绿色文字：<font color="#006600">深绿色文字</font><br><br>浅蓝色文字：<font color="#0000dd">浅蓝色文字</font><br><br>深蓝色文字：<font color="#000066">深蓝色文字</font><br><br>浅黄色文字：<font color="#dddd00">浅黄色文字</font><br><br>深黄色文字：<font color="#666600">深黄色文字</font><br><br>浅青色文字：<font color="#00dddd">浅青色文字</font><br><br>深青色文字：<font color="#006666">深青色文字</font><br><br>浅紫色文字：<font color="#dd00dd">浅紫色文字</font><br><br>深紫色文字：<font color="#660066">深紫色文字</font><br> </p>
+]]></content>
       <categories>
         <category>Makedown</category>
       </categories>
