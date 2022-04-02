@@ -1,7 +1,270 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>卡尔曼滤波器</title>
+    <title>卡尔曼滤波的数学推导</title>
+    <url>/2022/04/02/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>卡尔曼滤波（Kalman filter）是一种高效率的<strong>递归滤波器</strong>（自回归滤波器），它能够从一系列的不完全及包含噪声的测量中，估计动态系统的状态。卡尔曼滤波会根据各测量量在不同时间下的值，考虑各时间下的联合分布，再产生对未知变数的估计，因此会比只以单一测量量为基础的估计方式要准。卡尔曼滤波得名自主要贡献者之一的鲁道夫·卡尔曼。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="卡尔曼滤波的数学推导"><a href="#卡尔曼滤波的数学推导" class="headerlink" title="卡尔曼滤波的数学推导"></a>卡尔曼滤波的数学推导</h1><h2 id="先验与后验估计"><a href="#先验与后验估计" class="headerlink" title="先验与后验估计"></a>先验与后验估计</h2><p>由之前的状态空间方程：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+{x_k }&=Ax_{k-1}+Bu_{k-1}+w_{k-1}\\
+z_{k}&=Hx_{k}+v_k
+\end{align}</script><p>其中$w_{k-1}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$P_{(w)}\sim(0,Q)，P_{(v)}\sim(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+Q=E[ww^T]&=E
+\begin{bmatrix}
+\begin{bmatrix}w_1\\w_2\\.\\.\\w_k \end{bmatrix}
+\begin{bmatrix}w_1&w_2&...&w_k \end{bmatrix}
+\end{bmatrix}
+=E
+\begin{bmatrix}w_1^2&w_1w_2&...&w_1w_k\\
+w_2w_1&w_2^2&...&w_2w_k\\
+...&...&...&...\\
+w_kw_1&w_kw_1&...&w_k^2
+\end{bmatrix}\\
+&=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
+Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
+...&...&...&...\\
+Ew_kw_1&Ew_kw_1&...&Ew_k^2
+\end{bmatrix}
+\end{align}</script><p>由于$w$的期望为$0$，由方差等于平方的期望减去期望的平方以及协方差公式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+Var(X)&=E(X^2)-E^2(X)\\
+Cov(X,Y)&=E((X-\mu)(Y-v))
+\end{align}</script><p>所以此处平方的期望就等于方差：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+Var(X)&=E(X^2)\\
+Cov(X,Y)&=E(X·Y)
+\end{align}</script><p>即为：</p>
+<script type="math/tex; mode=display">
+Ew_k^2=\sigma_{w_1}^2,Ew_iw_j=\sigma_i\sigma_j</script><p>所以：</p>
+<script type="math/tex; mode=display">
+Q=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
+Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
+...&...&...&...\\
+Ew_kw_1&Ew_kw_1&...&Ew_k^2
+\end{bmatrix}=
+\begin{bmatrix}
+\sigma_{w_{1} }^2&\sigma_{w_1}\sigma_{w_2}&...&\sigma_{w_1}\sigma_{w_k}\\
+\sigma_{w_2}\sigma_{w_1}&\sigma_{w_{2} }^2&...&\sigma_{w_2}\sigma_{w_k}\\
+...&...&...&...\\
+\sigma_{w_k}\sigma_{w_1}&\sigma_{w_k}\sigma_{w_1}&...&\sigma_{w_{k} }^2
+\end{bmatrix}</script><p>因此$Q$就是之前所提到的协方差矩阵，同样的，测量噪声也有协方差矩阵$R$，满足类似的条件。</p>
+<hr>
+<p>由于存在噪声的影响，所得到的$x_k$并不精确，我们暂且设它为$\hat{x}_k$，表示这是$x_k$的估计值；同样的$x_{k-1}$也是不准确的，设为$\hat{x}_{k-1}$，并且我们设通过下试得到的$x_k$成为先验估计，定义为$\hat{x}^-_k$；</p>
+<p><b><span style="color:rgb(255, 0, 255);">先验估计（公式1）：</span></b></p>
+<script type="math/tex; mode=display">
+\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}</script><p>由于$z_k$是测出的结果，是已知的，由$z_k=Hx_k$可知：</p>
+<script type="math/tex; mode=display">
+\hat{x}_{kmea}=H^-z_k</script><p>对于上面的两个式子，$\hat{x}^-_k$是算出来的，$\hat{x}_{kmea}$是测出来的，因为收到噪声的影响，它们两个都是不准确的，因此这时候卡尔曼滤波的作用就显现出来了，如何利用两个不准确的值去得出一个相对准确的结果？这里就很容易想到之前提到的数据融合的思想。</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+G(H^-z_k-\hat{x}^-_k)，G\in[0,1]</script><p>分析式子很容易理解，当我们的测量数据很少时，$G\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多时，$G\approx1$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+<p>一般教科书上设$G=K_kH$；</p>
+<p><b><span style="color:rgb(255, 0, 255);">后验估计（公式2）：</span></b></p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p>同样的，当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+<h2 id="卡尔曼增益"><a href="#卡尔曼增益" class="headerlink" title="卡尔曼增益"></a>卡尔曼增益</h2><p>因此，我们的目标变得十分明确了，如何选择一个合适的$K_k$值，使得$\hat{x}_k\rightarrow x_k$，其中$x_k$表示真实值。</p>
+<p>此时，我们定义一个误差值$e_k$，以及一个先验误差值$e_k^-$：</p>
+<script type="math/tex; mode=display">
+e_k=x_k-\hat{x}_k\\
+e_k^-=x_k-\hat{x}^-_k</script><p>误差也是符合高斯分布，$p(e_k)\sim(0,P)$，其中协方差矩阵$P=E[ee^T]$，与之前推导的$Q$是类似的。</p>
+<p>因此，最终的目的就是选择一个合适的$K_k$值，使得$e_k$最小，也就是使得它的方差最小，因为方差越小，说明越接近期望值$0$，即$e_k\approx0$。而方差最小就是使得它的协方差矩阵的迹$tr(P)=\sigma^2_{e_{1} }+\sigma^2_{e_{2} }+…+\sigma^2_{e_{k} }$最小。</p>
+<font color="#dd0000">所以，最终的目的为：寻找一个合适的$K_k$使得$tr(P)$最小！</font>
+
+<hr>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]
+\end{align}</script><p>已知：</p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k)\\
+z_k=Hx_k+v_k</script><p>带入上式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_k-\hat{x}_k&=x_k-(\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k))\\
+&=x_k-\hat{x}^-_k-K_kz_k+K_kH\hat{x}^-_k\\
+&=x_k-\hat{x}^-_k-K_k(Hx_k+v_k)+K_kH\hat{x}^-_k\\
+&=x_k-\hat{x}^-_k-K_kHx_k-K_kv_k+K_kH\hat{x}^-_k\\
+&=(x_k-\hat{x}^-_k)-K_kH(x_k-\hat{x}^-_k)-K_kv_k\\
+&=(I-K_kH)(x_k-\hat{x}^-_k)-K_kv_k\\
+&=(I-K_kH)e_k^--K_kv_k
+\end{align}</script><p>所以：</p>
+<blockquote>
+<p>可能会用到的公式：</p>
+<p>$(AB)^T=B^TA^T$，$(A+B)^T=A^T+B^T$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]\\
+&=E[[(I-K_kH)e_k^--K_kv_k][(I-K_kH)e_k^--K_kv_k]^T]\\
+&=E[[(I-K_kH)e_k^--K_kv_k][e_k^{-T}(I-K_kH)^T-v_k^TK_k^T]]\\
+&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T-(I-K_kH)e_k^-v_k^TK_k^T\\
+&-K_kv_ke_k^{-T}(I-K_kH)^T+K_kv_kv_k^TK_k^T]\\
+
+\end{align}</script><p>分别求每一项的期望：</p>
+<blockquote>
+<p>可能会用到的已知条件：</p>
+<p>$E[e_k^-]=0,E[e_k^{-T}]=0,E[v_k^T]=0,E[v_k]=0$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+&E[-(I-K_kH)e_k^-v_k^TK_k^T]\\
+&=-(I-K_kH)E[e_k^-v_k^T]K_k^T\\
+&=-(I-K_kH)E[e_k^-]E[v_k^T]K_k^T\\
+&=0
+\end{align}</script><p>同理可得：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&E[-K_kv_ke_k^{-T}(I-K_kH)^T]\\
+&=-K_kE[v_k]E[e_k^{-T}](I-K_kH)^T\\
+&=0
+\end{align}</script><p>所以最终：</p>
+<blockquote>
+<p>可能会用到的定义：</p>
+<p>已知协方差矩阵$P=E[ee^T]$，则定义$P_k^-=E[e_k^-e_k^{-T}]$</p>
+<p>$p_{(v)}\sim(0,R)$，所以$R_k=E[v_kv^T_k]$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=E[ee^T]\\
+&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T]+E[K_kv_kv_k^TK_k^T]\\
+&=(I-K_kH)E[e_k^-e_k^{-T}](I-K_kH)^T+K_kE[v_kv_k^T]K_k^T\\
+&=(P_k^--K_kHP_k^-)(I^T-H^TK_k^T)+K_kR_kK_k^T\\
+&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
+\end{align}</script><blockquote>
+<p>由于，协方差矩阵的转置就是它本身，所以$P_k^{-T}=P_k^-$</p>
+<p>$(P_k^-H^TK_k^T)^T=K_kHP_k^{-T}=K_kHP_k^-$，所以$tr(K_kHP_k^-)=tr(P_k^-H^TK_k^T)$</p>
+</blockquote>
+<p>因此：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+tr(P)&=tr(P_k^-)-tr(K_kHP_k^-)-tr(P_k^-H^TK_k^T)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)\\
+&=tr(P_k^-)-2tr(K_kHP_k^-)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)
+\end{align}</script><p>$tr(P)$对$K_k$求导，使得$\frac{dtr(P_k)}{dK_k}=0$：</p>
+<blockquote>
+<p>可能会用到的公式：</p>
+<p>$\frac{dtr(AB)}{dA}=B^T$，$\frac{dtr(ABA^T)}{dA}=2AB$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{dtr(P_k)}{dK_k}&=\frac{tr(P_k^-)}{dK_k}
+-\frac{2tr(K_kHP_k^-)}{dK_k}
++\frac{tr(K_kHP_k^-H^TK_k^T))}{dK_k}
++\frac{tr(K_kR_kK_k^T))}{dK_k}\\
+&=0-2(HP_k^-)^T+2K_kHP_k^-H^T+2K_kR_k\\
+&=0
+\end{align}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+(HP_k^-)^T&=K_k(HP_k^-H^T+R_k)
+\end{align}</script><p><b><span style="color:rgb(255, 0, 255);">卡尔曼增益（公式3）：</span></b></p>
+<script type="math/tex; mode=display">
+\begin{align}
+K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
+\end{align}</script><p>因此，结合我们之前的结论：</p>
+<blockquote>
+<p>当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+</blockquote>
+<p>此处也是相同的：</p>
+<p>$R_k$表示测量噪声，当测量噪声很大时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；</p>
+<p>当测量噪声很小时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
+<hr>
+<h2 id="误差协方差矩阵"><a href="#误差协方差矩阵" class="headerlink" title="误差协方差矩阵"></a>误差协方差矩阵</h2><p>总结前面推导的三个公式：</p>
+<p><font color="#dd0000"><strong>先验估计（公式1）：</strong></font></p>
+<script type="math/tex; mode=display">
+\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}</script><p><font color="#dd0000"><strong>后验估计（公式2）：</strong></font></p>
+<script type="math/tex; mode=display">
+\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p><font color="#dd0000"><strong>卡尔曼增益（公式3）：</strong></font></p>
+<script type="math/tex; mode=display">
+\begin{align}
+K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
+\end{align}</script><p>上面的公式里只有$P_k^-$是未知的，需要推导。由于已知协方差矩阵$P=E[ee^T]$，所以定义$P_k^-=E[e_k^-e_k^{-T}]$，如何求这个误差协方差矩阵是以下篇幅讨论的重点。</p>
+<blockquote>
+<p>可能会用到的定义与公式：</p>
+<p>$e_k=x_k-\hat{x}_k$，$P_k=E[ee^T]$</p>
+<p>$e_k^-=x_k-\hat{x}^-_k$ ，$P_k^-=E[e_k^-e_k^{-T}]$</p>
+<p>$\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}$</p>
+<p>$x_k =Ax_{k-1}+Bu_{k-1}+w_{k-1}$</p>
+</blockquote>
+<p>首先推导$e_k^-=x_k-\hat{x}^-_k$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+e_k^-&=x_k-\hat{x}^-_k\\
+&=Ax_{k-1}+Bu_{k-1}+w_{k-1}-A\hat{x}_{k-1}-B\mu_{k-1}\\
+&=A(x_{k-1}-\hat{x}_{k-1})+w_{k-1}\\
+&=Ae_{k-1}+w_{k-1}
+\end{align}</script><p>所以：</p>
+<blockquote>
+<p>由于$e_{k-1}=x_{k-1}-\hat{x}_{k-1}$，所以$e_{k-1}$作用的是上一时刻，而$w_k$是作用于当前时刻的，它们之间是相互独立的。$E[e_{k-1}w_{k}^T]=E[e_{k-1}]E[w_{k}^T]$，且$E[e_{k-1}]=E[w_{k}^T]=0$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+P_k^-&=E[e_k^-e_k^{-T}]\\
+&=E[(Ae_{k-1}+w_{k-1})(Ae_{k-1}+w_{k-1})^T]\\
+&=E[(Ae_{k-1}+w_{k-1})(e_{k-1}^TA^T+w_{k-1}^T)]\\
+&=E[Ae_{k-1}e_{k-1}^TA^T+Ae_{k-1}w_{k-1}^T+w_{k}e_{k-1}^TA^T+w_{k-1}w_{k-1}^T]\\
+&=E[Ae_{k-1}e_{k-1}^TA^T]+E[Ae_{k-1}w_{k-1}^T]+E[w_{k-1}e_{k-1}^TA^T]+E[w_{k-1}w_{k-1}^T]\\
+&=AE[e_{k-1}e_{k-1}^T]A^T+E[w_{k-1}w_{k-1}^T]\\
+&=AP_{k-1}A^T+Q_{k-1}
+\end{align}</script><p><font color="#dd0000"><strong>误差协方差矩阵（公式4）：</strong></font></p>
+<script type="math/tex; mode=display">
+\begin{align}
+P_k^-=AP_{k-1}A^T+Q_{k-1}
+\end{align}</script><p>由于每一次的误差协方差矩阵$P_k^-$，都需要上一次的$P_{k-1}$，所以每一时刻我们都需要更新一下$P_k$的值，为下一时刻使用做准备。</p>
+<p><font color="#dd0000"><strong>更新误差协方差：（公式5）：</strong></font></p>
+<script type="math/tex; mode=display">
+\begin{align}
+P_k&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
+&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_k(HP_k^-H^T+R_k)K_k^T\\
+&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+\frac{P_k^-H^T}{HP_k^-H^T+R_k}(HP_k^-H^T+R_k)K_k^T\\
+&=P_k^--K_kHP_k^-\\
+&=(I-K_kH)P_k^-
+\end{align}</script><p>至此，我们可以总结一下整个卡尔曼滤波的过程：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">预测</th>
+<th>校正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">先验：$\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}$</td>
+<td>卡尔曼增益：$K_k=\frac{P_k^-H^T}{HP_k^-H^T+R_k}$</td>
+</tr>
+<tr>
+<td style="text-align:left">先验误差协方差：$P_k^-=AP_{k-1}A^T+Q_{k-1}$</td>
+<td>后验估计：$\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]$</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td>更新误差协方差：$P_k=(I-K_kH)P_k^-$</td>
+</tr>
+</tbody>
+</table>
+</div>
+]]></content>
+      <categories>
+        <category>SLAM十四讲</category>
+      </categories>
+      <tags>
+        <tag>SLAM实践</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>卡尔曼滤波器的数学基础</title>
     <url>/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -10,7 +273,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="数学基础"><a href="#数学基础" class="headerlink" title="数学基础"></a>数学基础</h1><h2 id="递归算法"><a href="#递归算法" class="headerlink" title="递归算法"></a>递归算法</h2><p>卡尔曼滤波器(Kalman Filter)，它是一种最优化的递归的数字处理算法(Optimal Recursive Data Processing Algorithm)。</p>
+<h1 id="卡尔曼滤波器的数学基础"><a href="#卡尔曼滤波器的数学基础" class="headerlink" title="卡尔曼滤波器的数学基础"></a>卡尔曼滤波器的数学基础</h1><h2 id="递归算法"><a href="#递归算法" class="headerlink" title="递归算法"></a>递归算法</h2><p>卡尔曼滤波器(Kalman Filter)，它是一种最优化的递归的数字处理算法(Optimal Recursive Data Processing Algorithm)。</p>
 <p><strong>为什么使用卡尔曼滤波？</strong></p>
 <p>因为显示生活中充满了不确定性，而这些不确定性主要体现在以下几个方面：</p>
 <ul>
@@ -241,173 +504,12 @@ Z_{(t)}=HX_{(t)}</script><p>离散型：</p>
 <script type="math/tex; mode=display">
 {X_k }=AX_{k-1}+Bu_{k}\\
 Z_{k}=HX_{k}</script><p>其中$k$表示采样时间单位。</p>
-<p>由于现实中存在着不确定性，比如存在过程噪声(Process Noise)：$w_{k-1}$，测量噪声(Measurement Noise)：$v_k$</p>
+<p>由于现实中存在着不确定性，比如存在过程噪声(Process Noise)：$w_{k}$，测量噪声(Measurement Noise)：$v_k$</p>
 <script type="math/tex; mode=display">
 \begin{align}
-{X_k }&=AX_{k-1}+Bu_{k}+w_{k-1}\\
+{X_k }&=AX_{k-1}+Bu_{k}+w_{k}\\
 Z_{k}&=HX_{k}+v_k
 \end{align}</script><p>因此，我们的模型和测量都存在误差，导致计算值以及测量值都是不准确的，如何通过两个不确定的值去估计一个准确的值$\hat{x}_k=?$，根据数据融合的例子，我们可以使用这两个不准确的结果进行数据融合，从而得到一个比较准确的估计值。</p>
-<h1 id="卡尔曼滤波的数学推导"><a href="#卡尔曼滤波的数学推导" class="headerlink" title="卡尔曼滤波的数学推导"></a>卡尔曼滤波的数学推导</h1><h2 id="卡尔曼公式"><a href="#卡尔曼公式" class="headerlink" title="卡尔曼公式"></a>卡尔曼公式</h2><p>由之前的状态空间方程：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-{x_k }&=Ax_{k-1}+Bu_{k}+w_{k-1}\\
-z_{k}&=Hx_{k}+v_k
-\end{align}</script><p>其中$w_{k-1}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$P_{(w)}\sim(0,Q)，P_{(v)}\sim(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-Q=E[ww^T]&=E
-\begin{bmatrix}
-\begin{bmatrix}w_1\\w_2\\.\\.\\w_k \end{bmatrix}
-\begin{bmatrix}w_1&w_2&...&w_k \end{bmatrix}
-\end{bmatrix}
-=E
-\begin{bmatrix}w_1^2&w_1w_2&...&w_1w_k\\
-w_2w_1&w_2^2&...&w_2w_k\\
-...&...&...&...\\
-w_kw_1&w_kw_1&...&w_k^2
-\end{bmatrix}\\
-&=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
-Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
-...&...&...&...\\
-Ew_kw_1&Ew_kw_1&...&Ew_k^2
-\end{bmatrix}
-\end{align}</script><p>由于$w$的期望为$0$，由方差等于平方的期望减去期望的平方以及协方差公式：</p>
-<script type="math/tex; mode=display">
-Var(X)=E(X^2)-E^2(X)\\
-Cov(X,Y)=E((X-\mu)(Y-v))</script><p>所以此处平方的期望就等于方差：</p>
-<script type="math/tex; mode=display">
-Var(X)=E(X^2)\\
-Cov(X,Y)=E(X·Y)</script><p>即为：</p>
-<script type="math/tex; mode=display">
-Ew_k^2=\sigma_{w_1}^2,Ew_iw_j=\sigma_i\sigma_j</script><p>所以：</p>
-<script type="math/tex; mode=display">
-Q=\begin{bmatrix}Ew_1^2&Ew_1w_2&...&Ew_1w_k\\
-Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
-...&...&...&...\\
-Ew_kw_1&Ew_kw_1&...&Ew_k^2
-\end{bmatrix}=
-\begin{bmatrix}
-\sigma_{w_{1} }^2&\sigma_{w_1}\sigma_{w_2}&...&\sigma_{w_1}\sigma_{w_k}\\
-\sigma_{w_2}\sigma_{w_1}&\sigma_{w_{2} }^2&...&\sigma_{w_2}\sigma_{w_k}\\
-...&...&...&...\\
-\sigma_{w_k}\sigma_{w_1}&\sigma_{w_k}\sigma_{w_1}&...&\sigma_{w_{k} }^2
-\end{bmatrix}</script><p>因此$Q$就是之前所提到的协方差矩阵，同样的，测量噪声也有协方差矩阵$R$，满足类似的条件。</p>
-<hr>
-<p>由于存在噪声的影响，所得到的$x_k$并不精确，我们暂且设它为$\hat{x}_k$，表示这是$x_k$的估计值；同样的$x_{k-1}$也是不准确的，设为$\hat{x}_{k-1}$，并且我们设通过下试得到的$x_k$成为先验估计，定义为$\hat{x}^-_k$</p>
-<script type="math/tex; mode=display">
-\hat{x}^-_k=Ax_{k-1}+B\mu_{k-1}</script><p>由于$z_k$是测出的结果，是已知的，由$z_k=Hx_k$可知：</p>
-<script type="math/tex; mode=display">
-\hat{x}_{kmea}=H^-z_k</script><p>对于上面的两个式子，$\hat{x}^-_k$是算出来的，$\hat{x}_{kmea}$是测出来的，因为收到噪声的影响，它们两个都是不准确的，因此这时候卡尔曼滤波的作用就显现出来了，如何利用两个不准确的值去得出一个相对准确的结果？这里就很容易想到之前提到的数据融合的思想。</p>
-<script type="math/tex; mode=display">
-\hat{x}_k=\hat{x}^-_k+G(H^-z_k-\hat{x}^-_k)，G\in[0,1]</script><p>分析式子很容易理解，当我们的测量数据很少时，$G\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多时，$G\approx1$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
-<p>一般教科书上设$G=K_kH$</p>
-<script type="math/tex; mode=display">
-\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p>同样的，当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
-<hr>
-<h2 id="推导卡尔曼增益"><a href="#推导卡尔曼增益" class="headerlink" title="推导卡尔曼增益"></a>推导卡尔曼增益</h2><p>因此，我们的目标变得十分明确了，如何选择一个合适的$K_k$值，使得$\hat{x}_k\rightarrow x_k$，其中$x_k$表示真实值。</p>
-<p>此时，我们定义一个误差值$e_k$，以及一个先验误差值$e_k^-$：</p>
-<script type="math/tex; mode=display">
-e_k=x_k-\hat{x}_k\\
-e_k^-=x_k-\hat{x}^-_k</script><p>误差也是符合高斯分布，$p(e_k)\sim(0,P)$，其中协方差矩阵$P=E[ee^T]$，与之前推导的$Q$是类似的。</p>
-<p>因此，最终的目的就是选择一个合适的$K_k$值，使得$e_k$最小，也就是使得它的方差最小，因为方差越小，说明越接近期望值$0$，即$e_k\approx0$。而方差最小就是使得它的协方差矩阵的迹$tr(P)=\sigma^2_{e_{1} }+\sigma^2_{e_{2} }+…+\sigma^2_{e_{k} }$最小。</p>
-<font color="#dd0000">所以，最终的目的为：寻找一个合适的$K_k$使得$tr(P)$最小！</font>
-
-<hr>
-<script type="math/tex; mode=display">
-\begin{align}
-tr(P)&=E[ee^T]\\
-&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]
-\end{align}</script><p>已知：</p>
-<script type="math/tex; mode=display">
-\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k)\\
-z_k=Hx_k+v_k</script><p>带入上式：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-x_k-\hat{x}_k&=x_k-(\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k))\\
-&=x_k-\hat{x}^-_k-K_kz_k+K_kH\hat{x}^-_k\\
-&=x_k-\hat{x}^-_k-K_k(Hx_k+v_k)+K_kH\hat{x}^-_k\\
-&=x_k-\hat{x}^-_k-K_kHx_k-K_kv_k+K_kH\hat{x}^-_k\\
-&=(x_k-\hat{x}^-_k)-K_kH(x_k-\hat{x}^-_k)-K_kv_k\\
-&=(I-K_kH)(x_k-\hat{x}^-_k)-K_kv_k\\
-&=(I-K_kH)e_k^--K_kv_k
-\end{align}</script><p>所以：</p>
-<blockquote>
-<p>可能会用到的公式：</p>
-<p>$(AB)^T=B^TA^T$，$(A+B)^T=A^T+B^T$</p>
-</blockquote>
-<script type="math/tex; mode=display">
-\begin{align}
-tr(P)&=E[ee^T]\\
-&=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]\\
-&=E[[(I-K_kH)e_k^--K_kv_k][(I-K_kH)e_k^--K_kv_k]^T]\\
-&=E[[(I-K_kH)e_k^--K_kv_k][e_k^{-T}(I-K_kH)^T-v_k^TK_k^T]]\\
-&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T-(I-K_kH)e_k^-v_k^TK_k^T\\
-&-K_kv_ke_k^{-T}(I-K_kH)^T+K_kv_kv_k^TK_k^T]\\
-
-\end{align}</script><p>分别求每一项的期望：</p>
-<blockquote>
-<p>可能会用到的已知条件：</p>
-<p>$E[e_k^-]=0,E[e_k^{-T}]=0,E[v_k^T]=0,E[v_k]=0$</p>
-</blockquote>
-<script type="math/tex; mode=display">
-\begin{align}
-&E[-(I-K_kH)e_k^-v_k^TK_k^T]\\
-&=-(I-K_kH)E[e_k^-v_k^T]K_k^T\\
-&=-(I-K_kH)E[e_k^-]E[v_k^T]K_k^T\\
-&=0
-\end{align}</script><p>同理可得：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-&E[-K_kv_ke_k^{-T}(I-K_kH)^T]\\
-&=-K_kE[v_k]E[e_k^{-T}](I-K_kH)^T\\
-&=0
-\end{align}</script><p>所以最终：</p>
-<blockquote>
-<p>可能会用到的定义：</p>
-<p>已知协方差矩阵$P=E[ee^T]$，则定义$P_k^-=E[e_k^-e_k^{-T}]$</p>
-<p>$p_{(v)}\sim(0,R)$，所以$R_k=E[v_kv^T_k]$</p>
-</blockquote>
-<script type="math/tex; mode=display">
-\begin{align}
-tr(P)&=E[ee^T]\\
-&=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T]+E[K_kv_kv_k^TK_k^T]\\
-&=(I-K_kH)E[e_k^-e_k^{-T}](I-K_kH)^T+K_kE[v_kv_k^T]K_k^T\\
-&=(P_k^--K_kHP_k^-)(I^T-H^TK_k^T)+K_kR_kK_k^T\\
-&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
-\end{align}</script><blockquote>
-<p>由于，协方差矩阵的转置就是它本身，所以$P_k^{-T}=P_k^-$</p>
-<p>$(P_k^-H^TK_k^T)^T=K_kHP_k^{-T}=K_kHP_k^-$，所以$tr(K_kHP_k^-)=tr(P_k^-H^TK_k^T)$</p>
-</blockquote>
-<p>因此：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-tr(P)&=tr(P_k^-)-tr(K_kHP_k^-)-tr(P_k^-H^TK_k^T)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)\\
-&=tr(P_k^-)-2tr(K_kHP_k^-)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)
-\end{align}</script><p>$tr(P)$对$K_k$求导，使得$\frac{dtr(P_k)}{dK_k}=0$：</p>
-<blockquote>
-<p>可能会用到的公式：</p>
-<p>$\frac{dtr(AB)}{dA}=B^T$，$\frac{dtr(ABA^T)}{dA}=2AB$</p>
-</blockquote>
-<script type="math/tex; mode=display">
-\begin{align}
-\frac{dtr(P_k)}{dK_k}&=\frac{tr(P_k^-)}{dK_k}
--\frac{2tr(K_kHP_k^-)}{dK_k}
-+\frac{tr(K_kHP_k^-H^TK_k^T))}{dK_k}
-+\frac{tr(K_kR_kK_k^T))}{dK_k}\\
-&=0-2(HP_k^-)^T+2K_kHP_k^-H^T+2K_kR_k\\
-&=0
-\end{align}</script><p>所以：</p>
-<script type="math/tex; mode=display">
-\begin{align}
-(HP_k^-)^T&=K_k(HP_k^-H^T+R_k)\\
-K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
-\end{align}</script><p>因此，结合我们之前的结论：</p>
-<blockquote>
-<p>当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
-</blockquote>
-<p>此处也是相同的：</p>
-<p>$R_k$表示测量噪声，当测量噪声很大时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；</p>
-<p>当测量噪声很小时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
 ]]></content>
       <categories>
         <category>SLAM十四讲</category>
