@@ -10,12 +10,12 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="卡尔曼滤波的数学推导"><a href="#卡尔曼滤波的数学推导" class="headerlink" title="卡尔曼滤波的数学推导"></a>卡尔曼滤波的数学推导</h1><h2 id="先验与后验估计"><a href="#先验与后验估计" class="headerlink" title="先验与后验估计"></a>先验与后验估计</h2><p>由之前的状态空间方程：</p>
+<h1 id="线性滤波"><a href="#线性滤波" class="headerlink" title="线性滤波"></a>线性滤波</h1><h2 id="先验与后验估计"><a href="#先验与后验估计" class="headerlink" title="先验与后验估计"></a>先验与后验估计</h2><p>由之前的状态空间方程：</p>
 <script type="math/tex; mode=display">
 \begin{align}
 {x_k }&=Ax_{k-1}+Bu_{k-1}+w_{k-1}\\
 z_{k}&=Hx_{k}+v_k
-\end{align}</script><p>其中$w_{k-1}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$P_{(w)}\sim(0,Q)，P_{(v)}\sim(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
+\end{align}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
 <script type="math/tex; mode=display">
 \begin{align}
 Q=E[ww^T]&=E
@@ -63,7 +63,7 @@ Ew_kw_1&Ew_kw_1&...&Ew_k^2
 <p>由于存在噪声的影响，所得到的$x_k$并不精确，我们暂且设它为$\hat{x}_k$，表示这是$x_k$的估计值；同样的$x_{k-1}$也是不准确的，设为$\hat{x}_{k-1}$，并且我们设通过下试得到的$x_k$成为先验估计，定义为$\hat{x}^-_k$；</p>
 <p><b><span style="color:rgb(255, 0, 255);">先验估计（公式1）：</span></b></p>
 <script type="math/tex; mode=display">
-\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}</script><p>由于$z_k$是测出的结果，是已知的，由$z_k=Hx_k$可知：</p>
+\hat{x}^-_k=A\hat{x}_{k-1}+Bu_{k-1}</script><p>由于$z_k$是测出的结果，是已知的，由$z_k=Hx_k$可知：</p>
 <script type="math/tex; mode=display">
 \hat{x}_{kmea}=H^-z_k</script><p>对于上面的两个式子，$\hat{x}^-_k$是算出来的，$\hat{x}_{kmea}$是测出来的，因为收到噪声的影响，它们两个都是不准确的，因此这时候卡尔曼滤波的作用就显现出来了，如何利用两个不准确的值去得出一个相对准确的结果？这里就很容易想到之前提到的数据融合的思想。</p>
 <script type="math/tex; mode=display">
@@ -183,7 +183,7 @@ K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
 <h2 id="误差协方差矩阵"><a href="#误差协方差矩阵" class="headerlink" title="误差协方差矩阵"></a>误差协方差矩阵</h2><p>总结前面推导的三个公式：</p>
 <p><font color="#dd0000"><strong>先验估计（公式1）：</strong></font></p>
 <script type="math/tex; mode=display">
-\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}</script><p><font color="#dd0000"><strong>后验估计（公式2）：</strong></font></p>
+\hat{x}^-_k=A\hat{x}_{k-1}+Bu_{k-1}</script><p><font color="#dd0000"><strong>后验估计（公式2）：</strong></font></p>
 <script type="math/tex; mode=display">
 \hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p><font color="#dd0000"><strong>卡尔曼增益（公式3）：</strong></font></p>
 <script type="math/tex; mode=display">
@@ -194,14 +194,14 @@ K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
 <p>可能会用到的定义与公式：</p>
 <p>$e_k=x_k-\hat{x}_k$，$P_k=E[ee^T]$</p>
 <p>$e_k^-=x_k-\hat{x}^-_k$ ，$P_k^-=E[e_k^-e_k^{-T}]$</p>
-<p>$\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}$</p>
+<p>$\hat{x}^-_k=A\hat{x}_{k-1}+Bu_{k-1}$</p>
 <p>$x_k =Ax_{k-1}+Bu_{k-1}+w_{k-1}$</p>
 </blockquote>
 <p>首先推导$e_k^-=x_k-\hat{x}^-_k$:</p>
 <script type="math/tex; mode=display">
 \begin{align}
 e_k^-&=x_k-\hat{x}^-_k\\
-&=Ax_{k-1}+Bu_{k-1}+w_{k-1}-A\hat{x}_{k-1}-B\mu_{k-1}\\
+&=Ax_{k-1}+Bu_{k}+w_{k-1}-A\hat{x}_{k-1}-Bu_{k}\\
 &=A(x_{k-1}-\hat{x}_{k-1})+w_{k-1}\\
 &=Ae_{k-1}+w_{k-1}
 \end{align}</script><p>所以：</p>
@@ -213,14 +213,14 @@ e_k^-&=x_k-\hat{x}^-_k\\
 P_k^-&=E[e_k^-e_k^{-T}]\\
 &=E[(Ae_{k-1}+w_{k-1})(Ae_{k-1}+w_{k-1})^T]\\
 &=E[(Ae_{k-1}+w_{k-1})(e_{k-1}^TA^T+w_{k-1}^T)]\\
-&=E[Ae_{k-1}e_{k-1}^TA^T+Ae_{k-1}w_{k-1}^T+w_{k}e_{k-1}^TA^T+w_{k-1}w_{k-1}^T]\\
+&=E[Ae_{k-1}e_{k-1}^TA^T+Ae_{k-1}w_{k-1}^T+w_{k-1}e_{k-1}^TA^T+w_{k-1}w_{k-1}^T]\\
 &=E[Ae_{k-1}e_{k-1}^TA^T]+E[Ae_{k-1}w_{k-1}^T]+E[w_{k-1}e_{k-1}^TA^T]+E[w_{k-1}w_{k-1}^T]\\
 &=AE[e_{k-1}e_{k-1}^T]A^T+E[w_{k-1}w_{k-1}^T]\\
-&=AP_{k-1}A^T+Q_{k-1}
+&=AP_{k-1}A^T+Q
 \end{align}</script><p><font color="#dd0000"><strong>误差协方差矩阵（公式4）：</strong></font></p>
 <script type="math/tex; mode=display">
 \begin{align}
-P_k^-=AP_{k-1}A^T+Q_{k-1}
+P_k^-=AP_{k-1}A^T+Q
 \end{align}</script><p>由于每一次的误差协方差矩阵$P_k^-$，都需要上一次的$P_{k-1}$，所以每一时刻我们都需要更新一下$P_k$的值，为下一时刻使用做准备。</p>
 <p><font color="#dd0000"><strong>更新误差协方差：（公式5）：</strong></font></p>
 <script type="math/tex; mode=display">
@@ -241,12 +241,91 @@ P_k&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left">先验：$\hat{x}^-_k=A\hat{x}_{k-1}+B\mu_{k-1}$</td>
+<td style="text-align:left">先验：$\hat{x}^-_k=A\hat{x}_{k-1}+Bu_{k-1}$</td>
 <td>卡尔曼增益：$K_k=\frac{P_k^-H^T}{HP_k^-H^T+R_k}$</td>
 </tr>
 <tr>
-<td style="text-align:left">先验误差协方差：$P_k^-=AP_{k-1}A^T+Q_{k-1}$</td>
+<td style="text-align:left">先验误差协方差：$P_k^-=AP_{k-1}A^T+Q$</td>
 <td>后验估计：$\hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]$</td>
+</tr>
+<tr>
+<td style="text-align:left"></td>
+<td>更新误差协方差：$P_k=(I-K_kH)P_k^-$</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>介绍卡尔曼滤波论文：</strong><a href="http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf">http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf</a></p>
+</blockquote>
+<h1 id="非线性滤波器"><a href="#非线性滤波器" class="headerlink" title="非线性滤波器"></a>非线性滤波器</h1><p>前面的卡尔曼滤波我们可以在一个线性系统得到一个最优的估计值，那么卡尔曼滤波器在非线性系统中的应用如何呢？一般来说有许多方法，但是最基本的方法就是将非线性系统进行线性化，这种滤波器我们称为扩展卡尔曼滤波器（Extended Kalman Filter，简称EKF）。</p>
+<hr>
+<p>对于线性系统的状态空间表达式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+{x_k }&=Ax_{k-1}+Bu_{k-1}+w_{k-1}\\
+z_{k}&=Hx_{k}+v_k
+\end{align}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
+<hr>
+<p>对于非线性系统的状态空间表达式：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_k&=f(x_{k-1},u_{k-1},w_{k-1})\\
+z_k&=h(x_k,v_k)
+\end{align}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
+<p>虽然噪声仍然满足正态分布，但是<span style="color:red;">正态分布的随机变量通过非线性系统后就不再是正态的了。</span></p>
+<p><img src="/2022/04/02/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220402154736261.png" alt="image-20220402154736261"></p>
+<p>所以需要对非线性系统进行线性化处理，这里会用到泰勒展开。</p>
+<p>比如我们对$f(x)$在$x_0$处进行泰勒展开：</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+\frac{\partial f}{\partial x}(x-x_0)</script><p>对于一个非线性系统来说，最好的一个线性化的点就是它的真实点，但是由于系统存在误差，所以我们永远无法知道系统的真实点是多少，所以一般$f(x)$在$\hat{x}_{k-1}$(即上一时刻的后验估计)处进行线性化。</p>
+<ul>
+<li>过程方程线性化</li>
+</ul>
+<blockquote>
+<p>假设误差$w_{k-1}=0$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+\begin{align}
+x_k&=f(\hat{x}_{k-1},u_{k-1},w_{k-1})+A(x_k-\hat{x}_{k-1})+Ww_{k-1}\\
+&=f(\hat{x}_{k-1},u_{k-1},0)+A(x_k-\hat{x}_{k-1})+Ww_{k-1}
+\end{align}</script><blockquote>
+<p>记：$f(\hat{x}_{k-1},u_{k-1},0)=\widetilde{x}$，而$A，W$是雅可比矩阵，且$A=\frac{\partial f}{\partial x}|\hat{x}_{k-1},u_{k-1}$，$W=\frac{\partial f}{\partial w}|\hat{x}_{k-1},u_{k-1}$</p>
+</blockquote>
+<ul>
+<li>测量方程线性化</li>
+</ul>
+<p>将$z_k$在$\widetilde{x}$处线性化：</p>
+<blockquote>
+<p>假设误差 $v_{k}=0$</p>
+</blockquote>
+<script type="math/tex; mode=display">
+z_{k}=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k</script><blockquote>
+<p>而$H，V$是雅可比矩阵，且$H=\frac{\partial f}{\partial x}|\widetilde{x}_{k}$，$V=\frac{\partial f}{\partial v}|\widetilde{x}_{k}$</p>
+</blockquote>
+<p>所以非线性系统线性化后：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+x_k&=f(\hat{x}_{k-1},u_{k-1},0)+A(x_k-\hat{x}_{k-1})+Ww_{k-1}\\
+z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
+\end{align}</script><p>由于$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，那么很容易得到$p_{(Ww)}\sim N(0,wQw^T)，p_{(Vv)}\sim N(0,vRv^T)$</p>
+<p>至此，我们可以总结一下整个卡尔曼滤波的过程：</p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th style="text-align:left">预测</th>
+<th>校正</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">先验：$\hat{x}^-_k=Af(\hat{x}_{k-1},u_{k-1},0)+Bu_{k-1}$</td>
+<td>卡尔曼增益：$K_k=\frac{P_k^-H^T}{HP_k^-H^T+vRv^T}$</td>
+</tr>
+<tr>
+<td style="text-align:left">先验误差协方差：$P_k^-=AP_{k-1}A^T+wQw^T$</td>
+<td>后验估计：$\hat{x}_k=\hat{x}^-_k+K_k(z_k-h(\hat{x}^-_k,0)),K_k\in[0,H^-]$</td>
 </tr>
 <tr>
 <td style="text-align:left"></td>
@@ -510,7 +589,26 @@ Z_{k}=HX_{k}</script><p>其中$k$表示采样时间单位。</p>
 {X_k }&=AX_{k-1}+Bu_{k}+w_{k}\\
 Z_{k}&=HX_{k}+v_k
 \end{align}</script><p>因此，我们的模型和测量都存在误差，导致计算值以及测量值都是不准确的，如何通过两个不确定的值去估计一个准确的值$\hat{x}_k=?$，根据数据融合的例子，我们可以使用这两个不准确的结果进行数据融合，从而得到一个比较准确的估计值。</p>
-]]></content>
+<h2 id="线性化"><a href="#线性化" class="headerlink" title="线性化"></a>线性化</h2><p>泰勒级数展开式：对于函数$f(x)$在任意一点$x_0$处展开</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+\frac{f^\prime(x_0)}{1!}(x-x_0)+\frac{f^{\prime \prime}(x_0)}{2!}(x-x_0)^2+...+\frac{f^{(n)}(x_0)}{1!}(x-x_0)^{n}</script><p>一般当$x-x_0\rightarrow0$时，则$(x-x_0)^{n}\rightarrow0,n\geq 2$，只取一阶泰勒：</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+f^\prime(x_0)(x-x_0)</script><p>设$f(x_0)=k_1,f^\prime(x_0)=k_2$:</p>
+<script type="math/tex; mode=display">
+\begin{align}
+f(x)&=k_1+k_2(x-x_0)\\
+&=k_2x+(k_1-k_2x_0)\\
+&=k_2x+b
+\end{align}</script><p>因此这样的一个非线性的函数$f(x)$在点$x_0$附近就被线性化为一个线性的函数。</p>
+<ul>
+<li><p><span style="color:red;">线性化是对某个点附近进行线性化，而不是全局进行线性化</span></p>
+</li>
+<li><p><span style="color:red;">线性化的前提条件，一定是$(x-x_0)\rightarrow0$ </span></p>
+</li>
+</ul>
+<p>如果对于二维以上的，我们的一阶泰勒展开如下：</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>]]></content>
       <categories>
         <category>SLAM十四讲</category>
       </categories>
@@ -1626,12 +1724,46 @@ e(x+\Delta x)\approx e(x)+J\Delta x</script><h1 id="集合符号"><a href="#集�
 <td>\ddot{x}</td>
 <td>$\ddot{x}$</td>
 </tr>
+<tr>
+<td>\partial{x}</td>
+<td>$\partial{x}$</td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>极限</p>
 <script type="math/tex; mode=display">
-\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script><p>浅红色文字：<font color="#dd0000">浅红色文字：</font><br><br>深红色文字：<font color="#660000">深红色文字</font><br><br>浅绿色文字：<font color="#00dd00">浅绿色文字</font><br><br>深绿色文字：<font color="#006600">深绿色文字</font><br><br>浅蓝色文字：<font color="#0000dd">浅蓝色文字</font><br><br>深蓝色文字：<font color="#000066">深蓝色文字</font><br><br>浅黄色文字：<font color="#dddd00">浅黄色文字</font><br><br>深黄色文字：<font color="#666600">深黄色文字</font><br><br>浅青色文字：<font color="#00dddd">浅青色文字</font><br><br>深青色文字：<font color="#006666">深青色文字</font><br><br>浅紫色文字：<font color="#dd00dd">浅紫色文字</font><br><br>深紫色文字：<font color="#660066">深紫色文字</font><br> </p>
+\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script><p>浅红色文字：<font color="#dd0000">浅红色文字：</font><br><br>深红色文字：<font color="#660000">深红色文字</font><br><br>浅绿色文字：<font color="#00dd00">浅绿色文字</font><br><br>深绿色文字：<font color="#006600">深绿色文字</font><br><br>浅蓝色文字：<font color="#0000dd">浅蓝色文字</font><br><br>深蓝色文字：<font color="#000066">深蓝色文字</font><br><br>浅黄色文字：<font color="#dddd00">浅黄色文字</font><br><br>深黄色文字：<font color="#666600">深黄色文字</font><br><br>浅青色文字：<font color="#00dddd">浅青色文字</font><br><br>深青色文字：<font color="#006666">深青色文字</font><br><br>浅紫色文字：<font color="#dd00dd">浅紫色文字</font><br><br>深紫色文字：<font color="#660066">深紫色文字</font><br> <span style="color:red;">文字</span></p>
+<p><span style="color:red;">正态分布的随机变量通过非线性系统后就不再是正态的了。</span></p>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th≯=</th>
+<th><script type="math/tex">\not=</script></th>
+<th>不等于</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>\not&gt;</td>
+<td>$\not&gt;$</td>
+<td>不大于</td>
+</tr>
+<tr>
+<td>\leq</td>
+<td>$\leq$</td>
+<td>小于等于</td>
+</tr>
+<tr>
+<td>\geq</td>
+<td>$\geq$</td>
+<td>大于等于</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>$\vec{a}$  向量<br>$\overline{a}$ 平均值<br>$\widehat{a}$ (线性回归，直线方程) y尖<br>$\widetilde{a}$ 颚化符号  等价无穷小<br>$\dot{a}$   一阶导数<br>$\ddot{a}$  二阶导数</p>
 ]]></content>
       <categories>
         <category>Makedown</category>
