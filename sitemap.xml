@@ -326,6 +326,20 @@
 
   
   <url>
+    <loc>http://lukeyalvin.top/tags/BUG/</loc>
+    <lastmod>2022-04-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://lukeyalvin.top/tags/slam/</loc>
+    <lastmod>2022-04-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://lukeyalvin.top/tags/GitHub/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
@@ -354,20 +368,6 @@
   </url>
   
   <url>
-    <loc>http://lukeyalvin.top/tags/BUG/</loc>
-    <lastmod>2022-04-05</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://lukeyalvin.top/tags/slam/</loc>
-    <lastmod>2022-04-05</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://lukeyalvin.top/tags/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
@@ -383,6 +383,13 @@
   
   <url>
     <loc>http://lukeyalvin.top/tags/eigen/</loc>
+    <lastmod>2022-04-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://lukeyalvin.top/tags/%E5%AE%89%E8%A3%85%EF%BC%8CSLAM%E5%AE%9E%E8%B7%B5/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -475,6 +482,13 @@
 
   
   <url>
+    <loc>http://lukeyalvin.top/categories/slam/</loc>
+    <lastmod>2022-04-05</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://lukeyalvin.top/categories/%E7%BB%8F%E9%AA%8C/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
@@ -489,14 +503,14 @@
   </url>
   
   <url>
-    <loc>http://lukeyalvin.top/categories/slam/</loc>
+    <loc>http://lukeyalvin.top/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://lukeyalvin.top/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/</loc>
+    <loc>http://lukeyalvin.top/categories/%E5%AE%89%E8%A3%85/</loc>
     <lastmod>2022-04-05</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
