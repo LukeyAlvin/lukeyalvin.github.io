@@ -22,17 +22,27 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="东北大学控制工程研究生">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Robot Go!">
-<meta property="og:url" content="http://lukeyalvin.top/tags/xacro/index.html">
+  <meta name="description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="g2o-viewer安装">
+<meta property="og:url" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="东北大学控制工程研究生">
+<meta property="og:description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405210455088.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405210828391.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211004286.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211129848.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211231692.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211615903.png">
+<meta property="article:published_time" content="2022-04-05T13:00:25.324Z">
+<meta property="article:modified_time" content="2022-04-05T13:16:42.719Z">
 <meta property="article:author" content="上善若水">
+<meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405210455088.png">
 
-<link rel="canonical" href="http://lukeyalvin.top/tags/xacro/">
+<link rel="canonical" href="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/">
 
 
 <script id="page-configurations">
@@ -40,12 +50,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: xacro | Robot Go!</title>
+  <title>g2o-viewer安装 | Robot Go!</title>
   
 
 
@@ -185,97 +195,213 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          g2o-viewer安装
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-05 21:00:25 / 修改时间：21:16:42" itemprop="dateCreated datePublished" datetime="2022-04-05T21:00:25+08:00">2022-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">xacro
-          <small>标签</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>706</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>首先，你要下载$g2o$:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/RainerKuemmerle/g2o</span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">sudo apt-get install libqt4-dev qt4-qmake libqglviewer-dev libsuitesparse-dev libcxsparse3.1.2 libcholmod-dev</span><br><span class="line"><span class="comment"># g2o_viewer依赖</span></span><br><span class="line">sudo apt-get install libsuitesparse-dev qtdeclarative5-dev qt5-qmake libqglviewer-dev-qt5</span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line"><span class="built_in">cd</span> g2o</span><br><span class="line">mkdir build</span><br><span class="line"><span class="built_in">cd</span> build </span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+<p>文件结构已经提过了</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405210455088.png" alt="image-20220405210455088"></p>
+<p>我们的g2o_viewer源文件就在app里面：</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405210828391.png" alt="image-20220405210828391"></p>
+<p>我们编译之后检查一下g2o源代码目录下<code>g2o\bin</code>下有没有生成g2o_viewer的可执行文件</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211004286.png" alt="image-20220405211004286"></p>
+<p>因为我们编译了，所以检查一下有没有在本地</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211129848.png" alt="image-20220405211129848"></p>
+<p>如果没有说明你没有<code>sudo make install</code>成功。</p>
+<p>如果此时还不可以直接在终端打开g2o:</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211231692.png" alt="image-20220405211231692"></p>
+<p>这就是没有链接成功了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo gedit /etc/ld.so.conf</span><br></pre></td></tr></table></figure>
+<p>然后加入：<code>include /usr/local/lib</code>,当然如果你有就不加咯</p>
+<p>然后执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+<p>然后就可以使用了！</p>
+<p><img src="/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/image-20220405211615903.png" alt="image-20220405211615903"></p>
+<p>如果还不可以，那你指定哪一步不对劲！</p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T15:51:21+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="上善若水 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="上善若水 支付宝">
+        <p>支付宝</p>
       </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_gazebo+rviz%E7%BB%BC%E5%90%88%E5%AE%9E%E8%B7%B5/" itemprop="url">
-            <span itemprop="name">机器人仿真实践_gazebo+rviz综合实践</span>
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>上善若水
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://lukeyalvin.top/2022/04/05/g2o-viewer%E5%AE%89%E8%A3%85/" title="g2o-viewer安装">http://lukeyalvin.top/2022/04/05/g2o-viewer安装/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
           </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T15:12:46+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_gazebo%E4%BB%BF%E7%9C%9F/" itemprop="url">
-            <span itemprop="name">机器人仿真实践_gazebo中搭建</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T14:25:45+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_XACRO%E6%90%AD%E5%BB%BA%E6%9C%BA%E5%99%A8%E4%BA%BA/" itemprop="url">
-            <span itemprop="name">机器人仿真实践_XACRO搭建机器人</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
+        </div>
     </div>
   </div>
-  
-  
-  
 
-  
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/04/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" rel="prev" title="线性最小二乘">
+      <i class="fa fa-chevron-left"></i> 线性最小二乘
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -842,6 +968,61 @@ window.addEventListener('pjax:success', () => {
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 
