@@ -31,7 +31,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/04/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/image-20220404164725825.png">
 <meta property="article:published_time" content="2022-04-04T08:46:33.032Z">
-<meta property="article:modified_time" content="2022-04-04T13:29:53.278Z">
+<meta property="article:modified_time" content="2022-04-05T02:11:08.321Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -219,10 +219,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-04-04 16:46:33 / 修改时间：21:29:53" itemprop="dateCreated datePublished" datetime="2022-04-04T16:46:33+08:00">2022-04-04</time>
+              <time title="创建时间：2022-04-04 16:46:33" itemprop="dateCreated datePublished" datetime="2022-04-04T16:46:33+08:00">2022-04-04</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-05 10:11:08" itemprop="dateModified" datetime="2022-04-05T10:11:08+08:00">2022-04-05</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -260,14 +266,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>2.8k</span>
+              <span>3.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>3 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -374,11 +380,39 @@ b=\begin{bmatrix}
 \end{bmatrix}=
 \begin{bmatrix}
 1.4\\3.5\\
-\end{bmatrix}</script><h2 id="多元线性回归求解过程"><a href="#多元线性回归求解过程" class="headerlink" title="多元线性回归求解过程"></a>多元线性回归求解过程</h2><p>【背景】给定$m$组点$(x_1,…,x_n,y_1),(x_1,…,x_n,y_2),…,(x_1,…,x_n,y_m)$，求它的拟合曲线？</p>
-<p>对于多元函数的拟合，可以设拟合函数为：$ h_θ(x_1,x_2,…x_n)=θ_0+θ_1x_1+…+θ_nx_n$</p>
-<p>为了简化，我们增加一个特征值$x_0=1$使得$ h_θ(x_0,x_1,x_2,…x_n)=θ_0x_0+θ_1x_1+…+θ_nx_n$</p>
+\end{bmatrix}</script><h2 id="多元线性回归求解过程"><a href="#多元线性回归求解过程" class="headerlink" title="多元线性回归求解过程"></a>多元线性回归求解过程</h2><p>【背景】给定$m$组点$(x_{11},…,x_{1n},y_1),(x_{21},…,x_{2n},y_2),…,(x_{m1},…,x_{mn},y_m)$，求它的拟合曲线？</p>
+<p>对于多元函数的拟合，可以设拟合函数为：$ h_θ(x_1,x_2,…x_n)=θ_1+θ_2x_{j1}+…+θ_nx_{jn}$</p>
+<p>为了简化，我们增加一个特征值$x_0=1$使得$ h_θ(x_0,x_1,x_2,…x_n)=θ_1+θ_2x_{j1}+…+θ_nx_{jn}$</p>
 <p>则每一组数为$(1,x_1,x_2,…,x_n,yj),j=1,2,…,m$，也就是求取最合适的系数$\theta_0,\theta_1,…\theta_n$,使得多元函数对所有点的拟合达到最佳！</p>
-<p>这样的问题可以用矩阵表示：</p>
+<p>损失函数：</p>
+<script type="math/tex; mode=display">
+J(\theta)=\sum^m_{j=0}(y_j-(θ_1+θ_2x_{j1}+...+θ_nx_{jn})^2</script><p>分别对$\theta_1,\theta_2,…,\theta_n$，求偏导：</p>
+<p>由于一共有$m$组数据，所以使用每一组数据对$\theta_1,\theta_2,…,\theta_n$分别求偏导，比如对$\theta_1$求偏导：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{\partial J_1(\theta)}{\partial \theta_1}&= \frac{\partial[ y_1-(θ_0+θ_1x_{11} +...+θ_nx_{1n})]^2}{\partial \theta_1}\\
+\frac{\partial J_2(\theta)}{\partial \theta_1}&= \frac{\partial[ y_2-(θ_0+θ_1x_{21} +...+θ_nx_{2n})]^2}{\partial \theta_1}\\
+&......\\
+\frac{\partial J_m(\theta)}{\partial \theta_1}&= \frac{\partial[ y_m-(θ_0+θ_1x_{m1} +...+θ_nx_{mn})]^2}{\partial \theta_1}
+
+\end{align}</script><p>我们可以得到一个雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+J(\theta)=
+\begin{bmatrix}
+\frac{\partial J_1(\theta)}{\partial \theta_1}
+&\frac{\partial J_2(\theta)}{\partial \theta_1}
+&...
+&\frac{\partial J_m(\theta)}{\partial \theta_1}\\
+\frac{\partial J_1(\theta)}{\partial \theta_2}
+&\frac{\partial J_2(\theta)}{\partial \theta_2}
+&...
+&\frac{\partial J_m(\theta)}{\partial \theta_2}\\
+...&...&...&...\\
+\frac{\partial J_1(\theta)}{\partial \theta_n}
+&\frac{\partial J_2(\theta)}{\partial \theta_n}
+&...
+&\frac{\partial J_m(\theta)}{\partial \theta_n}\\
+\end{bmatrix}</script><p>这样的问题可以用矩阵表示：</p>
 <script type="math/tex; mode=display">
 Ax=b</script><p>其中$X$表示$m$组点的自变量的值，$Y$代表每一组自变量对应的函数值。</p>
 <script type="math/tex; mode=display">
@@ -476,8 +510,8 @@ x=\begin{bmatrix}
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/04/04/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" rel="prev" title="SLAM中的非线性优化数学推导">
-      <i class="fa fa-chevron-left"></i> SLAM中的非线性优化数学推导
+    <a href="/2022/04/04/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" rel="prev" title="SLAM中的非线性优化">
+      <i class="fa fa-chevron-left"></i> SLAM中的非线性优化
     </a></div>
       <div class="post-nav-item"></div>
     </div>
@@ -880,12 +914,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">245k</span>
+    <span title="站点总字数">251k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">3:43</span>
+    <span title="站点阅读时长">3:48</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
