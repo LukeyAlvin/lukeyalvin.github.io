@@ -35,7 +35,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/WeChat%20Image_20220401141112.jpg">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/image-20220401152419675.png">
 <meta property="article:published_time" content="2022-04-01T01:23:32.450Z">
-<meta property="article:modified_time" content="2022-04-04T08:15:56.141Z">
+<meta property="article:modified_time" content="2022-04-06T05:59:22.353Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-04 16:15:56" itemprop="dateModified" datetime="2022-04-04T16:15:56+08:00">2022-04-04</time>
+                <time title="修改时间：2022-04-06 13:59:22" itemprop="dateModified" datetime="2022-04-06T13:59:22+08:00">2022-04-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -270,7 +270,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.6k</span>
+              <span>5.9k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -365,9 +365,11 @@ K_k=\frac{ {e_{EST} }_{k-1} }{ {e_{EST} }_{k-1}+{e_{MEA} }_{k} }</script><p><str
 &=(1-K_k)^2\sigma_1^2+K_k^2\sigma_2^2\\
 \end{align}</script><p>对$K_k$求导：</p>
 <script type="math/tex; mode=display">
-\frac{d\sigma^2_{\hat{z}_k } }{dK_k}=0\\
--2(1-K_k)\sigma_1^2+2K_k\sigma_2^2=0\\
-K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}</script><p>已知$\sigma_1=2,\sigma_2=4$:</p>
+\begin{align}
+&\frac{d\sigma^2_{\hat{z}_k } }{dK_k}=0\\
+-2(1-K_k)&\sigma_1^2+2K_k\sigma_2^2=0\\
+&K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}
+\end{align}</script><p>已知$\sigma_1=2,\sigma_2=4$:</p>
 <script type="math/tex; mode=display">
 K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带入：</p>
 <script type="math/tex; mode=display">
@@ -386,7 +388,14 @@ K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带�
 &= 1.79
 \end{align}</script><p>因此，我们根据两个称的特性，根据测量值对物体的真实重量进行了预测，预测值为$30.4g$，而且它是最优解。</p>
 <p>这个过程就是数据融合。</p>
-<p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112"></p>
+<p><strong>公式：</strong></p>
+<p>对于两个高斯分布的融合，如$p(A)\sim N(\mu_a,\sigma^2_a)$，$p(B)\sim N(\mu_b,\sigma^2_b)$</p>
+<p>融合之后的高斯分布$p(C)\sim N(\mu_c,\sigma^2_c)$：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\mu_c&=\frac{\sigma^2_b\mu_a+\sigma^2_a\mu_b}{\sigma^2_a+\sigma^2_b}\\
+\sigma_c&=\frac{\sigma^2_a\sigma^2_b}{\sigma^2_b+\sigma^2_b}
+\end{align}</script><p><img src="/2022/04/01/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112"></p>
 <hr>
 <h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
 <p>【例】</p>
