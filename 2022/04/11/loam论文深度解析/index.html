@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="LOAM这篇论文是发表于2014年RSS的文章，全称为：LOAM: Lidar Odometry and Mapping in Real-time . LOAM是基于激光雷达而搭建的在ROS平台下的SLAM系统。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了解析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LOAM-SLAM深度剖析">
+<meta property="og:url" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Robot Go!">
+<meta property="og:description" content="LOAM这篇论文是发表于2014年RSS的文章，全称为：LOAM: Lidar Odometry and Mapping in Real-time . LOAM是基于激光雷达而搭建的在ROS平台下的SLAM系统。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了解析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411152638255.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153159251.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153221345.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153230555.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411193701848.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411202023128.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411204216656.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411204829280.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411210656962.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png">
+<meta property="article:published_time" content="2022-04-11T03:06:44.036Z">
+<meta property="article:modified_time" content="2022-04-11T13:51:28.270Z">
+<meta property="article:author" content="上善若水">
+<meta property="article:tag" content="文献阅读">
+<meta property="article:tag" content="LOAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png">
+
+<link rel="canonical" href="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>LOAM-SLAM深度剖析 | Robot Go!</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Robot Go!" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Robot Go!</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          LOAM-SLAM深度剖析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-11 11:06:44 / 修改时间：21:51:28" itemprop="dateCreated datePublished" datetime="2022-04-11T11:06:44+08:00">2022-04-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">文献阅读</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>LOAM这篇论文是发表于2014年RSS的文章，全称为：LOAM: Lidar Odometry and Mapping in Real-time . LOAM是基于激光雷达而搭建的在ROS平台下的SLAM系统。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了解析。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>LOAM的整体流程：</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png" alt="image-20220410153142890"></p>
+<p>本文的核心主要在于两个部分：<strong>特征提取（Lidar Registration）</strong>和<strong>里程计解算（Odometry and Mapping）</strong>。<br>当提取出特征后，通过高频率的里程计（Odometry）实现<strong>粗定位</strong>，即为高频低精度；低频率的里程计（Mapping）实现<strong>精定位</strong>，即为低频高精度。 </p>
+<h1 id="Ⅱ-符号约定"><a href="#Ⅱ-符号约定" class="headerlink" title="Ⅱ.符号约定"></a>Ⅱ.符号约定</h1><ul>
+<li><p>一个sweep代表了一次扫描周期，$k$表示第$k$次扫描周期，$k\in Z^+$</p>
+</li>
+<li><p>一个扫描周期内获取到的所有点云记作 $P_k$， 代表了第$k$个扫描周期的点云</p>
+</li>
+<li><p>激光雷达坐标系$\left\{L\right\}$是一个以激光雷达几何中心为原点的三维坐标系。$x$轴是向左的，$y$轴是向上的，$z$轴是向前的。点$i, i\in P_k$在$\left\{L\right\}$中的坐标表示为$X^L_{(k,i)}$。</p>
+</li>
+<li><p>世界坐标系$\left\{W\right\}$是在初始位置与$\left\{L\right\}$重合的三维坐标系。点$i, i\in P_k$在$\left\{W\right\}$中的坐标为$X^W_{(k,i)}$。</p>
+</li>
+</ul>
+<p><strong>已知一段点云序列$P_k,k\in Z^+$ ，计算在前$k$个时期内的雷达位姿以及构建全局地图。</strong></p>
+<h1 id="Ⅲ-特征提取（点云注册）"><a href="#Ⅲ-特征提取（点云注册）" class="headerlink" title="Ⅲ.特征提取（点云注册）"></a>Ⅲ.特征提取（点云注册）</h1><h2 id="A-区分边缘点和平面点"><a href="#A-区分边缘点和平面点" class="headerlink" title="A.区分边缘点和平面点"></a>A.区分边缘点和平面点</h2><p>特征提取主要分为两部分，即为对边缘点和平面点分别进行特征提取。常见的特征点提取方法：特征向量、直方图、旋转图片等。这些方法虽然能很精准的涵盖一帧数据的大部分信息，但是由于计算量大，很难在激光slam的相邻帧的匹配中使用。 因此，需要想一些更好的方法。<br>本文作者根据点的曲率来计算<strong>平面光滑度</strong>作为提取当前帧的特征信息的指标。如下图所示，边缘点的矢量和的模一般较大，矢量<strong>和不为零</strong>向量，而对应平面点的矢量和的模一般较小，矢量<strong>和为零</strong>向量。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411152638255.png" alt="image-20220411152638255"></p>
+<p>不难发现：</p>
+<ul>
+<li>平面点：在三维空间中处于平滑平面上的点，其和周围点的大小差距不大，曲率较低，平滑度较低。</li>
+<li>边缘点：在三维空间中处于尖锐边缘上的点，其和周围点的大小差距较大，曲率较高，平滑度较高。</li>
+</ul>
+<p>所以定义<strong>平面光滑度</strong>$c$：</p>
+<script type="math/tex; mode=display">
+c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p>根据$c$值对扫描中的点进行排序，选择$c$值最大的点为边缘点，$c$值最小的点为平面点的特征点。论文中为了在环境中均匀分布特征点，将扫描分割成四个相同的子区域。每个子区域最多可提供$2$个边缘点和$4$个平面点。只有当点$i$的$c$值大于或小于一个阈值，且所选点的个数不超过最大值时，才能将点$i$选择为边缘点或平面点。</p>
+<h2 id="B-不可考点的设置"><a href="#B-不可考点的设置" class="headerlink" title="B.不可考点的设置"></a>B.不可考点的设置</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153159251.png" alt="image-20220410153159251"></p>
+<p>选取点的三要素：</p>
+<ul>
+<li>选择的边缘点或平面点的数量不能超过子区域的最大值</li>
+<li>它周围的点都没有被选中</li>
+<li>它不能在大致平行于激光束的表面上，也不能在被遮挡区域的边界上。</li>
+</ul>
+<p>经过特征点的提取，就可以得到论文中的帧数据对应的特征信息（边缘点和平面点分别用黄色和红色标记。）：</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153221345.png" alt="image-20220410153221345"></p>
+<h1 id="Ⅳ-特征点匹配"><a href="#Ⅳ-特征点匹配" class="headerlink" title="Ⅳ.特征点匹配"></a>Ⅳ.特征点匹配</h1><p>将点云重新投影到扫描的末端。蓝色线段表示扫描$k$时感知到的点云 $P_k$，在$k$次扫描结束时，经过<strong>畸变校正</strong>之后将$P_k$重新投影到时间戳$t_{k+1}$，得到绿色线段$\overline{P}_k$。然后，在$k+1$次扫描时，重投影点云数据(经过畸变校正)$\overline{P}_k$和新感知的点云$P_{k+1}$(橙色线段)一起估计激光雷达运动。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153230555.png" alt="image-20220410153230555"></p>
+<p>我们根据论文中的描述：</p>
+<ul>
+<li><p>$P_k$是$k$时刻激光雷达感知的点云集合， 根据上文的特征提取规则，得到边缘点的集合$\xi_{k}$和平面点的集合$H_{k}$；</p>
+</li>
+<li><p>$\overline{P}_k$是将$k$时刻激光雷达感知的点云集合$P_k$，经过畸变校正得到的点云集合；</p>
+</li>
+<li>$P_{k+1}$是$k+1$时刻激光雷达感知的点云集合， 类似$P_k$，边缘点的集合$\xi_{k+1}$以及平面点的集合$H_{k+1}$；</li>
+<li>在每次迭代中，使用当前估计的变换将$\xi_{k+1}$和$H_{k+1}$重新投影到扫描的开始，记$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$为重投影的点集。</li>
+</ul>
+<p>我们一一解释它们之间有什么关系。</p>
+<hr>
+<h2 id="A-激光雷达数据的畸变"><a href="#A-激光雷达数据的畸变" class="headerlink" title="A.激光雷达数据的畸变"></a>A.激光雷达数据的畸变</h2><p>激光雷达数据产生的畸变又叫<strong>激光雷达自运动畸变</strong>，对于多数激光雷达而言，尽管激光的发射与接收很快，但构成点云的每一个点仍非同一时刻生成的。一般我们会将$100ms $(对应典型值$10Hz$) 内累积的数据作为一帧点云输出。若在这$100ms$内，激光雷达本体或安装所在的机体发生绝对位置的变化，那么<strong>此帧点云中每一个点的坐标系就是不同的。</strong>直观上看，这一帧点云数据就会发生一定的“变形”，不能真实对应所探测到的环境信息，类似于拍照时手抖了，拍出来的照片就会糊。这便是激光雷达的自运动畸变。</p>
+<p>举一个例子，激光雷达对面有一面平行的墙面，理想状况下激光处于位置A或者位置B位置墙面的点云应该一样，但实际上，由于在这$100ms$内，激光雷达本身在运动，所以这一帧的墙面的点云中，某些点的坐标系就变得不同了，进而失去了原始平行墙面的特征，所以说，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑。</p>
+<p>如果是一堵平行的墙面，理想状况下激光处于A或者B位置测量到的同一点云的距离应该一样，但是实际中，激光雷达的位置发生了变化，所以这一帧的墙面的点云中，每一个点的坐标系就是不同的，失去了原始平行墙面的特征，进行激光SLAM时，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411193701848.png" alt="image-20220411193701848"></p>
+<h2 id="B-将点与线和面匹配的原因"><a href="#B-将点与线和面匹配的原因" class="headerlink" title="B.将点与线和面匹配的原因"></a>B.将点与线和面匹配的原因</h2><p>理想情况下，没有畸变，激光雷达在短时间里获取的相邻帧数据是<strong>含有大量同一特征点</strong>的，也就是$P_k$和$P_{k+1}$中很多特征点只是雷达在不同位置下观察的同一个点。所以只要找到一个变化关系$T$使得$P_k$和$P_{k+1}$对应的点的匹配，这个$T$就是表示激光雷达的帧间运动。为了减少计算量，增加鲁棒性，不直接使用点与点的匹配，而是使用边缘点和对应的线特征，平面点和对应的面特征，这样也可以得到变换关系 $T$。</p>
+<p>但是实际情况下，激光雷达的点云数据是含有畸变的，所以作者将矫正的$P_k$重新投影到时间戳$t_{k+1}$，得到$\overline{P}_k$。我们的目的就是：从$\overline{P}_k$中找到与$\xi_{k+1}$中的点对应的边线，从平面图中找到与$H_{k+1}$中的点对应的平面贴片(patch)。那么现在就是一边进行矫正，一边进行匹配，然后进行迭代。迭代过程中，$T$的值不断变化，直到寻找到一个$T$使得<strong>所有点和对应特征区域距离和最小</strong>。</p>
+<h2 id="C-点和对应特征区域距离的计算"><a href="#C-点和对应特征区域距离的计算" class="headerlink" title="C.点和对应特征区域距离的计算"></a>C.点和对应特征区域距离的计算</h2><p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411202023128.png" alt="image-20220411202023128"></p>
+<p>其中：$i\in \tilde{\xi}_{k+1}$，$j,l,m\in \overline{P}_k$</p>
+<p>图$7(a)$给出了寻找边缘点对应的边线的过程。设$i$是属于$\tilde{\xi}_{k+1}$的点，即$ i \in \tilde{\xi}_{k+1}$。边线由两个点表示。设$j$是$i$在$\overline{P}_k$中的最近邻，$j\in \overline{P}_k$，设$l$是$i$在连续两次扫描$j$时的最近邻，$(j, l)$构成$i$的对应关系。然后，为了验证$j$和$l$都是边缘点，我们根据公式$(1)$来检查局部表面的平滑度。这里，我们特别要求$j$和$l$来自不同的扫描，考虑到一次扫描不能包含来自同一边线的多个点。</p>
+<p>图$7(b)$显示了寻找平面贴片(patch)作为平面点对应的过程。设$ i$ 为$\tilde{H}_{k+1}$中的一个点，即$i \in  \tilde{H}_{k+1}$。平面贴片(patch)由三个点表示。与上一段类似，我们在$\overline{P}_k$中找到$ i $的最近邻，记为$j$。 然后，我们找到另外两个点 $l$ 和$ m$，作为$ i $的最近邻，一个在$j $的同一扫描中，另一个在 $j $的两次连续扫描中。 这保证了三个点是非共线的。 为了验证 $j$、$l$和 $m$ 都是平面点，我们根据$ (1) $再次检查局部表面的平滑度。</p>
+<p>根据匹配的原理，可以构造优化问题：求解变换关系$T$，使边缘点和边缘线距离最短，平面点和平面距离最短</p>
+<ul>
+<li><p>$\tilde{X}^L_{(k+1,i)}$    ：表示$i， i \in \tilde{\xi}_{k+1}$在$\left\{L\right\}$中的坐标;</p>
+</li>
+<li><p>$\overline{X}^L_{(k,j)}$：表示$j， j \in \overline{P}_k$在$\left\{L\right\}$中的坐标;</p>
+</li>
+<li><p>$\overline{X}^L_{(k,l)}$：表示$l， l\in \overline{P}_k$在$\left\{L\right\}$中的坐标;</p>
+</li>
+<li><p>$\overline{X}^L_{(k,m)}$：表示$m， m\in \overline{P}_k$在$\left\{L\right\}$中的坐标;</p>
+</li>
+</ul>
+<h3 id="a-点到线的距离"><a href="#a-点到线的距离" class="headerlink" title="a.点到线的距离"></a>a.点到线的距离</h3><p>主要原理是利用“<strong>两向量叉积的模等于以这两个向量为边形成的平行四边形的面积</strong>”这条定理。</p>
+<p>如下图：</p>
+<script type="math/tex; mode=display">
+S=OD·AB=|\overrightarrow{OA}×\overrightarrow {OB}|=|\overrightarrow{OA}|·|\overrightarrow{OB}|·sin\theta</script><p>如果我们需要求高：</p>
+<script type="math/tex; mode=display">
+OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}</script><p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411204216656.png" alt="image-20220411204216656"></p>
+<p>所以对于：</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411204829280.png" alt="image-20220411204829280"></p>
+<p>得到点到线的距离$d_\xi$为：</p>
+<script type="math/tex; mode=display">
+d_{\xi}=\frac{|(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,j)})×(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,l)})|}
+{|\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)}|}</script><h3 id="b-点到面的距离"><a href="#b-点到面的距离" class="headerlink" title="b.点到面的距离"></a>b.点到面的距离</h3><p> 主要原理是<strong>点与平面内一点形成的向量与该平面的单位法向量的点积的模即为该点到平面的距离</strong>。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411210656962.png" alt="image-20220411210656962"></p>
+<script type="math/tex; mode=display">
+d_H=\frac
+{\begin{vmatrix}
+(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,j)})·((\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)})×(\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,m)}))
+\end{vmatrix}
+}
+{\begin{vmatrix}
+(\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)})×(\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,m)})
+\end{vmatrix} }</script><h1 id="Ⅴ-运动估计"><a href="#Ⅴ-运动估计" class="headerlink" title="Ⅴ.运动估计"></a>Ⅴ.运动估计</h1><h2 id="A-线性插值"><a href="#A-线性插值" class="headerlink" title="A.线性插值"></a>A.线性插值</h2><p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png" alt="Linear interpolation.png"></p>
+<p>假设我们已知坐标 $(x_0,y_0)$ 与$(x_1,y_1)$，要得到$[x_0.x_1]$区间内某一位置 $x$ 在直线上的值。根据图中所示，我们得到:</p>
+<script type="math/tex; mode=display">
+\frac{y-y_0}{x-x_0}=\frac{y_1-y_0}{x_1-x_0}</script><p>由于 $x$值已知，所以可以从公式得到 $y $的值:</p>
+<script type="math/tex; mode=display">
+y=y_0+\frac{y_1-y_0}{x_1-x_0}(x-x_0)</script><p>线性插值经常用于已知函数$ f $在两点的值要近似获得其它点数值的方法，这种近似方法的误差定义为:</p>
+<script type="math/tex; mode=display">
+R_T=f(x)-p(x)</script><p>其中 $p$ 表示上面定义的线性插值多项式</p>
+<script type="math/tex; mode=display">
+p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0)</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
+<script type="math/tex; mode=display">
+|R_T|\leq \frac{(x_1-x_0)^2}{8}\underset{x_0\leq x\leq x_1}{max}|f^{\prime\prime}(x)|</script><h2 id="B-运动估计"><a href="#B-运动估计" class="headerlink" title="B.运动估计"></a>B.运动估计</h2><p>激光雷达运动在扫描期间以<strong>恒定的角速度和线速度建模</strong>。这允许我们在一个扫描中对在不同时间接收到的点进行线性插值。</p>
+<p>假设$t$是当前的时间戳，$t_{k+1}$是扫描$k+1$的开始时间。</p>
+<p>设$T^L_{k+1}$为$[t_{k+1}, t]$之间的激光雷达位姿变换。$T^L_{k+1}$包含$6$自由度激光雷达的刚性运动，$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中$t_x$、$t_y$和$t_z$分别是$\left\{L\right\}$沿$x-$、$y-$和$z-$轴的平移，$θ_x$、$θ_y$和$θ_z$是旋转角度，遵循右手规则。</p>
+<p>给定点$i，i \in P_k$，设$t_i$为其时间戳，设为$[t_{k+1}, t_i]$之间的$T^L_{(k+1,i)}$位姿变换。</p>
+<p>$T^L_{(k+1,i)}$可以通过$T^L_{k+1}$的线性插值得到：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+\frac{T^L_{(k+1,i)} }{t_i-t_{k+1} }&=\frac{ T^L_{k+1}}{t-t_{k+1} }.
+\end{align}</script><p>整理一下即为论文中的公式:</p>
+<script type="math/tex; mode=display">
+T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/111388877">https://zhuanlan.zhihu.com/p/111388877</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/260012025">https://zhuanlan.zhihu.com/p/260012025</a></p>
+<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/DdW8xJBsfK1aQvYp7Lm6Ig">https://mp.weixin.qq.com/s/DdW8xJBsfK1aQvYp7Lm6Ig</a></p>
+<p>Ⅵ</p>
+<p>Ⅶ</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="上善若水 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="上善若水 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>上善若水
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" title="LOAM-SLAM深度剖析">http://lukeyalvin.top/2022/04/11/loam论文深度解析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
+              <a href="/tags/LOAM/" rel="tag"> <i class="fa fa-tag"></i> LOAM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" rel="prev" title="LOAM-SLAM翻译">
+      <i class="fa fa-chevron-left"></i> LOAM-SLAM翻译
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%AC%A6%E5%8F%B7%E7%BA%A6%E5%AE%9A"><span class="nav-text">Ⅱ.符号约定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A2-%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%EF%BC%88%E7%82%B9%E4%BA%91%E6%B3%A8%E5%86%8C%EF%BC%89"><span class="nav-text">Ⅲ.特征提取（点云注册）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E5%8C%BA%E5%88%86%E8%BE%B9%E7%BC%98%E7%82%B9%E5%92%8C%E5%B9%B3%E9%9D%A2%E7%82%B9"><span class="nav-text">A.区分边缘点和平面点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E4%B8%8D%E5%8F%AF%E8%80%83%E7%82%B9%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">B.不可考点的设置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A3-%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-text">Ⅳ.特征点匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%E6%95%B0%E6%8D%AE%E7%9A%84%E7%95%B8%E5%8F%98"><span class="nav-text">A.激光雷达数据的畸变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E5%B0%86%E7%82%B9%E4%B8%8E%E7%BA%BF%E5%92%8C%E9%9D%A2%E5%8C%B9%E9%85%8D%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-text">B.将点与线和面匹配的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E7%82%B9%E5%92%8C%E5%AF%B9%E5%BA%94%E7%89%B9%E5%BE%81%E5%8C%BA%E5%9F%9F%E8%B7%9D%E7%A6%BB%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-text">C.点和对应特征区域距离的计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#a-%E7%82%B9%E5%88%B0%E7%BA%BF%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">a.点到线的距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b-%E7%82%B9%E5%88%B0%E9%9D%A2%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">b.点到面的距离</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A4-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">Ⅴ.运动估计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC"><span class="nav-text">A.线性插值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">B.运动估计</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="上善若水"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">上善若水</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">上善若水</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">284k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:18</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>
