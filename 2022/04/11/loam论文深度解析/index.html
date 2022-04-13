@@ -45,7 +45,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413144755421.png">
 <meta property="article:published_time" content="2022-04-11T03:06:44.036Z">
-<meta property="article:modified_time" content="2022-04-13T12:58:54.184Z">
+<meta property="article:modified_time" content="2022-04-13T13:37:13.757Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="LOAM">
 <meta property="article:tag" content="文献阅读">
@@ -242,7 +242,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-13 20:58:54" itemprop="dateModified" datetime="2022-04-13T20:58:54+08:00">2022-04-13</time>
+                <time title="修改时间：2022-04-13 21:37:13" itemprop="dateModified" datetime="2022-04-13T21:37:13+08:00">2022-04-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -307,7 +307,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>LOAM的整体流程：</p>
+<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>如图所示，整个<code>LOAM</code>的流程为：<code>Lidar</code>接收数据，首先进行<code>Point Cloud Registration</code>，<code>Lidar Odometry</code>以$10Hz$的频率进行运动估计和坐标转换，<code>Lidar Mapping</code>以$1Hz$的频率构建三维地图。这样做主要是为了保证系统的实时性。</p>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png" alt="image-20220410153142890"></p>
 <p>本文的核心主要在于两个部分：<strong>特征提取（Lidar Registration）</strong>和<strong>里程计解算（Odometry and Mapping）</strong>。<br>当提取出特征后，通过高频率的里程计（Odometry）实现<strong>粗定位</strong>，即为高频低精度；低频率的里程计（Mapping）实现<strong>精定位</strong>，即为低频高精度。 </p>
 <h1 id="Ⅱ-符号约定"><a href="#Ⅱ-符号约定" class="headerlink" title="Ⅱ.符号约定"></a>Ⅱ.符号约定</h1><ul>
@@ -644,8 +644,8 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
       <i class="fa fa-chevron-left"></i> LOAM-SLAM翻译
     </a></div>
       <div class="post-nav-item">
-    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="next" title="loam-velodyne源码编译与数据集运行">
-      loam-velodyne源码编译与数据集运行 <i class="fa fa-chevron-right"></i>
+    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="next" title="loam_velodyne源码编译与数据集运行">
+      loam_velodyne源码编译与数据集运行 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -721,7 +721,7 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1047,12 +1047,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">291k</span>
+    <span title="站点总字数">295k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:25</span>
+    <span title="站点阅读时长">4:28</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

@@ -1,7 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>loam-velodyne源码编译与数据集运行</title>
+    <title>loam_velodyney源代码深度解析</title>
+    <url>/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>由于LOAM使用机器人操作系统(ROS)进行管理，所以我们比较关注节点和消息发布与接收的关系，我们可以通过rqt_graph查看所有的节点以及消息之间的关系，代码的框架图：</p>
+<p><img src="/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/rosgraph_loam-16498556914162.png" alt="rosgraph_loam"></p>
+<p>其中椭圆框代表节点(node)，矩形框代表消息(Message)。</p>
+<h1 id="Ⅱ-scanRegistration"><a href="#Ⅱ-scanRegistration" class="headerlink" title="Ⅱ.scanRegistration"></a>Ⅱ.scanRegistration</h1><p> <span style="color:red;"><strong>节点的主要功能:</strong></span> <span style="color:blue;"><strong>对点云和IMU数据进行预处理，用于特征点的配准。</strong></span> </p>
+<p>在前面的论文深度剖析中，我们提到点云的注册就是进行特征提取，而LOAM进行特征提取采用的是曲率$c$进行判断的，提取的特征主要为边缘点和平面点两种特征。</p>
+<p><strong>平面光滑度</strong>$c$：</p>
+<script type="math/tex; mode=display">
+c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p><strong>代码部分：</strong></p>
+<p>这里计算曲率的方式和论文中有点不同，计算以某点与其相邻的$10$个点所构成的平面在该点出的曲率：</p>
+<p>由曲率公式知：$K=1/R$，因此为简化计算可通过$10$个向量的和向量的模长表示其在该点处曲率半径的长，因此$R×R$可用来表示曲率的大小 $R×R$越大，该点处越不平坦。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 选取该点周围十个点（向前找五个，向后找五个），将这十个点的坐标分别和该点作差，得到每一维坐标的差值</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">5</span>; i &lt; cloudSize - <span class="number">5</span>; i++) </span><br><span class="line">&#123;<span class="comment">//使用每个点的前后五个点计算曲率，因此前五个与最后五个点跳过</span></span><br><span class="line">    <span class="keyword">float</span> diffX = laserCloud-&gt;points[i - <span class="number">5</span>].x + laserCloud-&gt;points[i - <span class="number">4</span>].x </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].x + laserCloud-&gt;points[i - <span class="number">2</span>].x </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].x - <span class="number">10</span> * laserCloud-&gt;points[i].x </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].x + laserCloud-&gt;points[i + <span class="number">2</span>].x</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].x + laserCloud-&gt;points[i + <span class="number">4</span>].x</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].x;</span><br><span class="line">    <span class="keyword">float</span> diffY = laserCloud-&gt;points[i - <span class="number">5</span>].y + laserCloud-&gt;points[i - <span class="number">4</span>].y </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].y + laserCloud-&gt;points[i - <span class="number">2</span>].y </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].y - <span class="number">10</span> * laserCloud-&gt;points[i].y </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].y + laserCloud-&gt;points[i + <span class="number">2</span>].y</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].y + laserCloud-&gt;points[i + <span class="number">4</span>].y</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].y;</span><br><span class="line">    <span class="keyword">float</span> diffZ = laserCloud-&gt;points[i - <span class="number">5</span>].z + laserCloud-&gt;points[i - <span class="number">4</span>].z </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].z + laserCloud-&gt;points[i - <span class="number">2</span>].z </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].z - <span class="number">10</span> * laserCloud-&gt;points[i].z </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].z + laserCloud-&gt;points[i + <span class="number">2</span>].z</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].z + laserCloud-&gt;points[i + <span class="number">4</span>].z</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].z;</span><br><span class="line">    <span class="comment">//曲率计算（将三个维度的差值求平方和得到R×R）</span></span><br><span class="line">    cloudCurvature[i] = diffX * diffX + diffY * diffY + diffZ * diffZ;</span><br><span class="line">    <span class="comment">//记录曲率点的索引</span></span><br><span class="line">    cloudSortInd[i] = i;</span><br><span class="line">    <span class="comment">//初始时，点全未筛选过</span></span><br><span class="line">    cloudNeighborPicked[i] = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//初始化为less flat点</span></span><br><span class="line">    cloudLabel[i] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//每个scan，只有第一个符合的点会进来，因为每个scan的点都在一起存放</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in"><span class="keyword">int</span></span>(laserCloud-&gt;points[i].intensity) != scanCount) </span><br><span class="line">    &#123;</span><br><span class="line">      scanCount = <span class="built_in"><span class="keyword">int</span></span>(laserCloud-&gt;points[i].intensity);<span class="comment">//控制每个scan只进入第一个点</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">//曲率只取同一个scan计算出来的，跨scan计算的曲率非法，排除，也即排除每个scan的前后五个点</span></span><br><span class="line">      <span class="keyword">if</span> (scanCount &gt; <span class="number">0</span> &amp;&amp; scanCount &lt; N_SCANS) </span><br><span class="line">      &#123;</span><br><span class="line">        scanStartInd[scanCount] = i + <span class="number">5</span>;	<span class="comment">// 该scan的起始点位置的索引（滤出前5个点）</span></span><br><span class="line">        scanEndInd[scanCount - <span class="number">1</span>] = i - <span class="number">5</span>;  <span class="comment">// 该scan的终止点位置的索引(滤出后5个点)</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第一个scan曲率点有效点序从第5个开始，最后一个激光线结束点序size-5</span></span><br><span class="line">scanStartInd[<span class="number">0</span>] = <span class="number">5</span>;				<span class="comment">// 第一条线的起始位置</span></span><br><span class="line">scanEndInd.<span class="built_in">back</span>() = cloudSize - <span class="number">5</span>;  <span class="comment">// 最后一条线的终止位置</span></span><br></pre></td></tr></table></figure>
+<p>main函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   </span><br><span class="line">  ros::<span class="built_in">init</span>(argc, argv, <span class="string">&quot;scanRegistration&quot;</span>);</span><br><span class="line">  ros::NodeHandle nh;</span><br><span class="line"></span><br><span class="line">  ros::Subscriber subLaserCloud = nh.subscribe&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/velodyne_points&quot;</span>, <span class="number">2</span>, laserCloudHandler);</span><br><span class="line"></span><br><span class="line">  ros::Subscriber subImu = nh.subscribe&lt;sensor_msgs::Imu&gt;(<span class="string">&quot;/imu/data&quot;</span>, <span class="number">50</span>, imuHandler);</span><br><span class="line"></span><br><span class="line">  pubLaserCloud = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/velodyne_cloud_2&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubCornerPointsSharp = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_sharp&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubCornerPointsLessSharp = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_less_sharp&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubSurfPointsFlat = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_flat&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubSurfPointsLessFlat = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_less_flat&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubImuTrans = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/imu_trans&quot;</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">  ros::<span class="built_in">spin</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>、Ⅲ、Ⅳ、Ⅴ、Ⅵ、Ⅶ、Ⅷ、Ⅸ、Ⅹ、Ⅺ</p>
+<p>参考文献</p>
+<p><a href="https://zhuanlan.zhihu.com/p/29719106">LOAM:3D激光里程计及环境建图的方法和实现（一）</a></p>
+]]></content>
+      <categories>
+        <category>SLAM项目实践</category>
+      </categories>
+      <tags>
+        <tag>LOAM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>loam_velodyne源码编译与数据集运行</title>
     <url>/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -28,7 +62,7 @@
 <p><img src="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220412212407985.png" alt="image-20220412212407985"></p>
 ]]></content>
       <categories>
-        <category>SLAM实践</category>
+        <category>SLAM项目实践</category>
       </categories>
       <tags>
         <tag>LOAM</tag>
@@ -44,7 +78,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>LOAM的整体流程：</p>
+<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>如图所示，整个<code>LOAM</code>的流程为：<code>Lidar</code>接收数据，首先进行<code>Point Cloud Registration</code>，<code>Lidar Odometry</code>以$10Hz$的频率进行运动估计和坐标转换，<code>Lidar Mapping</code>以$1Hz$的频率构建三维地图。这样做主要是为了保证系统的实时性。</p>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png" alt="image-20220410153142890"></p>
 <p>本文的核心主要在于两个部分：<strong>特征提取（Lidar Registration）</strong>和<strong>里程计解算（Odometry and Mapping）</strong>。<br>当提取出特征后，通过高频率的里程计（Odometry）实现<strong>粗定位</strong>，即为高频低精度；低频率的里程计（Mapping）实现<strong>精定位</strong>，即为低频高精度。 </p>
 <h1 id="Ⅱ-符号约定"><a href="#Ⅱ-符号约定" class="headerlink" title="Ⅱ.符号约定"></a>Ⅱ.符号约定</h1><ul>

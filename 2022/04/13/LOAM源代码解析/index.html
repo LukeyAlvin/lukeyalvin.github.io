@@ -22,17 +22,22 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="东北大学控制工程研究生">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Robot Go!">
-<meta property="og:url" content="http://lukeyalvin.top/tags/gazebo/index.html">
+  <meta name="description" content="对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="loam_velodyney源代码深度解析">
+<meta property="og:url" content="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="东北大学控制工程研究生">
+<meta property="og:description" content="对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/rosgraph_loam-16498556914162.png">
+<meta property="article:published_time" content="2022-04-13T13:08:50.276Z">
+<meta property="article:modified_time" content="2022-04-13T14:00:30.057Z">
 <meta property="article:author" content="上善若水">
+<meta property="article:tag" content="LOAM">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/rosgraph_loam-16498556914162.png">
 
-<link rel="canonical" href="http://lukeyalvin.top/tags/gazebo/">
+<link rel="canonical" href="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/">
 
 
 <script id="page-configurations">
@@ -40,12 +45,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: gazebo | Robot Go!</title>
+  <title>loam_velodyney源代码深度解析 | Robot Go!</title>
   
 
 
@@ -185,117 +190,208 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="上善若水">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Robot Go!">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          loam_velodyney源代码深度解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-04-13 21:08:50 / 修改时间：22:00:30" itemprop="dateCreated datePublished" datetime="2022-04-13T21:08:50+08:00">2022-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/" itemprop="url" rel="index"><span itemprop="name">SLAM项目实践</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">gazebo
-          <small>标签</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-概述"><a href="#Ⅰ-概述" class="headerlink" title="Ⅰ.概述"></a>Ⅰ.概述</h1><p>由于LOAM使用机器人操作系统(ROS)进行管理，所以我们比较关注节点和消息发布与接收的关系，我们可以通过rqt_graph查看所有的节点以及消息之间的关系，代码的框架图：</p>
+<p><img src="/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/rosgraph_loam-16498556914162.png" alt="rosgraph_loam"></p>
+<p>其中椭圆框代表节点(node)，矩形框代表消息(Message)。</p>
+<h1 id="Ⅱ-scanRegistration"><a href="#Ⅱ-scanRegistration" class="headerlink" title="Ⅱ.scanRegistration"></a>Ⅱ.scanRegistration</h1><p> <span style="color:red;"><strong>节点的主要功能:</strong></span> <span style="color:blue;"><strong>对点云和IMU数据进行预处理，用于特征点的配准。</strong></span> </p>
+<p>在前面的论文深度剖析中，我们提到点云的注册就是进行特征提取，而LOAM进行特征提取采用的是曲率$c$进行判断的，提取的特征主要为边缘点和平面点两种特征。</p>
+<p><strong>平面光滑度</strong>$c$：</p>
+<script type="math/tex; mode=display">
+c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p><strong>代码部分：</strong></p>
+<p>这里计算曲率的方式和论文中有点不同，计算以某点与其相邻的$10$个点所构成的平面在该点出的曲率：</p>
+<p>由曲率公式知：$K=1/R$，因此为简化计算可通过$10$个向量的和向量的模长表示其在该点处曲率半径的长，因此$R×R$可用来表示曲率的大小 $R×R$越大，该点处越不平坦。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 选取该点周围十个点（向前找五个，向后找五个），将这十个点的坐标分别和该点作差，得到每一维坐标的差值</span></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">5</span>; i &lt; cloudSize - <span class="number">5</span>; i++) </span><br><span class="line">&#123;<span class="comment">//使用每个点的前后五个点计算曲率，因此前五个与最后五个点跳过</span></span><br><span class="line">    <span class="keyword">float</span> diffX = laserCloud-&gt;points[i - <span class="number">5</span>].x + laserCloud-&gt;points[i - <span class="number">4</span>].x </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].x + laserCloud-&gt;points[i - <span class="number">2</span>].x </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].x - <span class="number">10</span> * laserCloud-&gt;points[i].x </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].x + laserCloud-&gt;points[i + <span class="number">2</span>].x</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].x + laserCloud-&gt;points[i + <span class="number">4</span>].x</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].x;</span><br><span class="line">    <span class="keyword">float</span> diffY = laserCloud-&gt;points[i - <span class="number">5</span>].y + laserCloud-&gt;points[i - <span class="number">4</span>].y </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].y + laserCloud-&gt;points[i - <span class="number">2</span>].y </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].y - <span class="number">10</span> * laserCloud-&gt;points[i].y </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].y + laserCloud-&gt;points[i + <span class="number">2</span>].y</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].y + laserCloud-&gt;points[i + <span class="number">4</span>].y</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].y;</span><br><span class="line">    <span class="keyword">float</span> diffZ = laserCloud-&gt;points[i - <span class="number">5</span>].z + laserCloud-&gt;points[i - <span class="number">4</span>].z </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">3</span>].z + laserCloud-&gt;points[i - <span class="number">2</span>].z </span><br><span class="line">                + laserCloud-&gt;points[i - <span class="number">1</span>].z - <span class="number">10</span> * laserCloud-&gt;points[i].z </span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">1</span>].z + laserCloud-&gt;points[i + <span class="number">2</span>].z</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">3</span>].z + laserCloud-&gt;points[i + <span class="number">4</span>].z</span><br><span class="line">                + laserCloud-&gt;points[i + <span class="number">5</span>].z;</span><br><span class="line">    <span class="comment">//曲率计算（将三个维度的差值求平方和得到R×R）</span></span><br><span class="line">    cloudCurvature[i] = diffX * diffX + diffY * diffY + diffZ * diffZ;</span><br><span class="line">    <span class="comment">//记录曲率点的索引</span></span><br><span class="line">    cloudSortInd[i] = i;</span><br><span class="line">    <span class="comment">//初始时，点全未筛选过</span></span><br><span class="line">    cloudNeighborPicked[i] = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//初始化为less flat点</span></span><br><span class="line">    cloudLabel[i] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//每个scan，只有第一个符合的点会进来，因为每个scan的点都在一起存放</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in"><span class="keyword">int</span></span>(laserCloud-&gt;points[i].intensity) != scanCount) </span><br><span class="line">    &#123;</span><br><span class="line">      scanCount = <span class="built_in"><span class="keyword">int</span></span>(laserCloud-&gt;points[i].intensity);<span class="comment">//控制每个scan只进入第一个点</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">//曲率只取同一个scan计算出来的，跨scan计算的曲率非法，排除，也即排除每个scan的前后五个点</span></span><br><span class="line">      <span class="keyword">if</span> (scanCount &gt; <span class="number">0</span> &amp;&amp; scanCount &lt; N_SCANS) </span><br><span class="line">      &#123;</span><br><span class="line">        scanStartInd[scanCount] = i + <span class="number">5</span>;	<span class="comment">// 该scan的起始点位置的索引（滤出前5个点）</span></span><br><span class="line">        scanEndInd[scanCount - <span class="number">1</span>] = i - <span class="number">5</span>;  <span class="comment">// 该scan的终止点位置的索引(滤出后5个点)</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//第一个scan曲率点有效点序从第5个开始，最后一个激光线结束点序size-5</span></span><br><span class="line">scanStartInd[<span class="number">0</span>] = <span class="number">5</span>;				<span class="comment">// 第一条线的起始位置</span></span><br><span class="line">scanEndInd.<span class="built_in">back</span>() = cloudSize - <span class="number">5</span>;  <span class="comment">// 最后一条线的终止位置</span></span><br></pre></td></tr></table></figure>
+<p>main函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">   </span><br><span class="line">  ros::<span class="built_in">init</span>(argc, argv, <span class="string">&quot;scanRegistration&quot;</span>);</span><br><span class="line">  ros::NodeHandle nh;</span><br><span class="line"></span><br><span class="line">  ros::Subscriber subLaserCloud = nh.subscribe&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/velodyne_points&quot;</span>, <span class="number">2</span>, laserCloudHandler);</span><br><span class="line"></span><br><span class="line">  ros::Subscriber subImu = nh.subscribe&lt;sensor_msgs::Imu&gt;(<span class="string">&quot;/imu/data&quot;</span>, <span class="number">50</span>, imuHandler);</span><br><span class="line"></span><br><span class="line">  pubLaserCloud = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/velodyne_cloud_2&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubCornerPointsSharp = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_sharp&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubCornerPointsLessSharp = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_less_sharp&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubSurfPointsFlat = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_flat&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubSurfPointsLessFlat = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/laser_cloud_less_flat&quot;</span>, <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">  pubImuTrans = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="string">&quot;/imu_trans&quot;</span>, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">  ros::<span class="built_in">spin</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>、Ⅲ、Ⅳ、Ⅴ、Ⅵ、Ⅶ、Ⅷ、Ⅸ、Ⅹ、Ⅺ</p>
+<p>参考文献</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/29719106">LOAM:3D激光里程计及环境建图的方法和实现（一）</a></p>
+
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T22:46:34+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="上善若水 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="上善若水 支付宝">
+        <p>支付宝</p>
       </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/gazebo%E5%8A%A0%E8%BD%BDworld%E5%87%BA%E7%8E%B0%E9%BB%91%E5%B1%8F%E9%97%AE%E9%A2%98/" itemprop="url">
-            <span itemprop="name">gazebo加载world出现黑屏问题</span>
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>上善若水
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/" title="loam_velodyney源代码深度解析">http://lukeyalvin.top/2022/04/13/LOAM源代码解析/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
           </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T22:16:12+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/turtlebot3%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5/" itemprop="url">
-            <span itemprop="name">turtlebot3仿真实践</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T15:51:21+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_gazebo+rviz%E7%BB%BC%E5%90%88%E5%AE%9E%E8%B7%B5/" itemprop="url">
-            <span itemprop="name">机器人仿真实践_gazebo+rviz综合实践</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2021-11-02T15:12:46+08:00"
-              content="2021-11-02">
-          11-02
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/2021/11/02/%E6%9C%BA%E5%99%A8%E4%BA%BA%E4%BB%BF%E7%9C%9F%E5%AE%9E%E8%B7%B5_gazebo%E4%BB%BF%E7%9C%9F/" itemprop="url">
-            <span itemprop="name">机器人仿真实践_gazebo中搭建</span>
-          </a>
-      </div>
-
-    </header>
-  </article>
-
+        </div>
     </div>
   </div>
-  
-  
-  
 
-  
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LOAM/" rel="tag"> <i class="fa fa-tag"></i> LOAM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="prev" title="loam_velodyne源码编译与数据集运行">
+      <i class="fa fa-chevron-left"></i> loam_velodyne源码编译与数据集运行
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -342,6 +438,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-scanRegistration"><span class="nav-text">Ⅱ.scanRegistration</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -862,6 +959,61 @@ window.addEventListener('pjax:success', () => {
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 
