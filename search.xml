@@ -58,17 +58,40 @@
 </li>
 </ul>
 <p><strong>已知一段点云序列$P_k,k\in Z^+$ ，计算在前$k$个时期内的雷达位姿以及构建全局地图。</strong></p>
-<h1 id="Ⅲ-特征提取（点云注册）"><a href="#Ⅲ-特征提取（点云注册）" class="headerlink" title="Ⅲ.特征提取（点云注册）"></a>Ⅲ.特征提取（点云注册）</h1><h2 id="A-区分边缘点和平面点"><a href="#A-区分边缘点和平面点" class="headerlink" title="A.区分边缘点和平面点"></a>A.区分边缘点和平面点</h2><p>特征提取主要分为两部分，即为对边缘点和平面点分别进行特征提取。常见的特征点提取方法：特征向量、直方图、旋转图片等。这些方法虽然能很精准的涵盖一帧数据的大部分信息，但是由于计算量大，很难在激光slam的相邻帧的匹配中使用。 因此，需要想一些更好的方法。<br>本文作者根据点的曲率来计算<strong>平面光滑度</strong>作为提取当前帧的特征信息的指标。如下图所示，边缘点的矢量和的模一般较大，矢量<strong>和不为零</strong>向量，而对应平面点的矢量和的模一般较小，矢量<strong>和为零</strong>向量。</p>
-<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411152638255.png" alt="image-20220411152638255"></p>
-<p>不难发现：</p>
+<h1 id="Ⅲ-特征提取（点云注册）"><a href="#Ⅲ-特征提取（点云注册）" class="headerlink" title="Ⅲ.特征提取（点云注册）"></a>Ⅲ.特征提取（点云注册）</h1><h2 id="A-线束模型"><a href="#A-线束模型" class="headerlink" title="A.线束模型"></a>A.线束模型</h2><p>要读懂代码中特征提取中的一些处理，需要弄清楚<code>VLP16</code>扫描时的运动模型,论文中称单个线束为一个<code>Scan</code>，对全部$16$线组成的一帧点云称为一个<code>Sweep</code>，虽然是用的多线激光雷达,但是LOAM是针对单个<code>Scan</code>提取特征点的，这里主要考虑到线束间角分辨率(竖直分辨率)与单个线内点间角分辨率(水平分辨率)存在的差异。以VLP$16$为例, 竖直分辨率约为$2^\circ$，而水平分辨率最大为$0.4^\circ$。</p>
+<p>角分辨率越大， 代表越远的物体，反射的两点距离越大，中间丢失的信息越多。因此， LOAM没有针对Scan和<code>Scan</code>之间的点的关联性提取和描述特征， 而是直接针对单个<code>Scan</code>提取特征。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413152223146.png" alt="image-20220413152223146"></p>
+<p><strong>一个Sweep数据的采集如何完成的？</strong></p>
+<p>一帧内所有的点， 都是按顺序穿行扫描的，比如开始的时候水平的第一个角度为$0^\circ$左右，扫描水平角度为$0^\circ$上的竖直方向所有$16$个点（对应$16$个<code>Scan</code>）的深度，并且这$16$个点也是串行按顺序排列的，然后转到下一个水平角度；设水平分辨率为$0.4^\circ$，则下一个水平角度为$0.4^\circ$，其次水平角度为$0.8^\circ$，依次顺时针扫完一圈(论文中是$[-\pi,\pi]$)，这就完成了一个<code>Sweep</code>数据的采集。</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413162337900.png" alt="image-20220413162337900"></p>
+<p>由于从驱动得到的一个<code>Sweep</code>是以点云的形式输出（也就是一堆点，每个点有$XYZ$的信息，点和点之间无其他关系信息），因此我们并不知道每个点属于哪个<code>Scan</code>， 对应哪个水平角度。因此，我们需要根据上面的扫描模型去计算每个点的竖直角度和水平角度。点坐标与竖直角度/水平角度的换算关系如下图所示。[详细翻阅<a href="https://velodynelidar.com/wp-content/uploads/2019/12/63-9243-Rev-E-VLP-16-User-Manual.pdf">vlp-16 sensor coordinate system文档</a>]</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413151359585.png" alt="image-20220413151359585"></p>
+<p>通过这个图很容易就能理解如何确定某个点属于哪个<code>Scan</code>，我们使用激光点的垂直距离除以它的水平距离，就可以得到雷达到该点的射线和水平面的夹角，用过这个夹角我们就可以很容易的判断该点属于哪个<code>Scan</code>。但是，实际上，在多线雷达（比如$32$线，$64$线），由于竖直方向的点更密集，<code>Scan</code>与<code>Scan</code>之间的距离很小，很容易出现把<code>Scan10</code>分配到<code>Scan13</code>这样的误差。当然，如果有条件，可以修改数据存储格式，建议把某个点属于哪个<code>Scan</code>直接保存的该点对应的数据中去。</p>
+<p>摘取对应代码（src/loam_velodyne/src/scanRegistration.cpp）：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cloudSize; i++) &#123;</span><br><span class="line">    <span class="comment">//坐标轴交换，velodyne lidar的坐标系也转换到z轴向前，x轴向左的右手坐标系</span></span><br><span class="line">    point.x = laserCloudIn.points[i].y;</span><br><span class="line">    point.y = laserCloudIn.points[i].z;</span><br><span class="line">    point.z = laserCloudIn.points[i].x;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//计算点的仰角(根据lidar文档垂直角计算公式),根据仰角排列激光线号，velodyne每两个scan之间间隔2度</span></span><br><span class="line">    <span class="keyword">float</span> angle = <span class="built_in">atan</span>(point.y / <span class="built_in">sqrt</span>(point.x * point.x + point.z * point.z)) * <span class="number">180</span> / M_PI;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="B-区分边缘点和平面点"><a href="#B-区分边缘点和平面点" class="headerlink" title="B.区分边缘点和平面点"></a>B.区分边缘点和平面点</h2><p>常见的特征点提取方法：特征向量、直方图、旋转图片等。这些方法虽然能很精准的涵盖一帧数据的大部分信息，但是由于计算量大，很难在激光slam的相邻帧的匹配中使用。 因此，需要想一些更好的方法。</p>
+<p>LOAM的特征提取基于曲率，只提取两种特征点：边缘点和平面点，分别对应场景的平面区域和曲折区域。作者根据点的曲率来计算<strong>平面光滑度</strong>作为提取当前帧的特征信息的指标。如下图所示，边缘点的矢量和的模一般较大，矢量<strong>和不为零</strong>向量，而对应平面点的矢量和的模一般较小，矢量<strong>和为零</strong>向量。</p>
 <ul>
 <li>平面点：在三维空间中处于平滑平面上的点，其和周围点的大小差距不大，曲率较低，平滑度较低。</li>
 <li>边缘点：在三维空间中处于尖锐边缘上的点，其和周围点的大小差距较大，曲率较高，平滑度较高。</li>
 </ul>
-<p>所以定义<strong>平面光滑度</strong>$c$：</p>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411152638255.png" alt="image-20220411152638255"></p>
+<p>可以发现，LOAM没有使用特征描述子(连曲率都没有参与后续的匹配)。从代码中的边缘点与平面点的曲率判断阈值可以看出，LOAM提取的边缘点和平面点特征点的曲率，并没有特别大的差别，这使得LOAM有较强的场景适应性，在场景中比较曲折的区域，边缘点点会占据主导,而在较为平缓的区域，平面点点占据主导。 在激光扫描到的一块区域，总会提取出几个特征点。</p>
+<hr>
+<p>定义<strong>平面光滑度</strong>$c$：</p>
 <script type="math/tex; mode=display">
 c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p>根据$c$值对扫描中的点进行排序，选择$c$值最大的点为边缘点，$c$值最小的点为平面点的特征点。论文中为了在环境中均匀分布特征点，将扫描分割成四个相同的子区域。每个子区域最多可提供$2$个边缘点和$4$个平面点。只有当点$i$的$c$值大于或小于一个阈值，且所选点的个数不超过最大值时，才能将点$i$选择为边缘点或平面点。</p>
-<h2 id="B-不可靠点的设置"><a href="#B-不可靠点的设置" class="headerlink" title="B.不可靠点的设置"></a>B.不可靠点的设置</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
+<p>通过代码可以知道这四个相同的子区域分别为：</p>
+<ul>
+<li>曲率特别大的点（sharp）</li>
+<li>曲率大的点（less_sharp）</li>
+<li>曲率特别小的点（flat）</li>
+<li>曲率小的点（less_flat）</li>
+</ul>
+<blockquote>
+<p>这样操作的主要作用是，在进行后面的优化的时候，我们能根据这样的“等级”划分获得更明显</p>
+</blockquote>
+<h2 id="C-不可靠点的删除"><a href="#C-不可靠点的删除" class="headerlink" title="C.不可靠点的删除"></a>C.不可靠点的删除</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153159251.png" alt="image-20220410153159251"></p>
 <p>选取点的三要素：</p>
 <ul>
@@ -89,7 +112,9 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <li>$P_{k+1}$是$k+1$时刻激光雷达感知的点云集合， 类似$P_k$，边缘点的集合$\xi_{k+1}$以及平面点的集合$H_{k+1}$；</li>
 <li>在每次迭代中，使用当前估计的变换将$\xi_{k+1}$和$H_{k+1}$重新投影到扫描的开始，记$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$为重投影的点集。</li>
 </ul>
-<p>我们一一解释它们之间有什么关系。</p>
+<blockquote>
+<p>这里我们将$k$时刻的扫描点云$P_k$经过畸变校正，得到了$\overline{P}_k$，然后$k+1$时刻的扫描点云$P_{k+1}$的$\xi_{k+1}$和$H_{k+1}$重投影到了扫描的开始，得到$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$，这样就使得$\overline{P}_k$与$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$统一在同一坐标系下，进而我们才可以计算下面的距离。</p>
+</blockquote>
 <hr>
 <h2 id="A-激光雷达数据的畸变"><a href="#A-激光雷达数据的畸变" class="headerlink" title="A.激光雷达数据的畸变"></a>A.激光雷达数据的畸变</h2><p>激光雷达数据产生的畸变又叫<strong>激光雷达自运动畸变</strong>，对于多数激光雷达而言，尽管激光的发射与接收很快，但构成点云的每一个点仍非同一时刻生成的。一般我们会将$100ms $(对应典型值$10Hz$) 内累积的数据作为一帧点云输出。若在这$100ms$内，激光雷达本体或安装所在的机体发生绝对位置的变化，那么<strong>此帧点云中每一个点的坐标系就是不同的。</strong>直观上看，这一帧点云数据就会发生一定的“变形”，不能真实对应所探测到的环境信息，类似于拍照时手抖了，拍出来的照片就会糊。这便是激光雷达的自运动畸变。</p>
 <p>举一个例子，激光雷达对面有一面平行的墙面，理想状况下激光处于位置A或者位置B位置墙面的点云应该一样，但实际上，由于在这$100ms$内，激光雷达本身在运动，所以这一帧的墙面的点云中，某些点的坐标系就变得不同了，进而失去了原始平行墙面的特征，所以说，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑。</p>
@@ -193,7 +218,7 @@ c_yc_z+s_ys_xs_z &c_zs_ys_x-c_ys_z &c_xs_y\\
 c_xs_z&c_xc_z&-s_x\\
 c_ys_xs_z-c_zs_y&c_yc_zs_x+s_ys_z&c_yc_x
 \end{bmatrix}
-\end{align*}.\tag{15}</script><p>其中$c_x=con(\theta_x),c_y=con(\theta_y),c_z=con(\theta_z),s_x=sin(\theta_x),s_y=sin(\theta_y),s_z=sin(\theta_z)$</p>
+\end{align*}.\tag{15}</script><p>其中$c_x=cos(\theta_x),c_y=cos(\theta_y),c_z=cos(\theta_z),s_x=sin(\theta_x),s_y=sin(\theta_y),s_z=sin(\theta_z)$</p>
 <p>将$(14)(15)$合并：</p>
 <script type="math/tex; mode=display">
 loss=F(X^L_{(k+1,i)},T^L_{k+1})=D(G(X^L_{(k+1,i)},T^L_{k+1})).\tag{16}</script><p>损失函数建立之后，我们就可以优化位姿，求损失对于位姿的偏导：</p>
@@ -272,7 +297,12 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
 <li>按照位置和<code>cube</code>尺寸划分到对应的<code>cube</code>中</li>
 </ul>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413144755421.png" alt="image-20220413144755421"></p>
-<h1 id="Ⅶ"><a href="#Ⅶ" class="headerlink" title="Ⅶ."></a>Ⅶ.</h1>]]></content>
+<h1 id="Ⅶ-参考链接"><a href="#Ⅶ-参考链接" class="headerlink" title="Ⅶ.参考链接"></a>Ⅶ.参考链接</h1><p><a href="https://zhuanlan.zhihu.com/p/111388877/">LOAM-SLAM原理深度解析</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/260012025/">LOAM SLAM原理之论文原理解读</a></p>
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzI5MTM1MTQwMw==&amp;mid=2247530490&amp;idx=1&amp;sn=7d1c84b1a4b338887d9c9061da1bd0e3&amp;chksm=ec13c9fedb6440e87aeec427609c2c8592590353565c307e6bd046b1f168af75918871b457b4&amp;scene=132#wechat_redirect">【泡泡点云时空LOAM专题-3】LOAM 代价函数设计与雅可比求解详细推导（上）</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/57351961">LOAM细节分析</a></p>
+<p><a href="https://www.bilibili.com/video/BV1744y1J7ov/?spm_id_from=333.788.recommend_more_video.1">任务4 前端里程计LOAM系列</a></p>
+]]></content>
       <categories>
         <category>文献阅读</category>
       </categories>
