@@ -40,11 +40,12 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411204829280.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411210656962.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413144755421.png">
 <meta property="article:published_time" content="2022-04-11T03:06:44.036Z">
-<meta property="article:modified_time" content="2022-04-11T13:51:28.270Z">
+<meta property="article:modified_time" content="2022-04-13T06:49:17.362Z">
 <meta property="article:author" content="上善若水">
-<meta property="article:tag" content="文献阅读">
 <meta property="article:tag" content="LOAM">
+<meta property="article:tag" content="文献阅读">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153142890.png">
 
@@ -230,10 +231,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-04-11 11:06:44 / 修改时间：21:51:28" itemprop="dateCreated datePublished" datetime="2022-04-11T11:06:44+08:00">2022-04-11</time>
+              <time title="创建时间：2022-04-11 11:06:44" itemprop="dateCreated datePublished" datetime="2022-04-11T11:06:44+08:00">2022-04-11</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-13 14:49:17" itemprop="dateModified" datetime="2022-04-13T14:49:17+08:00">2022-04-13</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -271,14 +278,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.9k</span>
+              <span>10k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>5 分钟</span>
+              <span>9 分钟</span>
             </span>
 
         </div>
@@ -321,7 +328,7 @@
 <p>所以定义<strong>平面光滑度</strong>$c$：</p>
 <script type="math/tex; mode=display">
 c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p>根据$c$值对扫描中的点进行排序，选择$c$值最大的点为边缘点，$c$值最小的点为平面点的特征点。论文中为了在环境中均匀分布特征点，将扫描分割成四个相同的子区域。每个子区域最多可提供$2$个边缘点和$4$个平面点。只有当点$i$的$c$值大于或小于一个阈值，且所选点的个数不超过最大值时，才能将点$i$选择为边缘点或平面点。</p>
-<h2 id="B-不可考点的设置"><a href="#B-不可考点的设置" class="headerlink" title="B.不可考点的设置"></a>B.不可考点的设置</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
+<h2 id="B-不可靠点的设置"><a href="#B-不可靠点的设置" class="headerlink" title="B.不可靠点的设置"></a>B.不可靠点的设置</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220410153159251.png" alt="image-20220410153159251"></p>
 <p>选取点的三要素：</p>
 <ul>
@@ -376,7 +383,7 @@ OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow
 <p>得到点到线的距离$d_\xi$为：</p>
 <script type="math/tex; mode=display">
 d_{\xi}=\frac{|(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,j)})×(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,l)})|}
-{|\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)}|}</script><h3 id="b-点到面的距离"><a href="#b-点到面的距离" class="headerlink" title="b.点到面的距离"></a>b.点到面的距离</h3><p> 主要原理是<strong>点与平面内一点形成的向量与该平面的单位法向量的点积的模即为该点到平面的距离</strong>。</p>
+{|\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)}|}. \tag{2}</script><h3 id="b-点到面的距离"><a href="#b-点到面的距离" class="headerlink" title="b.点到面的距离"></a>b.点到面的距离</h3><p> 主要原理是<strong>点与平面内一点形成的向量与该平面的单位法向量的点积的模即为该点到平面的距离</strong>。</p>
 <p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220411210656962.png" alt="image-20220411210656962"></p>
 <script type="math/tex; mode=display">
 d_H=\frac
@@ -386,7 +393,7 @@ d_H=\frac
 }
 {\begin{vmatrix}
 (\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)})×(\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,m)})
-\end{vmatrix} }</script><h1 id="Ⅴ-运动估计"><a href="#Ⅴ-运动估计" class="headerlink" title="Ⅴ.运动估计"></a>Ⅴ.运动估计</h1><h2 id="A-线性插值"><a href="#A-线性插值" class="headerlink" title="A.线性插值"></a>A.线性插值</h2><p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png" alt="Linear interpolation.png"></p>
+\end{vmatrix} }. \tag{3}</script><h1 id="Ⅴ-运动估计"><a href="#Ⅴ-运动估计" class="headerlink" title="Ⅴ.运动估计"></a>Ⅴ.运动估计</h1><h2 id="A-线性插值"><a href="#A-线性插值" class="headerlink" title="A.线性插值"></a>A.线性插值</h2><p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/Linear_interpolation.png" alt="Linear interpolation.png"></p>
 <p>假设我们已知坐标 $(x_0,y_0)$ 与$(x_1,y_1)$，要得到$[x_0.x_1]$区间内某一位置 $x$ 在直线上的值。根据图中所示，我们得到:</p>
 <script type="math/tex; mode=display">
 \frac{y-y_0}{x-x_0}=\frac{y_1-y_0}{x_1-x_0}</script><p>由于 $x$值已知，所以可以从公式得到 $y $的值:</p>
@@ -395,11 +402,11 @@ y=y_0+\frac{y_1-y_0}{x_1-x_0}(x-x_0)</script><p>线性插值经常用于已知�
 <script type="math/tex; mode=display">
 R_T=f(x)-p(x)</script><p>其中 $p$ 表示上面定义的线性插值多项式</p>
 <script type="math/tex; mode=display">
-p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0)</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
+p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0). \tag{4}</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
 <script type="math/tex; mode=display">
 |R_T|\leq \frac{(x_1-x_0)^2}{8}\underset{x_0\leq x\leq x_1}{max}|f^{\prime\prime}(x)|</script><h2 id="B-运动估计"><a href="#B-运动估计" class="headerlink" title="B.运动估计"></a>B.运动估计</h2><p>激光雷达运动在扫描期间以<strong>恒定的角速度和线速度建模</strong>。这允许我们在一个扫描中对在不同时间接收到的点进行线性插值。</p>
 <p>假设$t$是当前的时间戳，$t_{k+1}$是扫描$k+1$的开始时间。</p>
-<p>设$T^L_{k+1}$为$[t_{k+1}, t]$之间的激光雷达位姿变换。$T^L_{k+1}$包含$6$自由度激光雷达的刚性运动，$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中$t_x$、$t_y$和$t_z$分别是$\left\{L\right\}$沿$x-$、$y-$和$z-$轴的平移，$θ_x$、$θ_y$和$θ_z$是旋转角度，遵循右手规则。</p>
+<p>设$T^L_{k+1}$为$[t_{k+1}, t]$之间的激光雷达位姿变换。$T^L_{k+1}$包含$6$自由度激光雷达的刚性运动，$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中我们用$T^L_{k+1}(1:3)$表示 $t_x$、$t_y$和$t_z$，它们分别是$\left\{L\right\}$沿$x-$、$y-$和$z-$轴的平移，我们用$T^L_{k+1}(4:6)$表示$θ_x$、$θ_y$和$θ_z$，它们是旋转角度，遵循右手规则。</p>
 <p>给定点$i，i \in P_k$，设$t_i$为其时间戳，设为$[t_{k+1}, t_i]$之间的$T^L_{(k+1,i)}$位姿变换。</p>
 <p>$T^L_{(k+1,i)}$可以通过$T^L_{k+1}$的线性插值得到：</p>
 <script type="math/tex; mode=display">
@@ -407,12 +414,125 @@ p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0)</script><p>根据罗尔定理
 \frac{T^L_{(k+1,i)} }{t_i-t_{k+1} }&=\frac{ T^L_{k+1}}{t-t_{k+1} }.
 \end{align}</script><p>整理一下即为论文中的公式:</p>
 <script type="math/tex; mode=display">
-T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/111388877">https://zhuanlan.zhihu.com/p/111388877</a></p>
-<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/260012025">https://zhuanlan.zhihu.com/p/260012025</a></p>
-<p><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/DdW8xJBsfK1aQvYp7Lm6Ig">https://mp.weixin.qq.com/s/DdW8xJBsfK1aQvYp7Lm6Ig</a></p>
-<p>Ⅵ</p>
-<p>Ⅶ</p>
-
+T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}. \tag{5}</script><p>由前文：在每次迭代中，使用当前估计的变换将$\xi_{k+1}$和$H_{k+1}$重新投影到扫描的开始，记$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$为重投影的点集。由于激光雷达位姿的变化，设旋转矩阵为$R$，平移向量$t=T^L_{(k+1,i)}(1:3)$我们可以得到：</p>
+<script type="math/tex; mode=display">
+X^L_{(k+1,i)}=R\tilde X^L_{(k+1,i)}+T^L_{(k+1,i)}(1:3). \tag{6}</script><p>由罗德里格斯公式：</p>
+<script type="math/tex; mode=display">
+R=e^{\hat{w} \theta}=I + \hat{w}sin\theta+\hat{w}^2(1-cos\theta).\tag{7}</script><p>在上式中，$θ$为旋转的大小，</p>
+<script type="math/tex; mode=display">
+\theta = \parallel T^L_{(k+1,i)}(4:6) \parallel. \tag{8}</script><p>$w$是表示旋转方向的单位向量，</p>
+<script type="math/tex; mode=display">
+w=\frac{T^L_{(k+1,i)}(4:6)}{\parallel T^L_{(k+1,i)}(4:6) \parallel}. \tag{9}</script><p>$\hat{w}$为$w$的斜对称矩阵[25]。</p>
+<p>忆$(2)$和$(3)$计算属于$\tilde \xi_{k+1} $ 和$\tilde H_{k+1}$ 的点之间的距离及其对应关系。结合$(2)$和$(5)-(8)$，我们可以推导出$\xi_{k+1}$中的一个边点与相应的边线之间的几何关系，</p>
+<script type="math/tex; mode=display">
+f_{\xi}(X^L_{(k+1,i)},T^L_{k+1})=d_\xi,i\in \xi_{k+1}.\tag{10}</script><p>合$(3)(5)-(8)$，我们可以在$H_{k+1}$中的一个平面点与对应的平面贴片(patch)建立另一个几何关系，</p>
+<script type="math/tex; mode=display">
+f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{11}</script><p>最后，我们用<code>Levenberg-Marquardt</code>方法[26]求解激光雷达运动。将$\xi_{k+1}$和$H_{k+1}$中每个特征点$(9)$和$(10)$叠加，得到一个非线性函数:</p>
+<script type="math/tex; mode=display">
+f(T^L_{k+1})=d,\tag{12}</script><p>其中每一行$f$对应一个特征点，$d$包含相应的距离。我们计算$f$关于$T^L_{k+1}$的雅可比矩阵，记作$J$，其中$J =\partial f /\partial T^L_{k+1}$。然后，$(12)$通过非线性迭代，使$d$趋近于$0$，</p>
+<script type="math/tex; mode=display">
+T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{13}</script><p>$\lambda$是由<code>Levenberg-Marquardt</code>方法确定的因子</p>
+<h2 id="C-雅可比矩阵求解"><a href="#C-雅可比矩阵求解" class="headerlink" title="C.雅可比矩阵求解"></a>C.雅可比矩阵求解</h2><p>LOAM中代价函数主要由两部分组成，即点到面的距离与点到线的距离，因此LOAM的代价函数不难写出：</p>
+<script type="math/tex; mode=display">
+loss= \sum^{N_{\xi} }_{i=1}d_{\xi_i}+\sum^{N_{H} }_{i=1}d_{H_i}=D(\tilde{X}^L_{(k+1,i)}).\tag{14}</script><blockquote>
+<p>我们的目的就是残差对位姿求偏导，进而求得一个使得残差最小的最优位姿。</p>
+</blockquote>
+<p>定义$t+1$时刻的位姿：$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中我们用$t=T^L_{k+1}(1:3)=[t_x, t_y, t_z]^T$表示位移 $t_x$、$t_y$和$t_z$，同时$R$也可以通过$T^L_{k+1}$经罗德里格斯公式求解。</p>
+<p>特征点从当前雷达坐标系投影到目标坐标系：</p>
+<script type="math/tex; mode=display">
+\tilde X^L_{(k+1,i)}=R X^L_{(k+1,i)}+t=G(X^L_{(k+1,i)},T^L_{k+1})</script><blockquote>
+<p>这里与论文略有不同，这里$t_{k+1}$时刻的点经过位姿变化投影到$t_{k}$时刻，进而将两帧的点云统一在一个坐标系下，论文中是相反的（公式6），但是含义是一样的。</p>
+</blockquote>
+<p>将旋矩阵转换成欧拉角：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+R &= R_yR_xR_z\\
+&=
+\begin{bmatrix}
+c_yc_z+s_ys_xs_z &c_zs_ys_x-c_ys_z &c_xs_y\\
+c_xs_z&c_xc_z&-s_x\\
+c_ys_xs_z-c_zs_y&c_yc_zs_x+s_ys_z&c_yc_x
+\end{bmatrix}
+\end{align*}.\tag{15}</script><p>其中$c_x=con(\theta_x),c_y=con(\theta_y),c_z=con(\theta_z),s_x=sin(\theta_x),s_y=sin(\theta_y),s_z=sin(\theta_z)$</p>
+<p>将$(14)(15)$合并：</p>
+<script type="math/tex; mode=display">
+loss=F(X^L_{(k+1,i)},T^L_{k+1})=D(G(X^L_{(k+1,i)},T^L_{k+1})).\tag{16}</script><p>损失函数建立之后，我们就可以优化位姿，求损失对于位姿的偏导：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+J&=\frac{\partial F(X^L_{(k+1,i)},T^L_{k+1}) }{\partial T^L_{k+1} }\\
+&=\frac{\partial D(G(X^L_{(k+1,i)},T^L_{k+1})) }{\partial T^L_{k+1} }\\
+&=\frac{\partial D(\tilde{X}^L_{(k+1,i)})}{\partial \tilde{X}^L_{(k+1,i)} }·
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial T^L_{k+1} }
+\end{align*}.
+\tag{17}</script><p>我们分别对这两部分进行推导：</p>
+<ul>
+<li>$\frac{\partial D(\tilde{X}^L_{(k+1,i)})}{\partial \tilde{X}^L_{(k+1,i)} }$的求解</li>
+</ul>
+<p>这部分表示的是损失函数对点云的偏导，这部分没有必要通过变量求导的方式去推导，我们知道求偏导就是求梯度方向，梯度方向就是使得残差减小的最快的方向；对于点云来说，残差减小最快的方向就是垂直于特征区域的方向：</p>
+<p>​    ①对于线特征，梯度方向为通过特征点的垂直于直线的方向：</p>
+<script type="math/tex; mode=display">
+\frac{\partial D(\tilde{X}^L_{(k+1,i)})}{\partial \tilde{X}^L_{(k+1,i)} }=[a_\xi,b_\xi,c_\xi]^T</script><p>​    ②对于面特征，梯度方向为通过特征点的垂直于平面的方向：</p>
+<script type="math/tex; mode=display">
+\frac{\partial D(\tilde{X}^L_{(k+1,i)})}{\partial \tilde{X}^L_{(k+1,i)} }=[a_H,b_H,c_H]^T</script><ul>
+<li>$\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial T^L_{k+1} }$的求解</li>
+</ul>
+<p>这部分表示的是点云对位姿的偏导，主要是对平移和旋转的求导：</p>
+<p>​    ①对平移求导</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial t_x}
+=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial t_x}
+=\begin{bmatrix} 1\\0\\0 \end{bmatrix}
+\end{align*}</script><script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial t_y}
+=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial t_y}
+=\begin{bmatrix} 0\\1\\0 \end{bmatrix}
+\end{align*}</script><script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial t_z}
+=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial t_z}
+=\begin{bmatrix} 0\\0\\1 \end{bmatrix}
+\end{align*}</script><p>​    ②对角度求导</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial \theta_x }
+&=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial \theta_x }
+=\frac{\partial G(R X^L_{(k+1,i)})}{\partial \theta_x }\\
+&=\begin{bmatrix}
+s_yc_xs_z&c_zs_yc_x &-s_xs_y\\
+-s_xs_z &-s_xc_z&-c_x\\
+c_yc_xs_z&c_yc_zc_x&-c_ys_x
+\end{bmatrix}
+\begin{bmatrix}x_{(k+1,i)}\\y_{(k+1,i)}\\z_{(k+1,i)}\end{bmatrix}
+\end{align*}</script><script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial \theta_y }
+&=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial \theta_y }
+=\frac{\partial G(R X^L_{(k+1,i)})}{\partial \theta_y }\\
+&=\begin{bmatrix}
+-s_yc_z+c_ys_xs_z&c_zc_ys_x+s_ys_z &c_xc_y\\0&0&0\\
+-s_ys_xs_z-c_zc_y&-s_yc_zs_x+c_ys_z&-s_yc_x
+\end{bmatrix}
+\begin{bmatrix}x_{(k+1,i)}\\y_{(k+1,i)}\\z_{(k+1,i)}\end{bmatrix}
+\end{align*}</script><script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial G(X^L_{(k+1,i)},T^L_{k+1})}{\partial \theta_z }
+&=\frac{\partial G(R X^L_{(k+1,i)}+t)}{\partial \theta_z}
+=\frac{\partial G(R X^L_{(k+1,i)})}{\partial \theta_z }\\
+&=\begin{bmatrix}
+-c_ys_z+s_ys_xc_z&-s_zs_ys_x &0\\
+c_xc_z &-c_xs_z&0\\
+c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
+\end{bmatrix}
+\begin{bmatrix}x_{(k+1,i)}\\y_{(k+1,i)}\\z_{(k+1,i)}\end{bmatrix}
+\end{align*}</script><h1 id="Ⅵ-构建地图"><a href="#Ⅵ-构建地图" class="headerlink" title="Ⅵ.构建地图"></a>Ⅵ.构建地图</h1><p>合并地图点：</p>
+<ul>
+<li>把关键帧的特征点按照位姿转到地图坐标系中</li>
+<li>按照位置和<code>cube</code>尺寸划分到对应的<code>cube</code>中</li>
+</ul>
+<p><img src="/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/image-20220413144755421.png" alt="image-20220413144755421"></p>
+<h1 id="Ⅶ"><a href="#Ⅶ" class="headerlink" title="Ⅶ."></a>Ⅶ.</h1>
     </div>
 
     
@@ -477,8 +597,8 @@ T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_bl
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
               <a href="/tags/LOAM/" rel="tag"> <i class="fa fa-tag"></i> LOAM</a>
+              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
           </div>
 
         
@@ -490,7 +610,10 @@ T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_bl
     <a href="/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/" rel="prev" title="LOAM-SLAM翻译">
       <i class="fa fa-chevron-left"></i> LOAM-SLAM翻译
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="next" title="loam-velodyne源码编译与数据集运行">
+      loam-velodyne源码编译与数据集运行 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -549,7 +672,7 @@ T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_bl
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%AC%A6%E5%8F%B7%E7%BA%A6%E5%AE%9A"><span class="nav-text">Ⅱ.符号约定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A2-%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%EF%BC%88%E7%82%B9%E4%BA%91%E6%B3%A8%E5%86%8C%EF%BC%89"><span class="nav-text">Ⅲ.特征提取（点云注册）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E5%8C%BA%E5%88%86%E8%BE%B9%E7%BC%98%E7%82%B9%E5%92%8C%E5%B9%B3%E9%9D%A2%E7%82%B9"><span class="nav-text">A.区分边缘点和平面点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E4%B8%8D%E5%8F%AF%E8%80%83%E7%82%B9%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">B.不可考点的设置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A3-%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-text">Ⅳ.特征点匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%E6%95%B0%E6%8D%AE%E7%9A%84%E7%95%B8%E5%8F%98"><span class="nav-text">A.激光雷达数据的畸变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E5%B0%86%E7%82%B9%E4%B8%8E%E7%BA%BF%E5%92%8C%E9%9D%A2%E5%8C%B9%E9%85%8D%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-text">B.将点与线和面匹配的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E7%82%B9%E5%92%8C%E5%AF%B9%E5%BA%94%E7%89%B9%E5%BE%81%E5%8C%BA%E5%9F%9F%E8%B7%9D%E7%A6%BB%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-text">C.点和对应特征区域距离的计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#a-%E7%82%B9%E5%88%B0%E7%BA%BF%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">a.点到线的距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b-%E7%82%B9%E5%88%B0%E9%9D%A2%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">b.点到面的距离</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A4-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">Ⅴ.运动估计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC"><span class="nav-text">A.线性插值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">B.运动估计</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%AC%A6%E5%8F%B7%E7%BA%A6%E5%AE%9A"><span class="nav-text">Ⅱ.符号约定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A2-%E7%89%B9%E5%BE%81%E6%8F%90%E5%8F%96%EF%BC%88%E7%82%B9%E4%BA%91%E6%B3%A8%E5%86%8C%EF%BC%89"><span class="nav-text">Ⅲ.特征提取（点云注册）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E5%8C%BA%E5%88%86%E8%BE%B9%E7%BC%98%E7%82%B9%E5%92%8C%E5%B9%B3%E9%9D%A2%E7%82%B9"><span class="nav-text">A.区分边缘点和平面点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E4%B8%8D%E5%8F%AF%E9%9D%A0%E7%82%B9%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">B.不可靠点的设置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A3-%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-text">Ⅳ.特征点匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E6%BF%80%E5%85%89%E9%9B%B7%E8%BE%BE%E6%95%B0%E6%8D%AE%E7%9A%84%E7%95%B8%E5%8F%98"><span class="nav-text">A.激光雷达数据的畸变</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E5%B0%86%E7%82%B9%E4%B8%8E%E7%BA%BF%E5%92%8C%E9%9D%A2%E5%8C%B9%E9%85%8D%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-text">B.将点与线和面匹配的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E7%82%B9%E5%92%8C%E5%AF%B9%E5%BA%94%E7%89%B9%E5%BE%81%E5%8C%BA%E5%9F%9F%E8%B7%9D%E7%A6%BB%E7%9A%84%E8%AE%A1%E7%AE%97"><span class="nav-text">C.点和对应特征区域距离的计算</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#a-%E7%82%B9%E5%88%B0%E7%BA%BF%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">a.点到线的距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#b-%E7%82%B9%E5%88%B0%E9%9D%A2%E7%9A%84%E8%B7%9D%E7%A6%BB"><span class="nav-text">b.点到面的距离</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A4-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">Ⅴ.运动估计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E7%BA%BF%E6%80%A7%E6%8F%92%E5%80%BC"><span class="nav-text">A.线性插值</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E8%BF%90%E5%8A%A8%E4%BC%B0%E8%AE%A1"><span class="nav-text">B.运动估计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E9%9B%85%E5%8F%AF%E6%AF%94%E7%9F%A9%E9%98%B5%E6%B1%82%E8%A7%A3"><span class="nav-text">C.雅可比矩阵求解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A5-%E6%9E%84%E5%BB%BA%E5%9C%B0%E5%9B%BE"><span class="nav-text">Ⅵ.构建地图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A6"><span class="nav-text">Ⅶ.</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -565,14 +688,14 @@ T^L_{(k+1,i)}=\frac{t_i-t_{k+1} }{t-t_{k+1} }T^L_{k+1}</script><p><a target="_bl
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">45</span>
+          <span class="site-state-item-count">46</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -891,12 +1014,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">284k</span>
+    <span title="站点总字数">289k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">4:18</span>
+    <span title="站点阅读时长">4:23</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
