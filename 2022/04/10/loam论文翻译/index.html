@@ -46,7 +46,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/image-20220410153615690.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/image-20220410153653541.png">
 <meta property="article:published_time" content="2022-04-10T07:29:00.883Z">
-<meta property="article:modified_time" content="2022-04-12T06:54:07.448Z">
+<meta property="article:modified_time" content="2022-04-16T02:52:01.130Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="LOAM">
 <meta property="article:tag" content="文献阅读">
@@ -243,7 +243,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-12 14:54:07" itemprop="dateModified" datetime="2022-04-12T14:54:07+08:00">2022-04-12</time>
+                <time title="修改时间：2022-04-16 10:52:01" itemprop="dateModified" datetime="2022-04-16T10:52:01+08:00">2022-04-16</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -410,9 +410,10 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>激光雷达里程计算法如算法1所示。该算法以上次扫描的点云$\overline{P}_k$、当前扫描的增长点云$P_{k+1}$和上次递归的位姿变换$T^L_{k+1}$作为输入。如果启动了新的扫描，$T^L_{k+1}$将被设置为零(第$4-6$行)。然后，算法从$P_{k+1}$中提取特征点构造第$7$行$\xi_{k+1}$和$H_{k+1}$。对于每个特征点，我们可以在$\overline{P}_k$(第$9-19$行)中找到对应。运动估计适应于鲁棒拟合[27]。在第$ 15 $行，该算法为每个特征点分配一个平方权值。 与其对应的距离较大的特征点被分配较小的权重，距离大于阈值的特征点被视为异常值并分配零权重。然后，在第$ 16 $行，为一次迭代更新位姿变换。 当发现收敛或满足最大迭代次数时，非线性优化终止。 如果算法到达扫描结束，则使用扫描期间估计的运动将$P_{k+1}$重新投影到时间戳 $t_{k+2}$。 否则，仅返回变换$T^L_{k+1}$ 用于下一轮递归。</p>
 <h1 id="VI-激光雷达建图"><a href="#VI-激光雷达建图" class="headerlink" title="VI.激光雷达建图"></a>VI.激光雷达建图</h1><p><img src="/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/image-20220410153350151.png" alt="image-20220410153350151"></p>
 <blockquote>
-<p>图 8. 建图过程示意图。 蓝色曲线表示地图上的激光雷达位姿$T^W_k$ ，由建图算法在扫描 $k $处生成。 橙色曲线表示扫描 $k + 1$、$T^L_{k+1}$ 期间的激光雷达运动，由里程计算法计算得出。 使用$ T^W_k$和$T^L_{k+1}$，将里程计算法发布的未失真点云投影到地图上，表示为（绿色线段）$\overline{Q}_{k+1}$，并与地图上现有的云$ Q_k$（黑色线段）进行匹配。</p>
+<p>图 8. 建图过程示意图。 蓝色曲线表示地图上的激光雷达位姿$T^W_k$ ，由建图算法在扫描 $k $处生成。 橙色曲线表示扫描 $k + 1$ 期间的激光雷达运动$T^L_{k+1}$，由里程计算法计算得出。 使用$ T^W_k$和$T^L_{k+1}$，将里程计算法发布的未失真点云投影到地图上，表示为（绿色线段）$\overline{Q}_{k+1}$，并与地图上现有的云$ Q_k$（黑色线段）进行匹配。</p>
 </blockquote>
-<p>建图算法运行的频率比里程计算法低，并且每次扫描只调用一次。在扫描 $k + 1$结束时，激光雷达里程计生成一个未失真的点云，$\overline{P}_{k+1}$，同时生成一个位姿变换$T^L_{k+1}$，包含扫描期间的激光雷达运动，介于$ [t_{k+1}, t_{k+2 }]$。建图算法在世界坐标$\left\{W\right\}$中匹配并注册$\overline{P}_{k+1}$，如图$8$所示。为了解释这个过程，让我们将$ Q_k$ 定义为地图上的点云，累积到扫描 $k$，设 $T^W_k$是扫描 $k ,t_{k+1}$结束时，激光雷达在地图上的位姿。利用激光雷达里程计的输出，建图算法将 $T^W_k$扩展到从$t_{k+1}$到 $t_{k+2}$的一次扫描，以获得$T^W_{k+1}$，并将 $\overline{P}_{k+1}$投影到世界坐标$\left\{W\right\}$中，表示为$\overline{Q}_{k+1}$。 接下来，该算法通过优化激光雷达位姿$T^W_{k+1}$，将$\overline{Q}_{k+1}$ 与$ Q_k$ 匹配。特征点的提取方法与第$V-A$节相同，但使用了$ 10 $倍的特征点。 为了找到特征点的对应关系，我们将点云存储在地图上$ Q_k$，在 $10$ 立方米区域中。立方体中与$\overline{Q}_{k+1}$相交的点被提取并存储在 $3D$  $KD-tree$ [24] 中。 我们发现$ Q_k$中的点在特征点周围的某一区域内。令$ S^\prime $为一组周围点。 对于边缘点，我们只在 $ S^\prime $中保留边缘线上的点，对于平面点，我们只保留平面上的点。然后，计算 $ S^\prime $的协方差矩阵，记为$M$, $M$的特征值和特征向量，分别记为$V$和$E$。如果$ S^\prime $分布在一条边线上，$V$包含的一个特征值明显大于其他两个特征值，$E$中与最大特征值相关联的特征向量表示边缘线的方向。另一方面，如果$ S^\prime $分布在一个平面贴片(patch)上，$V$包含两个较大的特征值，第三个特征值明显较小，$E$中最小的特征值对应的特征向量表示该平面贴片(patch)的方位。通过$ S^\prime $的几何中心确定边缘线或平面贴片(patch)的位置。</p>
+<p>建图算法运行的频率比里程计算法低，并且每次扫描只调用一次。在扫描 $k + 1$结束时，即介于$ [t_{k+1}, t_{k+2 }]$，激光雷达里程计生成一个未失真的点云$\overline{P}_{k+1}$，同时生成一个激光雷达的位姿变换$T^L_{k+1}$。建图算法在世界坐标$\left\{W\right\}$中匹配并注册$\overline{P}_{k+1}$，如图$8$所示。为了解释这个过程，让我们将$ Q_k$ 定义为累积到扫描 $k$的地图上的点云，设 $T^W_k$是扫描 $k $在$t_{k+1}$结束时，激光雷达在地图上的位姿。利用激光雷达里程计的输出，建图算法将 $T^W_k$扩展到从$t_{k+1}$到 $t_{k+2}$的一次扫描，以获得$T^W_{k+1}$，并将 $\overline{P}_{k+1}$投影到世界坐标$\left\{W\right\}$中，表示为$\overline{Q}_{k+1}$。 接下来，该算法通过优化激光雷达位姿$T^W_{k+1}$，将$\overline{Q}_{k+1}$ 与$ Q_k$ 匹配。</p>
+<p>特征点的提取方法与第$V-A$节相同，但使用了$ 10 $倍的特征点。 为了找到特征点的对应关系，我们将点云存储在地图上$ Q_k$，在 $10$ 立方米区域中。立方体中与$\overline{Q}_{k+1}$相交的点被提取并存储在 $3D$  $KD-tree$ [24] 中。 我们发现$ Q_k$中的点在特征点周围的某一区域内。令$ S^\prime $为一组周围点。 对于边缘点，我们只在 $ S^\prime $中保留边缘线上的点，对于平面点，我们只保留平面上的点。然后，计算 $ S^\prime $的协方差矩阵，记为$M$, $M$的特征值和特征向量，分别记为$V$和$E$。如果$ S^\prime $分布在一条边线上，$V$包含的一个特征值明显大于其他两个特征值，$E$中与最大特征值相关联的特征向量表示边缘线的方向。另一方面，如果$ S^\prime $分布在一个平面贴片(patch)上，$V$包含两个较大的特征值，第三个特征值明显较小，$E$中最小的特征值对应的特征向量表示该平面贴片(patch)的方位。通过$ S^\prime $的几何中心确定边缘线或平面贴片(patch)的位置。</p>
 <p>为了计算特征点与其对应点的距离，我们在边缘线上选择两个点，在平面贴片(patch)上选择三个点。这允许使用$(2)$和$(3)$相同的公式来计算距离。然后，为每个特征点推导出一个方程为$(9)$ 或 $(10)$，但不同之处在于$\overline{Q}_{k+1}$ 中的所有点共享相同的时间戳$t_{k+2}$。 非线性优化通过 <code>Levenberg-Marquardt</code>方法 [26] 通过鲁棒拟合 [27] 再次求解，并在$\overline{Q}_{k+1}$被注册在地图上。为了均匀分布这些点，地图云通过体素网格过滤器 [28] 缩小尺寸，体素大小为 5 厘米立方体。</p>
 <p><img src="/2022/04/10/loam%E8%AE%BA%E6%96%87%E7%BF%BB%E8%AF%91/image-20220410153401364.png" alt="image-20220410153401364"></p>
 <blockquote>
@@ -936,12 +937,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">333k</span>
+    <span title="站点总字数">343k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:03</span>
+    <span title="站点阅读时长">5:12</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
