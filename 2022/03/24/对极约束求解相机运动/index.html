@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/image-20220325110120640.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/image-20220325110908224.png">
 <meta property="article:published_time" content="2022-03-24T07:31:51.082Z">
-<meta property="article:modified_time" content="2022-03-29T13:49:31.652Z">
+<meta property="article:modified_time" content="2022-04-25T08:45:56.898Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -228,7 +228,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-29 21:49:31" itemprop="dateModified" datetime="2022-03-29T21:49:31+08:00">2022-03-29</time>
+                <time title="修改时间：2022-04-25 16:45:56" itemprop="dateModified" datetime="2022-04-25T16:45:56+08:00">2022-04-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -359,18 +359,18 @@ x_2^{T}t^{\land}Rx_1=0</script><p>首先，要知道像素坐标转相机归一�
 <p><img src="/2022/03/24/%E5%AF%B9%E6%9E%81%E7%BA%A6%E6%9D%9F%E6%B1%82%E8%A7%A3%E7%9B%B8%E6%9C%BA%E8%BF%90%E5%8A%A8/image-20220325110908224.png" alt="image-20220325110908224"></p>
 <p>按照对极几何中的定义，设 $x_1 , x_2 $为两个特征点的归一化坐标，满足：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 s_1p_1&=KP,\\ s_2p_2&=K(RP+t) 
-\end{align}</script><p>已知：</p>
+\end{align*}</script><p>已知：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 x_1 = K^{-1}p_1 \\
 x_2 = K^{-1}p_2
-\end{align}</script><p>将$p_1,p_2$换成$x_1,x_2$:</p>
+\end{align*}</script><p>将$p_1,p_2$换成$x_1,x_2$:</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 s_1Kx_1&=KP,\\ s_2Kx_2&=K(RP+t) 
-\end{align}</script><p>因此，$x_1,x_2$的关系满足：</p>
+\end{align*}</script><p>因此，$x_1,x_2$的关系满足：</p>
 <script type="math/tex; mode=display">
 s_2x_2= s_1Rx_1+t</script><p>我们已经知道了 $R, t$，想要求解的是两个特征点的深度 $s_1 , s_2$ 。当然这两个深度是可以分开求的，比方说先来看 $s_1$ 。如果我要算 $s_1 $，那么先对上式两侧左乘一个 $x^{\land}_2$</p>
 <script type="math/tex; mode=display">
@@ -553,20 +553,20 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -879,12 +879,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">343k</span>
+    <span title="站点总字数">363k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:12</span>
+    <span title="站点阅读时长">5:30</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

@@ -22,19 +22,21 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="本文主要把loam_velodyne源码进行编译运行，感受一下在数据集下LOAM的运行效果。">
+  <meta name="description" content="本文主要把loam_velodyne与aloam_velodyne源码进行编译运行，感受一下在数据集下两者的运行效果。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="loam_velodyne源码编译与数据集运行">
+<meta property="og:title" content="loam&amp;&amp;aloam源码编译与数据集运行">
 <meta property="og:url" content="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/index.html">
 <meta property="og:site_name" content="Robot Go!">
-<meta property="og:description" content="本文主要把loam_velodyne源码进行编译运行，感受一下在数据集下LOAM的运行效果。">
+<meta property="og:description" content="本文主要把loam_velodyne与aloam_velodyne源码进行编译运行，感受一下在数据集下两者的运行效果。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://github.com/laboshinl/loam_velodyne/raw/master/capture.bmp">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220412211213586.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220412212407985.png">
+<meta property="og:image" content="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220418094922467.png">
 <meta property="article:published_time" content="2022-04-12T12:54:24.570Z">
-<meta property="article:modified_time" content="2022-04-13T13:10:41.423Z">
+<meta property="article:modified_time" content="2022-04-25T08:53:06.611Z">
 <meta property="article:author" content="上善若水">
+<meta property="article:tag" content="ALOAM">
 <meta property="article:tag" content="LOAM">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://github.com/laboshinl/loam_velodyne/raw/master/capture.bmp">
@@ -52,7 +54,7 @@
   };
 </script>
 
-  <title>loam_velodyne源码编译与数据集运行 | Robot Go!</title>
+  <title>loam&&aloam源码编译与数据集运行 | Robot Go!</title>
   
 
 
@@ -212,7 +214,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          loam_velodyne源码编译与数据集运行
+          loam&&aloam源码编译与数据集运行
         </h1>
 
         <div class="post-meta">
@@ -229,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-13 21:10:41" itemprop="dateModified" datetime="2022-04-13T21:10:41+08:00">2022-04-13</time>
+                <time title="修改时间：2022-04-25 16:53:06" itemprop="dateModified" datetime="2022-04-25T16:53:06+08:00">2022-04-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -268,14 +270,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
+              <span>1.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -289,15 +291,15 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本文主要把loam_velodyne源码进行编译运行，感受一下在数据集下LOAM的运行效果。</p>
+            <p>本文主要把loam_velodyne与aloam_velodyne源码进行编译运行，感受一下在数据集下两者的运行效果。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="https://github.com/laboshinl/loam_velodyne/raw/master/capture.bmp" alt="Screenshot"></p>
 <blockquote>
-<p>基本环境:ubuntu20.04; ROS1:noetic;你首先得熟悉十四讲吧……</p>
+<p> 基本环境:ubuntu20.04; ROS1:noetic;你首先得熟悉十四讲吧……</p>
 </blockquote>
+<h1 id="LOAM"><a href="#LOAM" class="headerlink" title="LOAM"></a>LOAM</h1><p><img src="https://github.com/laboshinl/loam_velodyne/raw/master/capture.bmp" alt="Screenshot"></p>
 <p>由于LOAM在机器人操作系统上进行搭建，所以需要构建工作空间：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建工作空间</span></span><br><span class="line">mkdir -p LOAM_WS/src</span><br><span class="line"><span class="built_in">cd</span> src &amp;&amp; catkin_init_workspace </span><br><span class="line">git <span class="built_in">clone</span> https://github.com/laboshinl/loam_velodyne.git</span><br><span class="line"><span class="built_in">cd</span> .. &amp;&amp; catkin_make</span><br><span class="line"><span class="comment"># 编译和运行</span></span><br><span class="line">catkin_make -DCMAKE_BUILD_TYPE=Release </span><br><span class="line"><span class="comment"># 设置环境变量</span></span><br><span class="line"><span class="built_in">source</span> ./devel/setup.bash</span><br></pre></td></tr></table></figure>
 <p>如果你是用的vscode记得把引用放入<code>c_cpp_properties.json</code></p>
@@ -310,6 +312,17 @@
 <p>解决办法参考：<a href="https://link.zhihu.com/?target=https%3A//github.com/laboshinl/loam_velodyne/issues/157">https://github.com/laboshinl/lo</a></p>
 <p>修改LaserMapping.cpp, LaserOdomertyr.cpp, TransformMaintenance.cpp这三个文件中的“/camera_int”为“camera_init”</p>
 <p><img src="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220412212407985.png" alt="image-20220412212407985"></p>
+<h1 id="ALOAM"><a href="#ALOAM" class="headerlink" title="ALOAM"></a>ALOAM</h1><p>源代码地址：<a target="_blank" rel="noopener" href="https://github.com/HKUST-Aerial-Robotics/A-LOAM">https://github.com/HKUST-Aerial-Robotics/A-LOAM</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建工作空间</span></span><br><span class="line">mkdir -p ALOAM_WS/src</span><br><span class="line"><span class="built_in">cd</span> src &amp;&amp; catkin_init_workspace </span><br><span class="line">git <span class="built_in">clone</span> https://github.com/HKUST-Aerial-Robotics/A-LOAM</span><br><span class="line"><span class="built_in">cd</span> .. &amp;&amp; catkin_make</span><br><span class="line"><span class="comment"># 编译和运行</span></span><br><span class="line">catkin_make -DCMAKE_BUILD_TYPE=Release </span><br><span class="line"><span class="comment"># 设置环境变量</span></span><br><span class="line"><span class="built_in">source</span> ./devel/setup.bash</span><br></pre></td></tr></table></figure>
+<p>当然会遇到一些问题</p>
+<p>①把你的CMakeLists.txt文件中的C++11声明改成C++14</p>
+<p>ALOAM_WS/src/A-LOAM/CMakeLists.txt</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## set(CMAKE_CXX_FLAGS &quot;-std=c++11&quot;)</span></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++14&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p>②同LOAM，由于rviz版本问题，修改src下文件中的“/camera_int”为“camera_init”</p>
+<p>③将<code>ALOAM_WS/src/A-LOAM/src/kittiHelper.cpp</code>下的<code>CV_LOAD_IMAGE_GRAYSCALE</code>修改为<code>cv::IMREAD_GRAYSCALE</code></p>
+<p>这是由于pencv2 和 3 的命名规范产生了出入，具体查看 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_28660035/article/details/80772071"><strong>opencv3 与 opencv2 代码区别总结</strong></a></p>
+<p>然后重新编译运行即可：</p>
+<p><img src="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/image-20220418094922467.png" alt="image-20220418094922467"></p>
 
     </div>
 
@@ -345,7 +358,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" title="loam_velodyne源码编译与数据集运行">http://lukeyalvin.top/2022/04/12/loam-velodyne源码编译与数据集运行/</a>
+    <a href="http://lukeyalvin.top/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" title="loam&amp;&amp;aloam源码编译与数据集运行">http://lukeyalvin.top/2022/04/12/loam-velodyne源码编译与数据集运行/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -375,6 +388,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
+              <a href="/tags/ALOAM/" rel="tag"> <i class="fa fa-tag"></i> ALOAM</a>
               <a href="/tags/LOAM/" rel="tag"> <i class="fa fa-tag"></i> LOAM</a>
           </div>
 
@@ -449,6 +463,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#LOAM"><span class="nav-text">LOAM</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ALOAM"><span class="nav-text">ALOAM</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -464,20 +479,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -790,12 +805,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">343k</span>
+    <span title="站点总字数">363k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:12</span>
+    <span title="站点阅读时长">5:30</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

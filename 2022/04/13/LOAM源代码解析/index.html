@@ -44,7 +44,7 @@
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/image-20220416150539893.png">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/13/LOAM%E6%BA%90%E4%BB%A3%E7%A0%81%E8%A7%A3%E6%9E%90/image-20220416145505400.png">
 <meta property="article:published_time" content="2022-04-13T13:08:50.276Z">
-<meta property="article:modified_time" content="2022-04-16T11:19:36.770Z">
+<meta property="article:modified_time" content="2022-04-25T08:53:05.243Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="LOAM">
 <meta name="twitter:card" content="summary">
@@ -240,7 +240,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-16 19:19:36" itemprop="dateModified" datetime="2022-04-16T19:19:36+08:00">2022-04-16</time>
+                <time title="修改时间：2022-04-25 16:53:05" itemprop="dateModified" datetime="2022-04-25T16:53:05+08:00">2022-04-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -464,20 +464,20 @@ srz=sin\theta_z=s_z\\crz=cos\theta_z=c_z\\</script><p>然后结合之前推导�
 <p>我们这一对应代码部分做推导，设五个点分别是：$(x_1,y_1,z_1),(x_2,y_2,z_2),(x_3,y_3,z_3),(x_4,y_4,z_4),(x_5,y_5,z_5),$</p>
 <p>求平均值：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 \overline{x}&=\frac{x_1+x_2+x_3+x_4+x_5}{5}\\
 \overline{y}&=\frac{y_1+y_2+y_3+y_4+y_5}{5}\\
 \overline{z}&=\frac{z_1+z_2+z_3+z_4+z_5}{5}\\
-\end{align}</script><p>求协方差：</p>
+\end{align*}</script><p>求协方差：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 Cov(x,x)&=\sigma_{x}^2=E[(x-\overline{x})]^2\\
 Cov(y,y)&=\sigma_{y}^2=E[(y-\overline{y})]^2\\
 Cov(z,z)&=\sigma_{z}^2=E[(z-\overline{z})]^2\\
 Cov(x,y)&=\sigma_{x}\sigma_{y}=E[(x-\overline{x})(y-\overline{y})]\\
 Cov(x,z)&=\sigma_{x}\sigma_{z}=E[(x-\overline{x})(z-\overline{z})]\\
 Cov(y,z)&=\sigma_{y}\sigma_{z}=E[(y-\overline{y})(z-\overline{z})]
-\end{align}</script><p>得到协方差矩阵：</p>
+\end{align*}</script><p>得到协方差矩阵：</p>
 <script type="math/tex; mode=display">
 A=\begin{bmatrix}
 \sigma_{x}^2&\sigma_{x}\sigma_{y}&\sigma_{x}\sigma_{z}\\
@@ -573,10 +573,13 @@ A=\begin{bmatrix}
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="prev" title="loam_velodyne源码编译与数据集运行">
-      <i class="fa fa-chevron-left"></i> loam_velodyne源码编译与数据集运行
+    <a href="/2022/04/12/loam-velodyne%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BF%90%E8%A1%8C/" rel="prev" title="loam&&aloam源码编译与数据集运行">
+      <i class="fa fa-chevron-left"></i> loam&&aloam源码编译与数据集运行
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2022/04/18/aloam%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="next" title="aloam_velodyney源代码深度解析">
+      aloam_velodyney源代码深度解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -651,20 +654,20 @@ A=\begin{bmatrix}
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -977,12 +980,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">343k</span>
+    <span title="站点总字数">363k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:12</span>
+    <span title="站点阅读时长">5:30</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

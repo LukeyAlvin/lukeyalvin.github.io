@@ -31,7 +31,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://lukeyalvin.top/2022/04/02/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220402154736261.png">
 <meta property="article:published_time" content="2022-04-02T06:52:57.548Z">
-<meta property="article:modified_time" content="2022-04-04T06:52:31.324Z">
+<meta property="article:modified_time" content="2022-04-25T08:54:01.708Z">
 <meta property="article:author" content="上善若水">
 <meta property="article:tag" content="SLAM实践">
 <meta name="twitter:card" content="summary">
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-04 14:52:31" itemprop="dateModified" datetime="2022-04-04T14:52:31+08:00">2022-04-04</time>
+                <time title="修改时间：2022-04-25 16:54:01" itemprop="dateModified" datetime="2022-04-25T16:54:01+08:00">2022-04-25</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -294,12 +294,12 @@
 <span id="more"></span>
 <h1 id="线性滤波"><a href="#线性滤波" class="headerlink" title="线性滤波"></a>线性滤波</h1><h2 id="先验与后验估计"><a href="#先验与后验估计" class="headerlink" title="先验与后验估计"></a>先验与后验估计</h2><p>由之前的状态空间方程：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 {x_k }&=Ax_{k-1}+Bu_{k-1}+w_{k-1}\\
 z_{k}&=Hx_{k}+v_k
-\end{align}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
+\end{align*}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$，推导如下：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 Q=E[ww^T]&=E
 \begin{bmatrix}
 \begin{bmatrix}w_1\\w_2\\.\\.\\w_k \end{bmatrix}
@@ -316,17 +316,17 @@ Ew_2w_1&Ew_2^2&...&Ew_2w_k\\
 ...&...&...&...\\
 Ew_kw_1&Ew_kw_1&...&Ew_k^2
 \end{bmatrix}
-\end{align}</script><p>由于$w$的期望为$0$，由方差等于平方的期望减去期望的平方以及协方差公式：</p>
+\end{align*}</script><p>由于$w$的期望为$0$，由方差等于平方的期望减去期望的平方以及协方差公式：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 Var(X)&=E(X^2)-E^2(X)\\
 Cov(X,Y)&=E((X-\mu)(Y-v))
-\end{align}</script><p>所以此处平方的期望就等于方差：</p>
+\end{align*}</script><p>所以此处平方的期望就等于方差：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 Var(X)&=E(X^2)\\
 Cov(X,Y)&=E(X·Y)
-\end{align}</script><p>即为：</p>
+\end{align*}</script><p>即为：</p>
 <script type="math/tex; mode=display">
 Ew_k^2=\sigma_{w_1}^2,Ew_iw_j=\sigma_i\sigma_j</script><p>所以：</p>
 <script type="math/tex; mode=display">
@@ -364,15 +364,15 @@ e_k^-=x_k-\hat{x}^-_k</script><p>误差也是符合高斯分布，$p(e_k)\sim(0,
 
 <hr>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 tr(P)&=E[ee^T]\\
 &=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]
-\end{align}</script><p>已知：</p>
+\end{align*}</script><p>已知：</p>
 <script type="math/tex; mode=display">
 \hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k)\\
 z_k=Hx_k+v_k</script><p>带入上式：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 x_k-\hat{x}_k&=x_k-(\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k))\\
 &=x_k-\hat{x}^-_k-K_kz_k+K_kH\hat{x}^-_k\\
 &=x_k-\hat{x}^-_k-K_k(Hx_k+v_k)+K_kH\hat{x}^-_k\\
@@ -380,13 +380,13 @@ x_k-\hat{x}_k&=x_k-(\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k))\\
 &=(x_k-\hat{x}^-_k)-K_kH(x_k-\hat{x}^-_k)-K_kv_k\\
 &=(I-K_kH)(x_k-\hat{x}^-_k)-K_kv_k\\
 &=(I-K_kH)e_k^--K_kv_k
-\end{align}</script><p>所以：</p>
+\end{align*}</script><p>所以：</p>
 <blockquote>
 <p>可能会用到的公式：</p>
 <p>$(AB)^T=B^TA^T$，$(A+B)^T=A^T+B^T$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 tr(P)&=E[ee^T]\\
 &=E[(x_k-\hat{x}_k)(x_k-\hat{x}_k)^T]\\
 &=E[[(I-K_kH)e_k^--K_kv_k][(I-K_kH)e_k^--K_kv_k]^T]\\
@@ -394,67 +394,67 @@ tr(P)&=E[ee^T]\\
 &=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T-(I-K_kH)e_k^-v_k^TK_k^T\\
 &-K_kv_ke_k^{-T}(I-K_kH)^T+K_kv_kv_k^TK_k^T]\\
 
-\end{align}</script><p>分别求每一项的期望：</p>
+\end{align*}</script><p>分别求每一项的期望：</p>
 <blockquote>
 <p>可能会用到的已知条件：</p>
 <p>$E[e_k^-]=0,E[e_k^{-T}]=0,E[v_k^T]=0,E[v_k]=0$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 &E[-(I-K_kH)e_k^-v_k^TK_k^T]\\
 &=-(I-K_kH)E[e_k^-v_k^T]K_k^T\\
 &=-(I-K_kH)E[e_k^-]E[v_k^T]K_k^T\\
 &=0
-\end{align}</script><p>同理可得：</p>
+\end{align*}</script><p>同理可得：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 &E[-K_kv_ke_k^{-T}(I-K_kH)^T]\\
 &=-K_kE[v_k]E[e_k^{-T}](I-K_kH)^T\\
 &=0
-\end{align}</script><p>所以最终：</p>
+\end{align*}</script><p>所以最终：</p>
 <blockquote>
 <p>可能会用到的定义：</p>
 <p>已知协方差矩阵$P=E[ee^T]$，则定义$P_k^-=E[e_k^-e_k^{-T}]$</p>
 <p>$p_{(v)}\sim(0,R)$，所以$R_k=E[v_kv^T_k]$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 tr(P)&=E[ee^T]\\
 &=E[(I-K_kH)e_k^-e_k^{-T}(I-K_kH)^T]+E[K_kv_kv_k^TK_k^T]\\
 &=(I-K_kH)E[e_k^-e_k^{-T}](I-K_kH)^T+K_kE[v_kv_k^T]K_k^T\\
 &=(P_k^--K_kHP_k^-)(I^T-H^TK_k^T)+K_kR_kK_k^T\\
 &=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
-\end{align}</script><blockquote>
+\end{align*}</script><blockquote>
 <p>由于，协方差矩阵的转置就是它本身，所以$P_k^{-T}=P_k^-$</p>
 <p>$(P_k^-H^TK_k^T)^T=K_kHP_k^{-T}=K_kHP_k^-$，所以$tr(K_kHP_k^-)=tr(P_k^-H^TK_k^T)$</p>
 </blockquote>
 <p>因此：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 tr(P)&=tr(P_k^-)-tr(K_kHP_k^-)-tr(P_k^-H^TK_k^T)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)\\
 &=tr(P_k^-)-2tr(K_kHP_k^-)+tr(K_kHP_k^-H^TK_k^T)+tr(K_kR_kK_k^T)
-\end{align}</script><p>$tr(P)$对$K_k$求导，使得$\frac{dtr(P_k)}{dK_k}=0$：</p>
+\end{align*}</script><p>$tr(P)$对$K_k$求导，使得$\frac{dtr(P_k)}{dK_k}=0$：</p>
 <blockquote>
 <p>可能会用到的公式：</p>
 <p>$\frac{dtr(AB)}{dA}=B^T$，$\frac{dtr(ABA^T)}{dA}=2AB$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 \frac{dtr(P_k)}{dK_k}&=\frac{tr(P_k^-)}{dK_k}
 -\frac{2tr(K_kHP_k^-)}{dK_k}
 +\frac{tr(K_kHP_k^-H^TK_k^T))}{dK_k}
 +\frac{tr(K_kR_kK_k^T))}{dK_k}\\
 &=0-2(HP_k^-)^T+2K_kHP_k^-H^T+2K_kR_k\\
 &=0
-\end{align}</script><p>所以：</p>
+\end{align*}</script><p>所以：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 (HP_k^-)^T&=K_k(HP_k^-H^T+R_k)
-\end{align}</script><p><b><span style="color:rgb(255, 0, 255);">卡尔曼增益（公式3）：</span></b></p>
+\end{align*}</script><p><b><span style="color:rgb(255, 0, 255);">卡尔曼增益（公式3）：</span></b></p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
-\end{align}</script><p>因此，结合我们之前的结论：</p>
+\end{align*}</script><p>因此，结合我们之前的结论：</p>
 <blockquote>
 <p>当我们的测量数据很少（不准确）时，$K_k\approx0$，则$\hat{x}_k=\hat{x}^-_k$，我们选择相信计算值；当我们的测量数据很多（相对准确）时，$K_k\approx H^-$，则$\hat{x}_k=H^-z_k$，我们选择相信测量值；</p>
 </blockquote>
@@ -469,9 +469,9 @@ K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
 <script type="math/tex; mode=display">
 \hat{x}_k=\hat{x}^-_k+K_k(z_k-H\hat{x}^-_k),K_k\in[0,H^-]</script><p><font color="#dd0000"><strong>卡尔曼增益（公式3）：</strong></font></p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
-\end{align}</script><p>上面的公式里只有$P_k^-$是未知的，需要推导。由于已知协方差矩阵$P=E[ee^T]$，所以定义$P_k^-=E[e_k^-e_k^{-T}]$，如何求这个误差协方差矩阵是以下篇幅讨论的重点。</p>
+\end{align*}</script><p>上面的公式里只有$P_k^-$是未知的，需要推导。由于已知协方差矩阵$P=E[ee^T]$，所以定义$P_k^-=E[e_k^-e_k^{-T}]$，如何求这个误差协方差矩阵是以下篇幅讨论的重点。</p>
 <blockquote>
 <p>可能会用到的定义与公式：</p>
 <p>$e_k=x_k-\hat{x}_k$，$P_k=E[ee^T]$</p>
@@ -481,17 +481,17 @@ K_k&=\frac{P_k^-H^T}{HP_k^-H^T+R_k}
 </blockquote>
 <p>首先推导$e_k^-=x_k-\hat{x}^-_k$:</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 e_k^-&=x_k-\hat{x}^-_k\\
 &=Ax_{k-1}+Bu_{k}+w_{k-1}-A\hat{x}_{k-1}-Bu_{k}\\
 &=A(x_{k-1}-\hat{x}_{k-1})+w_{k-1}\\
 &=Ae_{k-1}+w_{k-1}
-\end{align}</script><p>所以：</p>
+\end{align*}</script><p>所以：</p>
 <blockquote>
 <p>由于$e_{k-1}=x_{k-1}-\hat{x}_{k-1}$，所以$e_{k-1}$作用的是上一时刻，而$w_k$是作用于当前时刻的，它们之间是相互独立的。$E[e_{k-1}w_{k}^T]=E[e_{k-1}]E[w_{k}^T]$，且$E[e_{k-1}]=E[w_{k}^T]=0$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 P_k^-&=E[e_k^-e_k^{-T}]\\
 &=E[(Ae_{k-1}+w_{k-1})(Ae_{k-1}+w_{k-1})^T]\\
 &=E[(Ae_{k-1}+w_{k-1})(e_{k-1}^TA^T+w_{k-1}^T)]\\
@@ -499,20 +499,20 @@ P_k^-&=E[e_k^-e_k^{-T}]\\
 &=E[Ae_{k-1}e_{k-1}^TA^T]+E[Ae_{k-1}w_{k-1}^T]+E[w_{k-1}e_{k-1}^TA^T]+E[w_{k-1}w_{k-1}^T]\\
 &=AE[e_{k-1}e_{k-1}^T]A^T+E[w_{k-1}w_{k-1}^T]\\
 &=AP_{k-1}A^T+Q
-\end{align}</script><p><font color="#dd0000"><strong>误差协方差矩阵（公式4）：</strong></font></p>
+\end{align*}</script><p><font color="#dd0000"><strong>误差协方差矩阵（公式4）：</strong></font></p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 P_k^-=AP_{k-1}A^T+Q
-\end{align}</script><p>由于每一次的误差协方差矩阵$P_k^-$，都需要上一次的$P_{k-1}$，所以每一时刻我们都需要更新一下$P_k$的值，为下一时刻使用做准备。</p>
+\end{align*}</script><p>由于每一次的误差协方差矩阵$P_k^-$，都需要上一次的$P_{k-1}$，所以每一时刻我们都需要更新一下$P_k$的值，为下一时刻使用做准备。</p>
 <p><font color="#dd0000"><strong>更新误差协方差：（公式5）：</strong></font></p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 P_k&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
 &=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_k(HP_k^-H^T+R_k)K_k^T\\
 &=P_k^--K_kHP_k^--P_k^-H^TK_k^T+\frac{P_k^-H^T}{HP_k^-H^T+R_k}(HP_k^-H^T+R_k)K_k^T\\
 &=P_k^--K_kHP_k^-\\
 &=(I-K_kH)P_k^-
-\end{align}</script><p>至此，我们可以总结一下整个卡尔曼滤波的过程：</p>
+\end{align*}</script><p>至此，我们可以总结一下整个卡尔曼滤波的过程：</p>
 <div class="table-container">
 <table>
 <thead>
@@ -544,17 +544,17 @@ P_k&=P_k^--K_kHP_k^--P_k^-H^TK_k^T+K_kHP_k^-H^TK_k^T+K_kR_kK_k^T\\
 <hr>
 <p>对于线性系统的状态空间表达式：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 {x_k }&=Ax_{k-1}+Bu_{k-1}+w_{k-1}\\
 z_{k}&=Hx_{k}+v_k
-\end{align}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
+\end{align*}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
 <hr>
 <p>对于非线性系统的状态空间表达式：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 x_k&=f(x_{k-1},u_{k-1},w_{k-1})\\
 z_k&=h(x_k,v_k)
-\end{align}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
+\end{align*}</script><p>其中$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵</p>
 <p>虽然噪声仍然满足正态分布，但是<span style="color:red;">正态分布的随机变量通过非线性系统后就不再是正态的了。</span></p>
 <p><img src="/2022/04/02/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220402154736261.png" alt="image-20220402154736261"></p>
 <p>所以需要对非线性系统进行线性化处理，这里会用到泰勒展开。</p>
@@ -568,10 +568,10 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x}(x-x_0)</script><p>对于一个非线�
 <p>假设误差$w_{k-1}=0$</p>
 </blockquote>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 x_k&=f(\hat{x}_{k-1},u_{k-1},w_{k-1})+A(x_k-\hat{x}_{k-1})+Ww_{k-1}\\
 &=f(\hat{x}_{k-1},u_{k-1},0)+A(x_k-\hat{x}_{k-1})+Ww_{k-1}
-\end{align}</script><blockquote>
+\end{align*}</script><blockquote>
 <p>记：$f(\hat{x}_{k-1},u_{k-1},0)=\widetilde{x}$，而$A，W$是雅可比矩阵，且$A=\frac{\partial f}{\partial x}|\hat{x}_{k-1},u_{k-1}$，$W=\frac{\partial f}{\partial w}|\hat{x}_{k-1},u_{k-1}$</p>
 </blockquote>
 <ul>
@@ -587,10 +587,10 @@ z_{k}=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k</script><blockquote
 </blockquote>
 <p>所以非线性系统线性化后：</p>
 <script type="math/tex; mode=display">
-\begin{align}
+\begin{align*}
 x_k&=f(\hat{x}_{k-1},u_{k-1},0)+A(x_k-\hat{x}_{k-1})+Ww_{k-1}\\
 z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
-\end{align}</script><p>由于$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，那么很容易得到$p_{(Ww)}\sim N(0,wQw^T)，p_{(Vv)}\sim N(0,vRv^T)$</p>
+\end{align*}</script><p>由于$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，那么很容易得到$p_{(Ww)}\sim N(0,wQw^T)，p_{(Vv)}\sim N(0,vRv^T)$</p>
 <p>至此，我们可以总结一下整个卡尔曼滤波的过程：</p>
 <div class="table-container">
 <table>
@@ -774,20 +774,20 @@ z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">47</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">23</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1100,12 +1100,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">343k</span>
+    <span title="站点总字数">363k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:12</span>
+    <span title="站点阅读时长">5:30</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
