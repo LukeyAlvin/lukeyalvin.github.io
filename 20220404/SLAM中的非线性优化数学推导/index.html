@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SLAM中的非线性优化">
+<meta property="og:url" content="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/index.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220405145736323.png">
+<meta property="article:published_time" content="2022-04-04T06:49:56.115Z">
+<meta property="article:modified_time" content="2022-04-26T01:20:20.935Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="SLAM实践">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220405145736323.png">
+
+<link rel="canonical" href="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SLAM中的非线性优化 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SLAM中的非线性优化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-04 14:49:56" itemprop="dateCreated datePublished" datetime="2022-04-04T14:49:56+08:00">2022-04-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-26 09:20:20" itemprop="dateModified" datetime="2022-04-26T09:20:20+08:00">2022-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="提出"><a href="#提出" class="headerlink" title="提出"></a>提出</h1><h2 id="模型"><a href="#模型" class="headerlink" title="模型"></a>模型</h2><p>经典 SLAM 模型。它由一个状态方程和一个运动方程构成：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+x_k&=f(x_{k-1},u_{k})+w_{k}\\
+z_{k,j}&=h(y_j,x_k)+v_{k,j}
+\end{align*}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$</p>
+<p>对应视觉$SLAM$，这里的 $x_k $乃是相机的位姿，$u_k$ 是运动传感器的读数（有时也叫输入），$y_j$代表的是相机在$x_k $处观察到的路标，并且观察到$y_j$后，产生了一个观测数据 $z_{k,j}$。整个方程里面，求解相机的位姿$x_k $就是一个定位的问题，而求解路标$y_j$就是一个建图的过程，但是由于噪声$w_{k}，v_{k,j}$的影响，我们得到的传感器数据$u_k$ 和$z_{k,j}$肯定不是完全准确的，因此需要使用这两组不太准确的数据，寻找一个相对最优的相机位姿$x_k $以及路标$y_j$。这个过程就是SLAM中的非线性优化问题。</p>
+<h2 id="需要优化什么？"><a href="#需要优化什么？" class="headerlink" title="需要优化什么？"></a>需要优化什么？</h2><p>我们把所有带估计的数据放在一个集合：</p>
+<script type="math/tex; mode=display">
+x=\left\{x_1,....,x_N,y_1,...y_M\}\right.</script><p>那么，我们的问题就变成求已知输入数据 $u$ 和观测数据 $z$ 的条件下，计算状态 $x$ 的条件概率分布：</p>
+<script type="math/tex; mode=display">
+P(x|z,u)</script><hr>
+<p>但是多数情况下，我们只有相机观察到的一帧帧的图片$z_{k,j}$，即只考虑观测方程带来的数据时，没有运动传感器$u_k$ ，这个概率分布就变成$P(x|z)$，利用贝叶斯法则：</p>
+<script type="math/tex; mode=display">
+P(x|z)=\frac{P(z|x)P(x)}{P(z)}∝P (z|x) P (x) .</script><p>$\frac{P(z|x)P(x)}{P(z)}$称为后验估计，$P (z|x)$ 称为似然，另一部分$ P (x)$ 称为先验。</p>
+<p>直接求后验分布是困难的，但是求一个状态最优估计，使得在该状态下，后验概率最大化（Maximize a Posterior，MAP），则是可行的：</p>
+<script type="math/tex; mode=display">
+x^∗_{MAP} = arg max P (x|z) = arg max P (z|x)P (x).</script><p>但是当我们不知道机器人位姿大概在什么地方，此时就没有了先验,那么，可以求解$x $的最大似然估计（Maximize Likelihood Estimation, MLE）：</p>
+<script type="math/tex; mode=display">
+x^∗_{MLE} = arg max P (z|x)</script><p>最大似然估计的含义就是：相机在什么样的状态下（这里指集合$x$即为相机位姿$x_{k}$以及路标$y_{j}$），最可能产生当前观测到的数据$z_{k,j}$。</p>
+<p><strong>所以我们需要优化的内容就是：求解最优的$x_k , y_j$，使得观测方程带来的最小误差，此时就是求$x$（或者是说$x_k , y_j$）的最大似然然估计。</strong></p>
+<h2 id="最小二乘问题"><a href="#最小二乘问题" class="headerlink" title="最小二乘问题"></a>最小二乘问题</h2><p>只考虑观测方程：</p>
+<script type="math/tex; mode=display">
+z_{k,j}=h(y_j,x_k)+v_{k,j}</script><p>由于我们假设了噪声项 $v_k ∼ N (0, Q)$，所以观测数据的条件概率为：</p>
+<script type="math/tex; mode=display">
+P (z_{j,k} |x_k , y_j ) = N (h(y_j , x_k ), Q) .</script><p>我们的目标就是最大化$x_k , y_j$，使得该状态下最可能产生当前观测到的数据$z_{k,j}$。</p>
+<p>考虑一个任意的高维高斯分布 $x ∼ N (µ, Σ)$，它的概率密度函数展开形式为:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p(x)=\frac{1}{\sqrt{(2\pi)^N det(Σ)} }exp(−(x−\mu)Σ^{-1} (x−\mu))
+\end{align*}</script><p>取负对数:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+-ln(p(x))=\frac{1}{2}ln((2\pi)^N det(Σ))+\frac{1}{2}(x−\mu)^TΣ^{-1} (x−\mu)
+\end{align*}</script><p>对原分布求最大化相当于对负对数求最小化。在最小化上式的 $x$ 时，第一项与 $x $无关，可以略去于是，只要最小化右侧的二次型项。带入SLAM观测模型：</p>
+<script type="math/tex; mode=display">
+x^*=argmin((z_{k,j}-h(x_k,y_j))^TQ^{-1}_{k,j}(z_{k,j}-h(x_k,y_j)))</script><p>定义：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+e_{v,k}&=x_k-f(x_{k-1},u_k)\\
+e_{u,j,k}&=z_{k,j}-h(x_k,y_j)
+\end{align*}</script><p>考虑运动与观测方程结合来看，我们求解的就是总的误差的平方和：</p>
+<script type="math/tex; mode=display">
+J(x)=\sum_ke^T_{v,k}R^{-1}e_{v,k}+\sum_k\sum_je^T_{y,k,j}Q^{-1}e_{y,k,j}</script><p>这就得到了一个总体意义下的最小二乘问题（Least Square Problem）。我们明白它的最优解等价于状态的最大似然估计。直观来讲，由于噪声的存在，当我们把估计的轨迹与地图代入 SLAM 的运动、观测方程中时，它们并不会完美的成立。这时候怎么办呢？我们把状态的估计值进行微调，使得整体的误差下降一些。当然这个下降也有限度，它一般会到达一个极小值。这就是一个典型非线性优化的过程。</p>
+<h2 id="非线性函数线性化"><a href="#非线性函数线性化" class="headerlink" title="非线性函数线性化"></a>非线性函数线性化</h2><p>在非线性优化的过程中，由于高斯分布经过非线性映射后不会再符合高斯分布，因此，一般我们对非线性进行线性化，这里用到泰勒级数：</p>
+<p>泰勒级数展开式：对于函数$f(x)$在任意一点$x_0$处展开</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+\frac{f^\prime(x_0)}{1!}(x-x_0)+\frac{f^{\prime \prime}(x_0)}{2!}(x-x_0)^2+...+\frac{f^{(n)}(x_0)}{1!}(x-x_0)^{n}</script><p>一般当$x-x_0\rightarrow0$时，则$(x-x_0)^{n}\rightarrow0,n\geq 2$，只取一阶泰勒：</p>
+<script type="math/tex; mode=display">
+f(x)=f(x_0)+f^\prime(x_0)(x-x_0)</script><p>如果对于二维以上的，我们的一阶泰勒展开如下：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+f(x，y)&=f(x_0)+\frac{\partial f}{\partial x}|_{x=x_0}(x-x_0)\\
+&=f(x_0)+J(x)(x-x_0)
+\end{align*}</script><p>这里的雅克比矩阵代表的就是$f(x)$对于$x$的偏导数。</p>
+<h1 id="求解非线性最小二乘"><a href="#求解非线性最小二乘" class="headerlink" title="求解非线性最小二乘"></a>求解非线性最小二乘</h1><p>对于上文，我们知道通过把最大似然估计问题转化为最小化其负对数的问题，其实就是求解一个非线性函数的最小值的问题，我们暂且考虑一个问题，我们有一个非线性的函数$f(x)$，如何求解它的最小值？</p>
+<p>这就是一个简单的最小二乘问题：</p>
+<script type="math/tex; mode=display">
+\underset{x}{min}\frac{1}{2}\parallel f(x) \parallel^2</script><p>这里自变量 $x\in \mathbb R^n$ ，$f $是任意一个非线性函数，我们设它有 $m $维：$f (x) \in \mathbb R^m$ 。</p>
+<p>一般求解就是类似于二元函数求极值，对$x$求导，使得$\frac{df}{dx}=0$，即可得到$f(x)$的极值，但是也不是绝对的，我们知道这个点可能是极大值、极小值也可能是鞍点，因此需要比较所有使得$\frac{df}{dx}=0$的自变量对应的函数值$f(x)$.</p>
+<p>但是在SLAM中，$f(x)$将是一个复杂的非线性方程，所以一般我们使用迭代的方法，从一个初始值出发，不断地更新当前的优化变量，使目标函数下降，具体步骤如下：</p>
+<ul>
+<li>给定某个初始值$ x_0$</li>
+<li>对于第$k$次迭代，寻找一个增量$\Delta x_k$，使得$\parallel f(x_k+\Delta x_k)\parallel^2_2$达到极小值。</li>
+<li>若$\Delta x_k$足够小，则停止</li>
+<li>否则，令$x_{k+1}=x_k+\Delta x_k$，返回第二步。</li>
+</ul>
+<p>这让求解导函数为零的问题，变成了一个不断寻找梯度并下降的过程。直到某个时刻增量非常小，无法再使函数下降。此时算法收敛，目标达到了一个极小，我们完成了寻找极小值的过程。在这个过程中，我们只要找到迭代点的梯度方向即可，而无需寻找全局导函数为零的情况。</p>
+<hr>
+<p><strong>如何寻找$\Delta x_k$?</strong></p>
+<h2 id="一阶和二阶梯度法"><a href="#一阶和二阶梯度法" class="headerlink" title="一阶和二阶梯度法"></a>一阶和二阶梯度法</h2><p>我们之前介绍过非线性的线性化方法，我们可以将一个非线性函数在某个点附件进行泰勒展开。</p>
+<p>比如：对于增量方程在$x$附近进行泰勒展开：</p>
+<script type="math/tex; mode=display">
+\parallel f(x+\Delta x)\parallel^2_2\approx\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x</script><p>这里$J$是 $\parallel f(x)\parallel^2$ 关于$ x $的导数（雅可比矩阵），而$ H $则是二阶导数（海塞（Hessian）矩阵）。保留一阶二阶分别就对应了一阶梯度法和二阶梯度法。</p>
+<h3 id="一阶梯度法"><a href="#一阶梯度法" class="headerlink" title="一阶梯度法"></a>一阶梯度法</h3><script type="math/tex; mode=display">
+\Delta x^*=argmin\parallel f(x)\parallel^2_2+J(x)\Delta x</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
+<script type="math/tex; mode=display">
+\Delta x^*=-J^T(x)</script><p>当然，我们还需要该方向上取一个步长$ λ$，求得最快的下降方式。这种方法被称为<strong>最速下降法</strong>。但是它本身也有缺点：最速下降法过于贪心，容易走出锯齿路线，反而增加了迭代次数。</p>
+<h3 id="二阶梯度-牛顿法"><a href="#二阶梯度-牛顿法" class="headerlink" title="二阶梯度(牛顿法)"></a>二阶梯度(牛顿法)</h3><script type="math/tex; mode=display">
+\Delta x^*=argmin\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
+<script type="math/tex; mode=display">
+H\Delta x=-J^T.</script><p>但是牛顿法需要计算目标函数的 $H $矩阵，这在问题规模较大时非常困难，我们通常倾向于避免$ H $的计算。</p>
+<h2 id="Gauss-Newton"><a href="#Gauss-Newton" class="headerlink" title="Gauss-Newton"></a>Gauss-Newton</h2><p>Gauss Newton 是最优化算法里面最简单的方法之一。它的思想是$f(x)$而不是$f(x)^2$在$x$处进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+f(x+\Delta x)\approx f(x)+J(x)\Delta x</script><p>这里$ J (x)$ 为$ f (x) $关于$ x$ 的导数，实际上是一个$ m × n$ 的矩阵，也是一个雅可比矩阵。</p>
+<p>当前的目标是为了寻找下降矢量 $\Delta x$，使得$ f(x+\Delta x)$达到最小。为了求 $\Delta x$，我们需要解一个线性的最小二乘问题：</p>
+<script type="math/tex; mode=display">
+\Delta x^*=argmin\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2</script><p>对上式平方项进行展开：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2&=\frac{1}{2}(f(x)+J(x)\Delta x)^T(f(x)+J(x)\Delta x)\\
+&=\frac{1}{2}(\parallel f(x)\parallel^2_2+2f(x)^TJ(x)\Delta x+\Delta x^TJ(x)^TJ(x)\Delta x)\\
+
+\end{align*}</script><p>求上式关于 $\Delta x$ 的导数，并令其为零：</p>
+<script type="math/tex; mode=display">
+2J(x)^Tf(x)+2J(x)^TJ(x)\Delta x=0</script><p>化简：</p>
+<script type="math/tex; mode=display">
+J(x)^TJ(x)\Delta x=-J(x)^Tf(x)</script><p>要求解的变量是  $\Delta x$，因此这是一个线性方程组，我们称它为增量方程，也可以称为<strong>高斯牛顿方程 (Gauss Newton equations)</strong> 或者<strong>正规方程 (Normal equations)</strong>。我们把左边的系数定义为 $H$，右边定义为 $g$，那么上式变为：</p>
+<script type="math/tex; mode=display">
+H \Delta x=g</script><p>对比牛顿法可见，Gauss-Newton 用$J(x)^TJ(x)$作为牛顿法中二阶 Hessian 矩阵的近似，从而省略了计算 $H $的过程。求解增量方程是整个优化问题的核心所在。</p>
+<p>Gauss Newton 求解步骤：</p>
+<ul>
+<li>给定初始值$x_0$</li>
+<li>对于第$k$次迭代，求出当前的雅可比矩阵$J(x_k)和误差$$f(x_k)$</li>
+<li>求解增量方程：$H \Delta x=g$</li>
+<li>若$\Delta x_k$足够小，则停止。否则，令$x_{k+1}=x_k+\Delta x_k$，返回步骤2.</li>
+</ul>
+<p>整个步骤中，增量方程的求解占据着主要地位。原则上，它要求我们所用的近似 $H$ 矩阵是可逆的（而且是正定的），但实际数据中计算得到的 $J(x)^TJ(x)$却只有半正定性。也就是说，在使用 Gauss Newton 方法时，可能出现$J(x)^TJ(x)$为<strong>奇异矩阵</strong>或者<strong>病态 (ill-condition)</strong> 的情况，此时增量的稳定性较差，导致算法不收敛。</p>
+<p>更严重的是，就算我们假设$ H $非奇异也非病态，如果我们求出来的步长$ ∆x $太大，也会导致我们采用的局部近似不够准确，这样一来我们甚至都无法保证它的迭代收敛，哪怕是让目标函数变得更大都是有可能的。</p>
+<h2 id="Levenberg-Marquadt"><a href="#Levenberg-Marquadt" class="headerlink" title="Levenberg-Marquadt"></a>Levenberg-Marquadt</h2><h1 id="BA求解"><a href="#BA求解" class="headerlink" title="BA求解"></a>BA求解</h1><h2 id="投影模型"><a href="#投影模型" class="headerlink" title="投影模型"></a>投影模型</h2><p>从一个世界坐标系中的点 p 出发，把相机的内外参数和畸变都考虑进来，最后投影成像素坐标，一共需要如下几个步骤：</p>
+<ol>
+<li>首先，把世界坐标转换到相机坐标，这里将用到相机外参数$ (R, t)$：</li>
+</ol>
+<script type="math/tex; mode=display">
+P^\prime=Rp+t=[X^\prime,Y^\prime,Z^\prime]^T</script><ol>
+<li>然后，将 $P^\prime$ 投至归一化平面，得到归一化坐标：</li>
+</ol>
+<script type="math/tex; mode=display">
+P_c=[u_c,v_c,1]^T=[\frac{X^\prime}{Z^\prime},\frac{Y^\prime}{Z^\prime},1]^T</script><ol>
+<li>对归一化坐标去畸变，得到去畸变后的坐标。这里暂时只考虑径向畸变：</li>
+</ol>
+<script type="math/tex; mode=display">
+u_c^\prime=u_c(1+k_1r_c^2+k_2r_c^4)\\
+v_c^\prime=v_c(1+k_1r_c^2+k_2r_c^4)\</script><ol>
+<li>最后，根据内参模型，计算像素坐标：</li>
+</ol>
+<script type="math/tex; mode=display">
+u_s=f_xu_c^\prime+c_x\\
+v_s=f_yv_c^\prime+c_y</script><p>对于观测方程：</p>
+<script type="math/tex; mode=display">
+z_{k,j}=h(y_j,x_k)+v_{k,j}</script><p>这里的 $x$ 指代此时相机的位姿，即外参 $R, t$，它对应的李代数为 $ξ$。路标 $y$ 即这里的三维点 $p$，而观测数据则是像素坐标$z = [u_s , v_s ]^T $。</p>
+<p><img src="/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/image-20220405145736323.png" alt="image-20220405145736323"></p>
+<p>以最小二乘的角度来考虑，那么可以列写关于此次观测的误差：</p>
+<script type="math/tex; mode=display">
+e=z-h(ξ,p)</script><p>设 $z_{ij}$为在位姿 $ξ_i $处观察路标 $p_j $产生的数据，那么整体的损失函数（Cost Function）为：</p>
+<script type="math/tex; mode=display">
+\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}\parallel^2=\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel z_{ij}-h(ξ_i,p_j) \parallel^2</script><p>对这个最小二乘进行求解，相当于对位姿和路标同时作了调整，也就是所谓的$BA$。</p>
+<h2 id="BA求解-1"><a href="#BA求解-1" class="headerlink" title="BA求解"></a>BA求解</h2><p>在整体 $BA$目标函数上，我们必须把自变量定义成所有待优化的变量：</p>
+<script type="math/tex; mode=display">
+x=[\xi_1,...,\xi_m,p_1,...,p_n]^T</script><p>相应的，增量方程中的$ ∆x $则是对整体自变量的增量。在这个意义下，当我们给自变量一个增量时，目标函数变为：</p>
+<script type="math/tex; mode=display">
+\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}+F_{ij}\Delta\xi_i+E_{ij}\Delta p_i \parallel^2</script><p>其中$ F_{ij} $表示整个代价函数在当前状态下对<strong>相机姿态</strong>的偏导数，而 $E_{ij}$ 表示该函数对<strong>路标点位置</strong>的偏导。</p>
+<p><strong>观测相机方程关于相机位姿的导数矩阵：</strong></p>
+<script type="math/tex; mode=display">
+\begin{align*}
+J&=-
+\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
+&-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
+\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+&-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&\frac{f_yX^′}{Z^{′}}
+\end{bmatrix}\\
+\end{align*}</script><p><strong>观测相机方程关于特征点的导数矩阵</strong></p>
+<script type="math/tex; mode=display">
+J=\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+\end{bmatrix}R</script><p>现在，把相机位姿变量放在一起：</p>
+<script type="math/tex; mode=display">
+x_c=[\xi_1,\xi_2,...,\xi_1]\in\mathbb{R}^{6m}</script><p>并把空间点的变量也放在一起：</p>
+<script type="math/tex; mode=display">
+x_p=[p_1,p_2,...,p_n]^T\in \mathbb{R}^{3n}</script><p>目标函数变为：</p>
+<script type="math/tex; mode=display">
+\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e+F\Delta x_c+E_\Delta x_p \parallel^2</script><p>需要注意的是，该式从一个由<strong>很多个小型二次项之和</strong>，变成了一个更整体的样子。这里的雅可比矩阵 $E $和$ F$ 必须是整体目标函数对整体变量的导数，它将是一个很大块的矩阵，而里头每个小分块，需要由每个误差项的导数 $F_{ij} $和 $E_{ij}$ “拼凑”起来。然后，无论我们使用 $G-N$ 还是$ L-M $方法，最后都将面对增量线性方程：</p>
+<script type="math/tex; mode=display">
+H\Delta x = g</script><p>如果是高斯牛顿，$H$ 取$J^TJ$；列文伯格是 $J^T J + λI $的形式</p>
+<p>由于我们把变量归类成了位姿和空间点两种，所以雅可比矩阵可以分块为：</p>
+<script type="math/tex; mode=display">
+J=
+\begin{bmatrix}
+F & E
+\end{bmatrix}</script><p>其中$F$是$2 × 6$的矩阵，$E$是$2 × 3$的矩阵.</p>
+<p>以 G-N 为例，则 H 矩阵为：</p>
+<script type="math/tex; mode=display">
+H=J^TJ=
+\begin{bmatrix}
+F^TF & F^TE\\
+E^TF & E^TE
+\end{bmatrix}</script><p>在SLAM中我们会考虑H矩阵的稀疏性，进而加速BA的求解。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/20220404/SLAM%E4%B8%AD%E7%9A%84%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" title="SLAM中的非线性优化">https://lukeyalvin.top/20220404/SLAM中的非线性优化数学推导/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/20220402/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8%E7%9A%84%E6%95%B0%E5%AD%A6%E6%8E%A8%E5%AF%BC/" rel="prev" title="卡尔曼滤波的数学推导">
+      <i class="fa fa-chevron-left"></i> 卡尔曼滤波的数学推导
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/20220404/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" rel="next" title="线性最小二乘">
+      线性最小二乘 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%90%E5%87%BA"><span class="nav-text">提出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B"><span class="nav-text">模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E4%BC%98%E5%8C%96%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">需要优化什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E9%97%AE%E9%A2%98"><span class="nav-text">最小二乘问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E7%BA%BF%E6%80%A7%E5%8C%96"><span class="nav-text">非线性函数线性化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98"><span class="nav-text">求解非线性最小二乘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E5%92%8C%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶和二阶梯度法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶梯度法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6-%E7%89%9B%E9%A1%BF%E6%B3%95"><span class="nav-text">二阶梯度(牛顿法)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gauss-Newton"><span class="nav-text">Gauss-Newton</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Levenberg-Marquadt"><span class="nav-text">Levenberg-Marquadt</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3"><span class="nav-text">BA求解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-text">投影模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3-1"><span class="nav-text">BA求解</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">363k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:30</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>
