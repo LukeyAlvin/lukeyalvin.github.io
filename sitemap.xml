@@ -509,20 +509,6 @@
   </url>
   
   <url>
-    <loc>https://lukeyalvin.top/tags/c/</loc>
-    <lastmod>2022-04-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://lukeyalvin.top/tags/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2022-04-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
     <loc>https://lukeyalvin.top/tags/GitHub/</loc>
     <lastmod>2022-04-26</lastmod>
     <changefreq>weekly</changefreq>
@@ -531,6 +517,20 @@
   
   <url>
     <loc>https://lukeyalvin.top/tags/Hexo/</loc>
+    <lastmod>2022-04-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://lukeyalvin.top/tags/c/</loc>
+    <lastmod>2022-04-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://lukeyalvin.top/tags/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2022-04-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -672,14 +672,14 @@
   </url>
   
   <url>
-    <loc>https://lukeyalvin.top/categories/c/</loc>
+    <loc>https://lukeyalvin.top/categories/%E7%BB%8F%E9%AA%8C/</loc>
     <lastmod>2022-04-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://lukeyalvin.top/categories/%E7%BB%8F%E9%AA%8C/</loc>
+    <loc>https://lukeyalvin.top/categories/c/</loc>
     <lastmod>2022-04-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
