@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="$ICP:$迭代最近点$（Iterative Closest Point）$求解。读者应该注意到，$3D-3D $位姿估计问题中，并没有出现相机模型，也就是说，仅考虑两组 $3D $点之间的变换时，和相机并没有关系。因此，在激光 $SLAM $中也会碰到 $ICP$，不过由于激光数据特征不够丰富，我们无从知道两个点集之间的匹配关系，只能认为距离最">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ch7_求解ICP并使用BA优化">
+<meta property="og:url" content="https://lukeyalvin.top/posts/12311.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="$ICP:$迭代最近点$（Iterative Closest Point）$求解。读者应该注意到，$3D-3D $位姿估计问题中，并没有出现相机模型，也就是说，仅考虑两组 $3D $点之间的变换时，和相机并没有关系。因此，在激光 $SLAM $中也会碰到 $ICP$，不过由于激光数据特征不够丰富，我们无从知道两个点集之间的匹配关系，只能认为距离最">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-26T08:31:15.472Z">
+<meta property="article:modified_time" content="2022-04-26T02:57:05.729Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="SLAM实践">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lukeyalvin.top/posts/12311.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ch7_求解ICP并使用BA优化 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/12311.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ch7_求解ICP并使用BA优化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-26 16:31:15" itemprop="dateCreated datePublished" datetime="2022-03-26T16:31:15+08:00">2022-03-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-26 10:57:05" itemprop="dateModified" datetime="2022-04-26T10:57:05+08:00">2022-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/12311.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/12311.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>$ICP:$迭代最近点$（Iterative Closest Point）$求解。读者应该注意到，$3D-3D $位姿估计问题中，并没有出现相机模型，也就是说，仅考虑两组 $3D $点之间的变换时，和相机并没有关系。因此，在激光 $SLAM $中也会碰到 $ICP$，不过由于激光数据特征不够丰富，我们无从知道两个点集之间的匹配关系，只能认为距离最近的两个点为同一个，所以这个方法称为迭代最近点。而在视觉中，特征点为我们提供了较好的匹配关系，所以整个问题就变得更简单了。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>和 $PnP$ 类似，$ICP $的求解也分为两种方式：利用线性代数的求解（主要是$ SVD$），以及利用非线性优化方式的求解（类似于 $Bundle Adjustment$）。</p>
+<h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
+<script type="math/tex; mode=display">
+P = {p_1 , . . . , p_n } \\ P^′= {p^′_1 , . . . , p^′_n }</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
+<script type="math/tex; mode=display">
+∀i, p_i = Rp^′_i + t.</script><p>定义第 $i$对点的误差项：</p>
+<script type="math/tex; mode=display">
+e_i=p_i - (Rp^′_i + t).</script><p>构建最小二乘问题:</p>
+<script type="math/tex; mode=display">
+\underset{R,t}{min}J=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - (Rp^′_i + t)) \parallel^2_2</script><h3 id="求解最小二乘"><a href="#求解最小二乘" class="headerlink" title="求解最小二乘"></a>求解最小二乘</h3><p>首先，定义两组点的质心(注意质心是没有下标)：</p>
+<script type="math/tex; mode=display">
+p=\frac{1}{n}\sum^n_{i=1}(p_i)，p^{\prime}=\frac{1}{n}\sum^n_{i=1}(p^{\prime}_i)</script><p>在误差函数中，我们作如下的处理：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{1}{2}\sum^n_{i=1}\parallel (p_i - (Rp^{\prime}_i + t)) \parallel^2
+&=\frac{1}{2}\sum^n_{i=1}\parallel p_i - Rp^{\prime}_i - t-p+Rp^{\prime}+p-Rp^{\prime} \parallel^2
+\\&= \frac{1}{2}\sum^n_{i=1}\parallel (p_i -p- R(p^{\prime}_i-p^{\prime}) )+(p- Rp^{\prime}+t) \parallel^2
+\\&= \frac{1}{2}\sum^n_{i=1}(\parallel p_i -p- R(p^{\prime}_i-p^{\prime}) \parallel^2+
+\parallel p- Rp^{\prime}+t\parallel^2
+\\&+2(p_i -p-R(p^{\prime}_i-p^{\prime})^T(p-Rp^{\prime}-t))
+\end{align*}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_i-p-R(p^{\prime}_i-p^{\prime})&=(Rp^{\prime}_i+t)-(Rp^{\prime}+t)-R(p^{\prime}_i-p^{\prime})\\
+&=Rp^{\prime}_i+t-Rp^{\prime}-t-Rp^{\prime}_i+Rp^{\prime}\\
+&=0
+\end{align*}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\underset{R,t}{min}J&=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - (Rp^′_i + t)) \parallel^2\\
+&=\frac{1}{2}\sum^n_{i=1}\parallel p_i -p- R(p^{\prime}_i-p^{\prime}) \parallel^2+
+\parallel p- Rp^{\prime}+t\parallel^2
+\end{align*}</script><p>仔细观察左右两项，我们发现左边只和旋转矩阵 R 相关，而右边既有 R 也有 t，但只和质心相关。只要我们获得了 R，令第二项为零就能得到 t。于是，ICP 可以分为以下三个步骤求解：</p>
+<p>1.计算两组点的质心位置 $p$, $p^{\prime}$，然后计算每个点的去质心坐标：</p>
+<script type="math/tex; mode=display">
+q_i = p_i − p,\\
+q_i^{\prime} = p_i^{\prime} − p^{\prime}  .</script><p>2.根据以下优化问题计算旋转矩阵：</p>
+<script type="math/tex; mode=display">
+R^{*}=arg\underset{R}{min}\frac{1}{2}\sum^n_{i=1}\parallel q_i - Rq_i^{\prime} \parallel^2</script><p>3.根据第二步的 $R$，计算 $t$：</p>
+<script type="math/tex; mode=display">
+t^∗ = p − Rp^{\prime} .</script><p>计算$R$：</p>
+<script type="math/tex; mode=display">
+\frac{1}{2}\sum^n_{i=1}\parallel q_i - Rq_i^{\prime} \parallel^2
+=\frac{1}{2}\sum^n_{i=1}q_i^{T}q_i+q_i^{\prime T}R^TRq_i^{\prime}-2q^T_iRq_i^{\prime}</script><p>第一项和$ R$ 无关，第二项由于 $R^T R = I$，亦与 $R $无关。因此，实际上优化目标函数变为：</p>
+<script type="math/tex; mode=display">
+\sum^n_{i=1}-q_i^{T}Rq_i^{\prime}=\sum^n_{i=1}-tr(Rq_i^{\prime}q_i^{T})=-tr(R\sum^n_{i=1}q_i^{\prime}q_i^{T})</script><p>定义：</p>
+<script type="math/tex; mode=display">
+W=\sum^n_{i=1}q_i^{\prime}q_i^{T}</script><p>$W $是一个$ 3 × 3 $的矩阵，对$ W$ 进行 $SVD$ 分解，得：</p>
+<script type="math/tex; mode=display">
+W = UΣV^T</script><p>$Σ $为奇异值组成的对角矩阵，对角线元素从大到小排列，而 $U $和$ V$ 为正交矩阵。当 $W$ 满秩时，$R$ 为：</p>
+<script type="math/tex; mode=display">
+R = UV^T</script><p>解得 $R$后,按照$t^∗ = p − Rp^{\prime} .$求解 t 即可</p>
+<h2 id="非线性优化方法"><a href="#非线性优化方法" class="headerlink" title="非线性优化方法"></a>非线性优化方法</h2><p>求解$ ICP$ 的另一种方式是使用非线性优化，以迭代的方式去找最优值。该方法和我们前面讲述的 $PnP $非常相似。以李代数表达位姿时，目标函数可以写成：</p>
+<script type="math/tex; mode=display">
+\underset{\xi}{min}=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - exp(\xi^{\land})p^{\prime}_i) \parallel^2_2</script><p>单个误差项关于位姿导数已经在前面推导过了，使用李代数扰动模型即可:</p>
+<script type="math/tex; mode=display">
+\frac{\partial e}{\partial \delta \xi}=-(exp(\xi^{\land}p^{\prime}_i))^{⊙}</script><p>用非线性优化来计算$ ICP$不仅考虑相机的位姿，同时会优化 $3D$点的空间位置。对我们来说，RGB-D 相机每次可以观测到路标点的三维位置，从而产生一个$ 3D$ 观测数据。不过，由于$ g2o/sba$ 中没有提供 $3D$ 到 $3D$ 的边，而我们又想使用$ g2o/sba $中李代数实现的位姿节点，所以最好的方式是自定义一种这样的边，并向$ g2o$ 提供解析求导方式。</p>
+<h1 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h1><h2 id="1-特征点匹配"><a href="#1-特征点匹配" class="headerlink" title="1. 特征点匹配"></a>1. 特征点匹配</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1.特征点匹配</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">find_feature_matches</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;img_1,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;img_2,</span></span></span><br><span class="line"><span class="params"><span class="function">    std::vector&lt;KeyPoint&gt; &amp;keypoints_1,</span></span></span><br><span class="line"><span class="params"><span class="function">    std::vector&lt;KeyPoint&gt; &amp;keypoints_2,</span></span></span><br><span class="line"><span class="params"><span class="function">    std::vector&lt;DMatch&gt; &amp;matches)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//-- 初始化</span></span><br><span class="line">    Mat descriptors_1, descriptors_2;</span><br><span class="line"></span><br><span class="line">    Ptr&lt;FeatureDetector&gt; detector = ORB::<span class="built_in">create</span>();</span><br><span class="line">    Ptr&lt;DescriptorExtractor&gt; descriptor = ORB::<span class="built_in">create</span>();</span><br><span class="line">    Ptr&lt;DescriptorMatcher&gt; matcher = DescriptorMatcher::<span class="built_in">create</span>(<span class="string">&quot;BruteForce-Hamming&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//-- 第一步:检测 Oriented FAST 角点位置</span></span><br><span class="line">    detector-&gt;<span class="built_in">detect</span>(img_1, keypoints_1);</span><br><span class="line">    detector-&gt;<span class="built_in">detect</span>(img_2, keypoints_2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//-- 第二步:根据角点位置计算 BRIEF 描述子</span></span><br><span class="line">    descriptor-&gt;<span class="built_in">compute</span>(img_1, keypoints_1, descriptors_1);</span><br><span class="line">    descriptor-&gt;<span class="built_in">compute</span>(img_2, keypoints_2, descriptors_2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离</span></span><br><span class="line">    vector&lt;DMatch&gt; match;</span><br><span class="line">    matcher-&gt;<span class="built_in">match</span>(descriptors_1, descriptors_2, match);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//-- 第四步:匹配点对筛选</span></span><br><span class="line">    <span class="keyword">double</span> min_dist = <span class="number">10000</span>, max_dist = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">//找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptors_1.rows; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> dist = match[i].distance;</span><br><span class="line">        <span class="keyword">if</span> (dist &lt; min_dist)</span><br><span class="line">            min_dist = dist;</span><br><span class="line">        <span class="keyword">if</span> (dist &gt; max_dist)</span><br><span class="line">            max_dist = dist;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;max_dist: &quot;</span> &lt;&lt; max_dist &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;min_dist: &quot;</span> &lt;&lt; min_dist &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//当描述子之间的距离大于两倍的最小距离时,即认为匹配有误.但有时候最小距离会非常小,设置一个经验值30作为下限.</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; descriptors_1.rows; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (match[i].distance &lt;= <span class="built_in">max</span>(<span class="number">2</span> * min_dist, <span class="number">30.0</span>))</span><br><span class="line">        &#123;</span><br><span class="line">            matches.<span class="built_in">push_back</span>(match[i]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-建立3D点"><a href="#2-建立3D点" class="headerlink" title="2.建立3D点"></a>2.建立3D点</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">build_3d_points</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;depth_1,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;depth_2,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;K,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;KeyPoint&gt; &amp;keypoints_1,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;KeyPoint&gt; &amp;keypoints_2,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;DMatch&gt; matches,</span></span></span><br><span class="line"><span class="params"><span class="function">    vector&lt;Point3f&gt; &amp;pts1,</span></span></span><br><span class="line"><span class="params"><span class="function">    vector&lt;Point3f&gt; &amp;pts2)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//提取特征点的深度值：</span></span><br><span class="line">    <span class="keyword">for</span> (DMatch m : matches)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//取得匹配点的深度，queryIdx(表示匹配点的索引)查询描述子索引，pt关键点的坐标 (y行地址)[x列地址]</span></span><br><span class="line">        ushort d1 = depth_1.ptr&lt;<span class="keyword">unsigned</span> <span class="keyword">short</span>&gt;(<span class="built_in"><span class="keyword">int</span></span>(keypoints_1[m.queryIdx].pt.y))[<span class="built_in"><span class="keyword">int</span></span>(keypoints_1[m.queryIdx].pt.x)];</span><br><span class="line">        ushort d2 = depth_2.ptr&lt;<span class="keyword">unsigned</span> <span class="keyword">short</span>&gt;(<span class="built_in"><span class="keyword">int</span></span>(keypoints_2[m.trainIdx].pt.y))[<span class="built_in"><span class="keyword">int</span></span>(keypoints_2[m.trainIdx].pt.x)];</span><br><span class="line">        <span class="keyword">if</span> (d1 == <span class="number">0</span> || d2 == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        Point2d p1 = <span class="built_in">pixel2cam</span>(keypoints_1[m.queryIdx].pt, K);<span class="comment">// p1:(X/Z,Y/Z,1)</span></span><br><span class="line">        Point2d p2 = <span class="built_in">pixel2cam</span>(keypoints_2[m.trainIdx].pt, K);<span class="comment">// p2:(X/Z,Y/Z,1)</span></span><br><span class="line">        <span class="keyword">float</span> dd1 = <span class="built_in"><span class="keyword">float</span></span>(d1) / <span class="number">5000.0</span>;</span><br><span class="line">        <span class="keyword">float</span> dd2 = <span class="built_in"><span class="keyword">float</span></span>(d2) / <span class="number">5000.0</span>;</span><br><span class="line">        <span class="comment">// 将相机归一化坐标转换为相机坐标系下的3D组坐标</span></span><br><span class="line">        pts1.<span class="built_in">push_back</span>(<span class="built_in">Point3f</span>(p1.x * dd1, p1.y * dd1, dd1));<span class="comment">// (X,Y,Z)第一帧图像的3D坐标（相机坐标系下）</span></span><br><span class="line">        pts2.<span class="built_in">push_back</span>(<span class="built_in">Point3f</span>(p2.x * dd2, p2.y * dd2, dd2));<span class="comment">// (X,Y,Z)第二帧图像的3D坐标（相机坐标系下）</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;3d-3d pairs: &quot;</span> &lt;&lt; pts1.<span class="built_in">size</span>() &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-SVD求解ICP"><a href="#3-SVD求解ICP" class="headerlink" title="3.SVD求解ICP"></a>3.SVD求解ICP</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 3.SVD求解ICP</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">pose_estimation_3d3d</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;Point3f&gt; &amp;pts1,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;Point3f&gt; &amp;pts2,</span></span></span><br><span class="line"><span class="params"><span class="function">    Mat &amp;R, Mat &amp;t)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Point3f p1, p2;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> N = pts1.<span class="built_in">size</span>(); <span class="comment">// N = 72;</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        p1 += pts1[i]; <span class="comment">// p1 为pts1坐标各维之和</span></span><br><span class="line">        p2 += pts2[i]; <span class="comment">// p2 为pts2坐标各维之和</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    p1 = <span class="built_in">Point3f</span>(<span class="built_in">Vec3f</span>(p1) / N); <span class="comment">// 取平均得到质心p1</span></span><br><span class="line">    p2 = <span class="built_in">Point3f</span>(<span class="built_in">Vec3f</span>(p2) / N); <span class="comment">// 取平均得到质心p2</span></span><br><span class="line"></span><br><span class="line">    <span class="function">vector&lt;Point3f&gt; <span class="title">q1</span><span class="params">(N)</span>, <span class="title">q2</span><span class="params">(N)</span></span>; <span class="comment">// remove the center</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        q1[i] = pts1[i] - p1; <span class="comment">// 计算每个点的去质心坐标q1</span></span><br><span class="line">        q2[i] = pts2[i] - p2; <span class="comment">// 计算每个点的去质心坐标q2</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// compute q1*q2^T</span></span><br><span class="line">    Eigen::Matrix3d W = Eigen::Matrix3d::<span class="built_in">Zero</span>();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// w = sum(q1*q2^T)</span></span><br><span class="line">        W += Eigen::<span class="built_in">Vector3d</span>(q1[i].x, q1[i].y, q1[i].z) * Eigen::<span class="built_in">Vector3d</span>(q2[i].x, q2[i].y, q2[i].z).<span class="built_in">transpose</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;W=&quot;</span> &lt;&lt; W &lt;&lt; endl;</span><br><span class="line">    <span class="comment">// 对W进行SVD分解</span></span><br><span class="line">    <span class="function">Eigen::JacobiSVD&lt;Eigen::Matrix3d&gt; <span class="title">svd</span><span class="params">(W, Eigen::ComputeFullU | Eigen::ComputeFullV)</span></span>;</span><br><span class="line">    Eigen::Matrix3d U = svd.<span class="built_in">matrixU</span>(); <span class="comment">// 正交矩阵U</span></span><br><span class="line">    Eigen::Matrix3d V = svd.<span class="built_in">matrixV</span>(); <span class="comment">// 正交矩阵V</span></span><br><span class="line">    <span class="keyword">if</span> (U.<span class="built_in">determinant</span>() * V.<span class="built_in">determinant</span>() &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> x = <span class="number">0</span>; x &lt; <span class="number">3</span>; ++x)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">U</span>(x, <span class="number">2</span>) *= <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;U=&quot;</span> &lt;&lt; U &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;V=&quot;</span> &lt;&lt; V &lt;&lt; endl;</span><br><span class="line">    Eigen::Matrix3d R_ = U * (V.<span class="built_in">transpose</span>());</span><br><span class="line">    Eigen::Vector3d t_ = Eigen::<span class="built_in">Vector3d</span>(p1.x, p1.y, p1.z) - R_ * Eigen::<span class="built_in">Vector3d</span>(p2.x, p2.y, p2.z);</span><br><span class="line"></span><br><span class="line">    R = (Mat_&lt;<span class="keyword">double</span>&gt;(<span class="number">3</span>, <span class="number">3</span>) &lt;&lt; </span><br><span class="line">         <span class="built_in">R_</span>(<span class="number">0</span>, <span class="number">0</span>), <span class="built_in">R_</span>(<span class="number">0</span>, <span class="number">1</span>), <span class="built_in">R_</span>(<span class="number">0</span>, <span class="number">2</span>),</span><br><span class="line">         <span class="built_in">R_</span>(<span class="number">1</span>, <span class="number">0</span>), <span class="built_in">R_</span>(<span class="number">1</span>, <span class="number">1</span>), <span class="built_in">R_</span>(<span class="number">1</span>, <span class="number">2</span>),</span><br><span class="line">         <span class="built_in">R_</span>(<span class="number">2</span>, <span class="number">0</span>), <span class="built_in">R_</span>(<span class="number">2</span>, <span class="number">1</span>), <span class="built_in">R_</span>(<span class="number">2</span>, <span class="number">2</span>));</span><br><span class="line">    t = ( Mat_&lt;<span class="keyword">double</span>&gt; ( <span class="number">3</span>,<span class="number">1</span> ) &lt;&lt; <span class="built_in">t_</span> ( <span class="number">0</span>,<span class="number">0</span> ), <span class="built_in">t_</span> ( <span class="number">1</span>,<span class="number">0</span> ), <span class="built_in">t_</span> ( <span class="number">2</span>,<span class="number">0</span> ) );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-BA优化"><a href="#4-BA优化" class="headerlink" title="4.BA优化"></a>4.BA优化</h2><h3 id="自定义3D-3D的边"><a href="#自定义3D-3D的边" class="headerlink" title="自定义3D-3D的边"></a>自定义3D-3D的边</h3><p>由于 g2o/sba 中没有提供 3D 到 3D 的边，而我们又想使用 g2o/sba 中李代数实现的位姿节点，所以最好的方式是自定义一种这样的边，并向 g2o 提供解析求导方式。</p>
+<p> $J$矩阵:</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+0     &-z &y     &-1 &0     &0 \\
+z     &0     &-x &0     &-1 &0 \\
+-y     &x  &0     &0     &0     &-1
+\end{bmatrix}</script><p>自定义 3D 到 3D 的边：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">EdgeProjectXYZRGBDPoseOnly</span> :</span> <span class="keyword">public</span> g2o::BaseUnaryEdge&lt;<span class="number">3</span>, Eigen::Vector3d, g2o::VertexSE3Expmap&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 结构体包含eigen成员必须进行宏定义 EIGEN_MAKE_ALIGNED_OPERATOR_NEW, 保证内存对齐</span></span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">EdgeProjectXYZRGBDPoseOnly</span>(<span class="keyword">const</span> Eigen::Vector3d &amp;point) : _point(point) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 再添加边之前需要设定好该边连接的节点的索引以及观测值和信息矩阵，</span></span><br><span class="line">    <span class="comment">// 这个函数则是使用该边连接的节点和观测值来计算误差</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> g2o::VertexSE3Expmap *pose = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> g2o::VertexSE3Expmap *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="comment">// measurement is p, point is p&#x27;</span></span><br><span class="line">        _error = _measurement - pose-&gt;<span class="built_in">estimate</span>().<span class="built_in">map</span>(_point); <span class="comment">// 重投影误差</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算雅克比矩阵，这个函数是可选的，如果给出了则进行解析求导，不给则进行数值求导</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">linearizeOplus</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// VertexSE3Expmap，这个表示李代数的位姿；</span></span><br><span class="line">        g2o::VertexSE3Expmap *pose = <span class="keyword">static_cast</span>&lt;g2o::VertexSE3Expmap *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="function">g2o::SE3Quat <span class="title">T</span><span class="params">(pose-&gt;estimate())</span></span>;</span><br><span class="line">        Eigen::Vector3d xyz_trans = T.<span class="built_in">map</span>(_point); <span class="comment">// .map的功能是把世界坐标系下三维点变换到相机坐标系</span></span><br><span class="line">        <span class="keyword">double</span> x = xyz_trans[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">double</span> y = xyz_trans[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">double</span> z = xyz_trans[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//_jacobianOplusXi是误差关于世界坐标系下坐标点的偏导</span></span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">0</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">1</span>) = -z;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">2</span>) = y;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">3</span>) = <span class="number">-1</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">4</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>,<span class="number">5</span>) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">0</span>) = z;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">1</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">2</span>) = -x;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">3</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">4</span>) = <span class="number">-1</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>,<span class="number">5</span>) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">0</span>) = -y;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">1</span>) = x;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">2</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">3</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">4</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>,<span class="number">5</span>) = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    Eigen::Vector3d _point;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="BA优化"><a href="#BA优化" class="headerlink" title="BA优化"></a>BA优化</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 4.BA优化</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bundleAdjustment</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;Point3f&gt; &amp;pts1,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;Point3f&gt; &amp;pts2,</span></span></span><br><span class="line"><span class="params"><span class="function">    Mat &amp;R, Mat &amp;t)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 1.初始化</span></span><br><span class="line">    <span class="comment">// 每个误差项优化变量维度为6(即为se3李代数的维数，前三维为平移，后三维为旋转)</span></span><br><span class="line">    <span class="comment">// 误差值维度为3(每个3D点在第二个相机中的投影)</span></span><br><span class="line">    <span class="keyword">typedef</span> g2o::BlockSolver&lt;g2o::BlockSolverTraits&lt;<span class="number">6</span>, <span class="number">3</span>&gt;&gt; Block;</span><br><span class="line">    <span class="comment">// 实例化线性方程求解器:使用eigen中sparse Cholesky 求解</span></span><br><span class="line">    Block::LinearSolverType *linearSolver = <span class="keyword">new</span> g2o::LinearSolverEigen&lt;Block::PoseMatrixType&gt;();</span><br><span class="line">    <span class="comment">// 实例化矩阵块求解器</span></span><br><span class="line">    Block *solver_ptr = <span class="keyword">new</span> <span class="built_in">Block</span>(unique_ptr&lt;Block::LinearSolverType&gt;(linearSolver));</span><br><span class="line">    <span class="comment">// 梯度下降方法，GN(高斯牛顿)418133364</span></span><br><span class="line">    g2o::OptimizationAlgorithmGaussNewton *solver = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmGaussNewton</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line"></span><br><span class="line">    g2o::SparseOptimizer optimizer; <span class="comment">// 创建稀疏优化器</span></span><br><span class="line">    optimizer.<span class="built_in">setAlgorithm</span>(solver); <span class="comment">// 用前面定义好的求解器作为求解方法：（使用GN(高斯牛顿)方法）</span></span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);     <span class="comment">// setVerbose是设置优化过程输出信息用</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2.构建顶点</span></span><br><span class="line">    g2o::VertexSE3Expmap *pose = <span class="keyword">new</span> g2o::<span class="built_in">VertexSE3Expmap</span>(); <span class="comment">// 相机位姿</span></span><br><span class="line">    pose-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);</span><br><span class="line">    pose-&gt;<span class="built_in">setEstimate</span>(g2o::<span class="built_in">SE3Quat</span>(Eigen::Matrix3d::<span class="built_in">Identity</span>(), Eigen::<span class="built_in">Vector3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)));</span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(pose);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3.构建边</span></span><br><span class="line">    <span class="keyword">int</span> index = <span class="number">1</span>;</span><br><span class="line">    vector&lt;EdgeProjectXYZRGBDPoseOnly*&gt; edges;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; pts1.<span class="built_in">size</span>(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">        EdgeProjectXYZRGBDPoseOnly *edge = <span class="keyword">new</span> <span class="built_in">EdgeProjectXYZRGBDPoseOnly</span>(Eigen::<span class="built_in">Vector3d</span>(pts2[i].x,pts2[i].y,pts2[i].z));</span><br><span class="line">        edge-&gt;<span class="built_in">setId</span>(index);</span><br><span class="line">        edge-&gt;<span class="built_in">setVertex</span>(<span class="number">0</span>, <span class="keyword">dynamic_cast</span>&lt;g2o::VertexSE3Expmap*&gt;(pose));</span><br><span class="line">        edge-&gt;<span class="built_in">setMeasurement</span>(Eigen::<span class="built_in">Vector3d</span>(pts1[i].x,pts1[i].y,pts1[i].z));</span><br><span class="line">        edge-&gt;<span class="built_in">setInformation</span>(Eigen::Matrix3d::<span class="built_in">Identity</span>()*<span class="number">1e4</span>);</span><br><span class="line">        optimizer.<span class="built_in">addEdge</span>(edge);</span><br><span class="line">        index++;</span><br><span class="line">        edges.<span class="built_in">push_back</span>(edge);</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 开始优化</span></span><br><span class="line">    chrono::steady_clock::time_point t1 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);</span><br><span class="line">    optimizer.<span class="built_in">initializeOptimization</span>();</span><br><span class="line">    optimizer.<span class="built_in">optimize</span>(<span class="number">10</span>);</span><br><span class="line">    chrono::steady_clock::time_point t2 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line">    chrono::duration&lt;<span class="keyword">double</span>&gt; time_used = chrono::duration_cast&lt;chrono::duration&lt;<span class="keyword">double</span>&gt;&gt;(t2-t1);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;优化用时: &quot;</span> &lt;&lt; time_used.<span class="built_in">count</span>() &lt;&lt; <span class="string">&quot;ms&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;优化后的T: \n: &quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; Eigen::<span class="built_in">Isometry3d</span>(pose-&gt;<span class="built_in">estimate</span>()).<span class="built_in">matrix</span>() &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+<h2 id="主函数"><a href="#主函数" class="headerlink" title="主函数"></a>主函数</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">5</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;提供彩色图与深度图：img1 img2 depth1 depth2 &quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 1.特征点匹配</span></span><br><span class="line">    Mat img_1 = <span class="built_in">imread</span>(argv[<span class="number">1</span>], CV_LOAD_IMAGE_COLOR);</span><br><span class="line">    Mat img_2 = <span class="built_in">imread</span>(argv[<span class="number">2</span>], CV_LOAD_IMAGE_COLOR);</span><br><span class="line">    vector&lt;KeyPoint&gt; keypoints_1, keypoints_2;</span><br><span class="line">    vector&lt;DMatch&gt; matches;</span><br><span class="line">    <span class="built_in">find_feature_matches</span>(img_1, img_2, keypoints_1, keypoints_2, matches);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;一共找到&quot;</span> &lt;&lt; matches.<span class="built_in">size</span>() &lt;&lt; <span class="string">&quot;组特征匹配&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2.建立3D点</span></span><br><span class="line">    Mat depth_1 = <span class="built_in">imread</span>(argv[<span class="number">3</span>], CV_LOAD_IMAGE_UNCHANGED);</span><br><span class="line">    Mat depth_2 = <span class="built_in">imread</span>(argv[<span class="number">4</span>], CV_LOAD_IMAGE_UNCHANGED);</span><br><span class="line">    Mat K = (Mat_&lt;<span class="keyword">double</span>&gt;(<span class="number">3</span>, <span class="number">3</span>) &lt;&lt; <span class="number">520.9</span>, <span class="number">0</span>, <span class="number">325.1</span>, <span class="number">0</span>, <span class="number">521.0</span>, <span class="number">249.7</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">    vector&lt;Point3f&gt; pts1, pts2;</span><br><span class="line">    <span class="built_in">build_3d_points</span>(depth_1, depth_2, K, keypoints_1, keypoints_2, matches, pts1, pts2);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3.SVD求解ICP</span></span><br><span class="line">    Mat R, t;</span><br><span class="line">    <span class="built_in">pose_estimation_3d3d</span>(pts1, pts2, R, t);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;一共有&quot;</span> &lt;&lt; pts1.<span class="built_in">size</span>() &lt;&lt; <span class="string">&quot;对3D-3D&quot;</span>;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;ICP分解结果为：&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;R: \n&quot;</span></span><br><span class="line">         &lt;&lt; R &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;t: \n&quot;</span></span><br><span class="line">         &lt;&lt; t &lt;&lt; endl;</span><br><span class="line">    <span class="comment">// 由于前面的推导是按照pi= Rp′i+t进行的，这里的R,t, </span></span><br><span class="line">    <span class="comment">// 是第二帧到第一帧的变换，与前面PnP部分是相反的。</span></span><br><span class="line">    <span class="comment">// 所以在输出结果中，我们同时打印了逆变换</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;R_inv: \n &quot;</span> &lt;&lt; R.<span class="built_in">t</span>() &lt;&lt; endl; <span class="comment">// 求逆</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;t_inv: \n &quot;</span> &lt;&lt; -R.<span class="built_in">t</span>() * t &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4.BA优化</span></span><br><span class="line">    <span class="built_in">bundleAdjustment</span>(pts1, pts2, R, t);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>CMakeLsits.txt</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( pose_estimation_3d3d )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>( CMAKE_BUILD_TYPE <span class="string">&quot;Release&quot;</span> )</span><br><span class="line"><span class="keyword">set</span>( CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++14 -O3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加cmake模块以使用g2o</span></span><br><span class="line"><span class="keyword">list</span>( APPEND CMAKE_MODULE_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/cmake_modules )</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>( OpenCV <span class="number">3.1</span> REQUIRED )</span><br><span class="line"><span class="keyword">find_package</span>( G2O REQUIRED )</span><br><span class="line"><span class="keyword">find_package</span>( CSparse REQUIRED )</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_directories</span>( </span><br><span class="line">    <span class="variable">$&#123;OpenCV_INCLUDE_DIRS&#125;</span> </span><br><span class="line">    <span class="variable">$&#123;G2O_INCLUDE_DIRS&#125;</span></span><br><span class="line">    <span class="variable">$&#123;CSPARSE_INCLUDE_DIR&#125;</span></span><br><span class="line">    <span class="string">&quot;/usr/include/eigen3/&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>( pose_estimation_3d3d pose_estimation_3d3d.cpp )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( pose_estimation_3d3d </span><br><span class="line">   <span class="variable">$&#123;OpenCV_LIBS&#125;</span></span><br><span class="line">   g2o_core g2o_stuff g2o_types_sba g2o_csparse_extension </span><br><span class="line">   <span class="variable">$&#123;CSPARSE_LIBRARY&#125;</span></span><br><span class="line">)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>打印</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">max_dist: 94</span><br><span class="line">min_dist: 4</span><br><span class="line">一共找到79组特征匹配</span><br><span class="line">3d-3d pairs: 72</span><br><span class="line">W=  10.871 -1.01948  2.54771</span><br><span class="line">-2.16033  3.85307 -5.77742</span><br><span class="line"> 3.94738 -5.79979  9.62203</span><br><span class="line">U=  0.558087  -0.829399 -0.0252034</span><br><span class="line"> -0.428009  -0.313755   0.847565</span><br><span class="line">  0.710878   0.462228   0.530093</span><br><span class="line">V=  0.617887  -0.784771 -0.0484806</span><br><span class="line"> -0.399894  -0.366747   0.839989</span><br><span class="line">  0.676979   0.499631   0.540434</span><br><span class="line">一共有72对3D-3DICP分解结果为：</span><br><span class="line">R: </span><br><span class="line">[0.9969452349468715, 0.05983347698056557, -0.05020113095482046;</span><br><span class="line"> -0.05932607657705309, 0.9981719679735133, 0.01153858699565957;</span><br><span class="line"> 0.05079975545906246, -0.008525103184062521, 0.9986724725659557]</span><br><span class="line">t: </span><br><span class="line">[0.144159841091821;</span><br><span class="line"> -0.06667849443812729;</span><br><span class="line"> -0.03009747273569774]</span><br><span class="line">R_inv: </span><br><span class="line"> [0.9969452349468715, -0.05932607657705309, 0.05079975545906246;</span><br><span class="line"> 0.05983347698056557, 0.9981719679735133, -0.008525103184062521;</span><br><span class="line"> -0.05020113095482046, 0.01153858699565957, 0.9986724725659557]</span><br><span class="line">t_inv: </span><br><span class="line"> [-0.1461462958593589;</span><br><span class="line"> 0.05767443542067568;</span><br><span class="line"> 0.03806388018483625]</span><br><span class="line">iteration= 0     chi2= 18161.146626      time= 4.6935e-05        cumTime= 4.6935e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 1     chi2= 18155.141919      time= 9.614e-06         cumTime= 5.6549e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 2     chi2= 18155.140765      time= 9.938e-06         cumTime= 6.6487e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 3     chi2= 18155.140764      time= 9.516e-06         cumTime= 7.6003e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 4     chi2= 18155.140764      time= 8.688e-06         cumTime= 8.4691e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 5     chi2= 18155.140764      time= 8.358e-06         cumTime= 9.3049e-05     edges= 72       schur= 0</span><br><span class="line">iteration= 6     chi2= 18155.140764      time= 1.0723e-05        cumTime= 0.000103772    edges= 72       schur= 0</span><br><span class="line">iteration= 7     chi2= 18155.140764      time= 1.1911e-05        cumTime= 0.000115683    edges= 72       schur= 0</span><br><span class="line">iteration= 8     chi2= 18155.140764      time= 1.3427e-05        cumTime= 0.00012911     edges= 72       schur= 0</span><br><span class="line">iteration= 9     chi2= 18155.140764      time= 1.207e-05         cumTime= 0.00014118     edges= 72       schur= 0</span><br><span class="line">优化用时: 0.000604832ms</span><br><span class="line">优化后的T: </span><br><span class="line">: </span><br><span class="line">  0.996945  0.0598335 -0.0502011    0.14416</span><br><span class="line">-0.0593261   0.998172  0.0115386 -0.0666785</span><br><span class="line"> 0.0507998 -0.0085251   0.998672 -0.0300979</span><br><span class="line">         0          0          0          1</span><br></pre></td></tr></table></figure>
+<p>不使用解析求导</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.......</span><br><span class="line">优化用时: 0.00123263ms</span><br><span class="line">优化后的T: </span><br><span class="line">: </span><br><span class="line">   0.996945   0.0598335  -0.0502011     0.14416</span><br><span class="line"> -0.0593261    0.998172   0.0115386  -0.0666785</span><br><span class="line">  0.0507998 -0.00852509    0.998672  -0.0300979</span><br><span class="line">          0           0           0           1</span><br></pre></td></tr></table></figure>
+<p><strong>不难发现,使用解析求导(即给出函数<code>virtual void linearizeOplus()</code>),比使用数值求导(即不提供该函数)要快的多.</strong></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/12311.html" title="ch7_求解ICP并使用BA优化">https://lukeyalvin.top/posts/12311.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/20908.html" rel="prev" title="ch7_求解PnP并使用BA优化">
+      <i class="fa fa-chevron-left"></i> ch7_求解PnP并使用BA优化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/posts/5123.html" rel="next" title="g2o的结构以及BA节点与边的定义">
+      g2o的结构以及BA节点与边的定义 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3ICP"><span class="nav-text">求解ICP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SVD%E6%96%B9%E6%B3%95"><span class="nav-text">SVD方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98"><span class="nav-text">构建最小二乘</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98"><span class="nav-text">求解最小二乘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95"><span class="nav-text">非线性优化方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-text">代码实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%89%B9%E5%BE%81%E7%82%B9%E5%8C%B9%E9%85%8D"><span class="nav-text">1. 特征点匹配</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E5%BB%BA%E7%AB%8B3D%E7%82%B9"><span class="nav-text">2.建立3D点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-SVD%E6%B1%82%E8%A7%A3ICP"><span class="nav-text">3.SVD求解ICP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-BA%E4%BC%98%E5%8C%96"><span class="nav-text">4.BA优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%893D-3D%E7%9A%84%E8%BE%B9"><span class="nav-text">自定义3D-3D的边</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BA%E4%BC%98%E5%8C%96"><span class="nav-text">BA优化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E5%87%BD%E6%95%B0"><span class="nav-text">主函数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">362k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:29</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>

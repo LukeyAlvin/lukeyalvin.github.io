@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文选&lt;权美香，朴松昊，李国． 视觉 ＳＬＡＭ 综述&gt;一文,对整个论文进行梳理,让自己对整个SLAM的框架有一定的了解.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="视觉SLAM综述简介">
+<meta property="og:url" content="https://lukeyalvin.top/posts/17633.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="本文选&lt;权美香，朴松昊，李国． 视觉 ＳＬＡＭ 综述&gt;一文,对整个论文进行梳理,让自己对整个SLAM的框架有一定的了解.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/image-20211009165001747.png">
+<meta property="article:published_time" content="2021-10-31T03:02:17.192Z">
+<meta property="article:modified_time" content="2022-04-26T01:20:20.967Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="文献阅读">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/image-20211009165001747.png">
+
+<link rel="canonical" href="https://lukeyalvin.top/posts/17633.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>视觉SLAM综述简介 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/17633.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          视觉SLAM综述简介
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-31 11:02:17" itemprop="dateCreated datePublished" datetime="2021-10-31T11:02:17+08:00">2021-10-31</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-26 09:20:20" itemprop="dateModified" datetime="2022-04-26T09:20:20+08:00">2022-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">文献阅读</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/17633.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/17633.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>本文选&lt;权美香，朴松昊，李国． 视觉 ＳＬＡＭ 综述&gt;一文,对整个论文进行梳理,让自己对整个SLAM的框架有一定的了解.</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="视觉SLAM综述简介"><a href="#视觉SLAM综述简介" class="headerlink" title="视觉SLAM综述简介"></a>视觉SLAM综述简介</h1><blockquote>
+<p>参考文献：</p>
+<p>[1]权美香，朴松昊，李国． 视觉 ＳＬＡＭ 综述［Ｊ］． 智能系统学报， ２０１６， １１（６）： ７６８－７７６．</p>
+</blockquote>
+<h2 id="视觉SLAM方法介绍"><a href="#视觉SLAM方法介绍" class="headerlink" title="视觉SLAM方法介绍"></a>视觉SLAM方法介绍</h2><h3 id="视觉-SLAM的概念"><a href="#视觉-SLAM的概念" class="headerlink" title="视觉 SLAM的概念"></a>视觉 SLAM的概念</h3><p>视觉 SLAM指的是相机作为唯一的外部传感器，在进行自身定位的同时创建环境地图。 SLAM创建的地图<br>的好坏对之后自主的定位、路径规划以及壁障的性能起到一个决定性的作用。</p>
+<h3 id="视觉SLAM的分类"><a href="#视觉SLAM的分类" class="headerlink" title="视觉SLAM的分类"></a>视觉SLAM的分类</h3><ul>
+<li>单目视觉 SLAM (仅用一个相机作为唯一外部传感器)</li>
+<li>立体视觉 SLAM (使用多个相机作为传感器)</li>
+<li>RGB-D SLAM (基于单目相机与红外传感器结合构成的传感器)</li>
+</ul>
+<h3 id="视觉SLAM的方法介绍"><a href="#视觉SLAM的方法介绍" class="headerlink" title="视觉SLAM的方法介绍"></a>视觉SLAM的方法介绍</h3><p>根据利用图像信息的不同</p>
+<ul>
+<li>基于特征的 SLAM 方法</li>
+<li>direct SLAM 方法</li>
+</ul>
+<h4 id="基于特征的-SLAM-方法"><a href="#基于特征的-SLAM-方法" class="headerlink" title="基于特征的 SLAM 方法"></a>基于特征的 SLAM 方法</h4><h5 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h5><p>基于特征的 SLAM 方法指的是对输入的图像进行<strong>特征点检测及提取</strong>，并基于 ２⁃Ｄ 或 ３⁃Ｄ 的特征匹配<strong>计算相机位姿及对环境</strong>进行建图。如果对整幅图像进行处理，则计算复杂度太高，由于特征在保存图像重要信息的同时有效减少了计算量，从而被广泛使用。</p>
+<h5 id="发展"><a href="#发展" class="headerlink" title="发展"></a>发展</h5><h6 id="借助于滤波器实现的单目视觉SLAM"><a href="#借助于滤波器实现的单目视觉SLAM" class="headerlink" title="借助于滤波器实现的单目视觉SLAM"></a>借助于<strong>滤波器</strong>实现的单目视觉SLAM</h6><ul>
+<li><p>扩展卡尔曼滤波器（extended Kalman filter，EKF）</p>
+<p><strong>原理：</strong>利用扩展卡尔曼滤波器来实现同时定位与地图创建，其主要思想是使用状态向量来存储相机位姿及地图点的三维坐标，利用概率密度函数来表示不确定性，从观测模型和递归的计算，最终获得更新的状态向量的均值和方差。</p>
+<p><strong>缺点：</strong>由于EKF的引进，SLAM算法会有计算复杂度及由于线性化而带来的不确定性问题。</p>
+</li>
+<li><p>无迹卡尔曼滤波器（Unscented Kal-man filter，UKF）</p>
+<p>该方法虽然对不确定性有所改善，但同时也增加了计算复杂度。</p>
+</li>
+<li><p>Rao-Blackwellized粒子滤波（Particle filter）</p>
+<p>该方法避免了线性化，且对相机的快速运动有一定的弹力，但是为了保证定位精度，则需要使用较多的粒子，从而大大提高了计算复杂度</p>
+</li>
+</ul>
+<h6 id="基于关键帧的单目视觉SLAM"><a href="#基于关键帧的单目视觉SLAM" class="headerlink" title="基于关键帧的单目视觉SLAM"></a>基于关键帧的单目视觉SLAM</h6><ul>
+<li><p>Parallel Tracking and Mapping for Small AR Workspaces（PTAM）</p>
+<p>该论文提出了一个简单、有效的提取关键帧的方法，且将定位和创建地图分为两个独立的任务，并在两个线程上进行。</p>
+</li>
+<li><p>A Versatile and Accurate Monocular SLAM System</p>
+<p>在关键帧的基础上提出的一个单目视觉 SLAM 系统，将整个 SLAM 过程分为定位、创建地图、闭环 ３个线程，且对这 ３ 个任务使用相同的 ORB 特征，且引进本质图的概念来加速闭环校正过程。</p>
+</li>
+</ul>
+<h6 id="基于RGB-D数据的SLAM"><a href="#基于RGB-D数据的SLAM" class="headerlink" title="基于RGB-D数据的SLAM"></a>基于RGB-D数据的SLAM</h6><p>微软公司推出的Kinect相机，能够同时获得图像信息及深度信息，从而简化了三维重建的过程，且由于价格便宜，基于RGB_D数据的SLAM得到了迅速的发展。</p>
+<p>《RGB-D map-ping: using depth cameras for dense 3-D modeling of in-door environments》最早提出的使用<br>RGB-D相机对室内环境进行三维重建的方法，在彩色图像中提取 SHIF特征并在深度图像上查找相应的深度信息。然后使用RANSAC方法对3-D特征点进行匹配并计算出相应的刚体运动变换，再以此作为ICP (iterative closest point）的初始值来求出更精确的位姿。</p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/image-20211009165001747.png" alt="image-20211009165001747"></p>
+<h4 id="直接的SLAM-方法"><a href="#直接的SLAM-方法" class="headerlink" title="直接的SLAM 方法"></a>直接的SLAM 方法</h4><h5 id="简介-1"><a href="#简介-1" class="headerlink" title="简介"></a>简介</h5><p>直接的SLAM方法指的是直接对<strong>像素点的强度</strong>进行操作，避免了特征点的提取，该方法能够使用图像的所有信息。此外，提供更多的环境几何信息，有助于对地图的后续使用。且对特征较少的环境有更高的准确性和鲁棒性。</p>
+<h5 id="发展-1"><a href="#发展-1" class="headerlink" title="发展"></a>发展</h5><ul>
+<li>《Real-time dense geometry from a handheld camera》</li>
+</ul>
+<p>相机定位方法依赖图像的每个像素点，即用稠密的图像对准来进行自身定位，并构建出稠密的3-D地图。</p>
+<ul>
+<li>《Semi-Dense Visual Odometry for a Monocular Camera 》</li>
+</ul>
+<p>对当前图像构建半稠密inverse深度地图，并使用稠密图像配准（dense image alignment）法计算相机位姿。构建半稠密地图即估计图像中梯度较大的所有像素的深度值，该深度值被表示为高斯分布，且当新的图像到来时，该深度值被更新。</p>
+<ul>
+<li>《Dense tracking and mapping in real-time》</li>
+</ul>
+<p>对每个像素点进行概率的深度测量，有效降低了位姿估计的不确定性。</p>
+<ul>
+<li>《Fast semi-direct monocular visual odometry 》</li>
+</ul>
+<p>提出了一种半直接的单目视觉里程计方法，该方法相比于直接法不是对整幅图像进行直接匹配从而获得相机位姿，而是通过在整幅图像中提取的图像块来进行位姿的获取，这样能够增强算法的鲁棒性。</p>
+<ul>
+<li>《Large-Scale Direct Monocular SLAM》</li>
+</ul>
+<p>为了构建稠密的三维环境地图，Engel等提出了LSD-SLAM算法（large-scale direct SLAM），相比之前的直接的视觉里程计方法，该方法在估计高准确性的相机位姿的同时能够创建大规模的三维环境地图。</p>
+<ul>
+<li>《Kinect-Fusion: Real-time dense surface mapping and tracking》27</li>
+</ul>
+<p>提出了kinect融合的方法，该方法通过Kinect获取的深度图像对每帧图像中的每个像素进行最小化距离测量而获得相机位姿，且融合所有深度图像，从而获得全局地图信息。</p>
+<ul>
+<li>《A dense map building approach from spherical RGBD images》28</li>
+</ul>
+<p>使用图像像素点的光度信息和几何信息来构造误差函数，通过最小化误差函数而获得相机位姿，且地图问题被处理为位姿图表示。</p>
+<ul>
+<li>《Dense visual SLAM for RGB-D cameras》29</li>
+</ul>
+<p>这是较好的直接RGBD SLAM方法，该方法结合像素点的强度误差与深度误差作为误差函数，通过最小化代价函数，从而求出最优相机位姿，该过程由g20实现，并提出了基于熵的关键帧提取及闭环检方法，从而大大降低了路径的误差。</p>
+<ul>
+<li>《Distinctive image features from scale-invariant keypoints》30</li>
+</ul>
+<h3 id="视觉-SLAM主要标志性成果"><a href="#视觉-SLAM主要标志性成果" class="headerlink" title="视觉 SLAM主要标志性成果"></a>视觉 SLAM主要标志性成果</h3><h4 id="MonoSLAM"><a href="#MonoSLAM" class="headerlink" title="MonoSLAM"></a>MonoSLAM</h4><blockquote>
+<p>《Mono-SLAM: real-time single camera SLAM》</p>
+</blockquote>
+<p>Andrew Davison提出的第1个基于EKF方法的单目SLAM，能够达到实时但是不能确定漂移多少，能够在概率框架下在线创建稀疏地图。</p>
+<h4 id="DTAM"><a href="#DTAM" class="headerlink" title="DTAM"></a>DTAM</h4><blockquote>
+<p>《DTAM: Dense tracking and mapping in real-time》</p>
+</blockquote>
+<p>2011年提出的基于直接法的单目SLAM算法，该方法通过帧率的整幅图像对准来获得相对于稠密地图的相机的6个自由度位姿，能够在GPU上达到实时的效果。</p>
+<h4 id="PTAM"><a href="#PTAM" class="headerlink" title="PTAM"></a>PTAM</h4><blockquote>
+<p>《Parallel Tracking and Mapping for Small AR Workspaces》</p>
+</blockquote>
+<p>由Georg Klein提出的第1个用多线程处理SLAM的算法，将跟踪和建图分为两个单独的任务并在两个平行的线程进行处理。</p>
+<h4 id="Ki-nectFusion"><a href="#Ki-nectFusion" class="headerlink" title="Ki-nectFusion"></a>Ki-nectFusion</h4><blockquote>
+<p>《Kinect-Fusion: Real-time dense surface mapping and tracking》</p>
+</blockquote>
+<p>第1个基于Kinect的能在GPU上实时构建稠密三维地图的算法，该方法仅使用Kinect相机获取的深度信息去计算传感器的位姿以及构建精确的环境3-D地图模型。</p>
+<h4 id="LSD-SLAM"><a href="#LSD-SLAM" class="headerlink" title="LSD-SLAM"></a>LSD-SLAM</h4><blockquote>
+<p>《LSD-SLAM: Large-Scale Direct Monocular SLAM》</p>
+</blockquote>
+<p>直接的单目SLAM方法，即直接对图像的像素点进行处理，相比于之前的基于直接法的单目视觉里程计，不仅能计算出自身的位姿，还能构建出全局的半稠密且精确的环境地图。其中的追踪方法，直接在sim3上进行操作，从而能够准确地检测尺度漂移，可在CPU上实时运行。</p>
+<h4 id="ORB-SLAM"><a href="#ORB-SLAM" class="headerlink" title="ORB_SLAM"></a>ORB_SLAM</h4><blockquote>
+<p>《ORB-SLAM: A Versatile and Accurate Monocular SLAM  System》</p>
+</blockquote>
+<p>2015年出的比较完整的基于关键帧的单目SLAM算法，将整个系统分为追踪、地图创建、闭环控制3个线程进行处理，且特征的提取与匹配、稀疏地图的创建、位置识别都是基于ORB特征，其定位精确度很高，且可以实时运行。</p>
+<h3 id="SLAM的主要研究实验室"><a href="#SLAM的主要研究实验室" class="headerlink" title="SLAM的主要研究实验室"></a>SLAM的主要研究实验室</h3><p>1）<strong>苏黎世联邦理工学院的Autonomous System Lab</strong>:该实验室在tango项目上与谷歌合作，负责视觉-<br>惯导的里程计，基于视觉的定位和深度重建算法。<br>2）<strong>明尼苏达大学的Multiple Autonomous Robotic Systems Laboratory</strong>，主要研究四轴飞行器导航，合作建图，基于地图的定位，半稠密地图创建等。<br>3）<strong>慕尼黑理工大学的The Computer Vision Group</strong>，主要研究基于图像的3-D重建，机器人视觉视觉SLAM等。</p>
+<h2 id="视觉-SLAM-关键性问题"><a href="#视觉-SLAM-关键性问题" class="headerlink" title="视觉 SLAM 关键性问题"></a>视觉 SLAM 关键性问题</h2><h3 id="特征检测与匹配"><a href="#特征检测与匹配" class="headerlink" title="特征检测与匹配"></a>特征检测与匹配</h3><p>目前点特征使用最多,使用最多的点特征如下</p>
+<ul>
+<li><strong>SIFT（scale invariant feature transform）特征</strong></li>
+</ul>
+<p>SIFT特征已发展10多年，且获得了巨大的成功。SIFT特征具有可辨别性，由于其描述符用高维向量（128维）表示，且具有旋转不变性、尺度不变性、放射变换不变性，对噪声和光照变化也有鲁棒性。[33-6]在视觉SLAM里使用了SIFT特征，但是由于SIFT特征的向量维数太高，导致时间复杂度高。</p>
+<p>《Distinctive image features from scale-invariant keypoints》</p>
+<ul>
+<li><strong>SURT（speeded up robust features）[31]特征</strong></li>
+</ul>
+<p>SURF特征具有尺度不变性、旋转不变性，且相对于SIFT特征的算法速度提高了3到7倍。在文献[37-39]SURF被作为视觉SLAM的特征提取方法，与SIFT特征相比，时间复杂度有所降低。对两幅图像的SIFT和SURF特征进行匹配时通常是计算两个特征向量之间的欧氏距离，并以此作为特征点的相似性判断度量。</p>
+<p>《spee-ded up robust features》</p>
+<ul>
+<li><strong>ORB（oriented fast and rotated BRIEF）[32]特征。</strong></li>
+</ul>
+<p>ORB特征是FAST特征检测算子与BRIEF描述符的结合，并在其基础上做了一些改进。ORB特征最大的优点是计算速度快，是SIFT特征的100倍，SURF特征的10倍，其原因是FAST特征检测速度就很快，再加上BRIEF描述符是二进制串，大大缩减了匹配速度，而且具有旋转不变性，但不具备尺度不变性。ORB特征匹配是以BRIEF二进制描述符的汉明距离为相似性度量的。</p>
+<p>《An efficient alternative to SIFT or SURF》</p>
+<p>在大量包含直线和曲线的环境下，使用点特征时，环境中很多信息都将被遗弃，为了弥补这个缺陷，从而也提出了<strong>基于边特征的视觉SLAM</strong>和<strong>基于区域特征的视觉SLAM</strong>方法。</p>
+<blockquote>
+<p>基于边特征的视觉SLAM《Edge landmarks in monocular SLAM》《Improving the agility of keyframe-based SLAM 》</p>
+<p>基于区域特征的视觉SLAM《Using superpixels in monocular SLAM》</p>
+</blockquote>
+<h3 id="关键帧的选择"><a href="#关键帧的选择" class="headerlink" title="关键帧的选择"></a>关键帧的选择</h3><p>帧对帧的对准方法会造成大的累积漂浮，由于位姿估计过程中总会产生误差。为了减少帧对帧的对准方法带来的误差，基于关键帧的SLAM方法被提出。</p>
+<p>《Parallel Tracking and Mapping for Small AR Workspaces》</p>
+<p>《ORB-SLAM: A Versatile and Accurate Monocular SLAM System》</p>
+<blockquote>
+<p>提出满足以下全部条件时该帧作为关键帧插入到地图里：从上一个关键帧经过了n个帧；当前帧至少能看到n个地图点，位姿估计准确性较高。</p>
+</blockquote>
+<p>《RGB-D Mapping: Using Depth Cameras for Dense 3-D Modeling of Indoor Environments》</p>
+<blockquote>
+<p>当两幅图像看到的共同特征点数低于一定阈值时，创建一个新的关键帧。</p>
+</blockquote>
+<p>《Dense visual SLAM for RGB-D cameras 》</p>
+<blockquote>
+<p>提出了一种基于熵的相似性的选择关键帧的方法，由于简单的阈值不适用于不同的场景，对每一帧计算一个熵的相似性比，如果该值小于一个预先定义的阈值，则前一帧被选为新的关键帧，并插入地图里，该方法大大减少了位姿漂浮。</p>
+</blockquote>
+<h3 id="闭环检测（loop-closing）方法"><a href="#闭环检测（loop-closing）方法" class="headerlink" title="闭环检测（loop closing）方法"></a>闭环检测（loop closing）方法</h3><p>闭环检测及位置识别，判断当前位置是否是以前已访问过的环境区域。三维重建过程中必然会产生误差累积，实现闭环是消除的一种手段。在位置识别算法中，视觉是主要的传感器。</p>
+<p>文献《A compari-son of loop closing techniques in monocular SLAM》对闭环检测方法进行了比较</p>
+<p>且得出图像对图像的匹配性能<strong>优于</strong>地图对地图，图像对地图的匹配方法。</p>
+<ul>
+<li><p>图像对图像《Tracking and mapping recognizable features》《Accelerated appearance-only SLAM》</p>
+<blockquote>
+<p>图像对图像的匹配方法中，词袋（bag of words）方法由于其有效性得到了广泛的应用</p>
+<p>《Scalable Recognition with a Vocabulary Tree》</p>
+</blockquote>
+</li>
+<li><p>地图对地图《Unscented SLAM for large-scale outdoor environments 》</p>
+</li>
+<li><p>图像对地图《Probabilistic Lo-calization and Mapping in the Space of Appearance》</p>
+</li>
+</ul>
+<p>《Unified loop closing and recovery for real time monocular SLAM》</p>
+<blockquote>
+<p>对重定位和闭环检测提出了统一的方法，它们使用基于16维的SIFT特征的词典方法不断地搜索已访问过的位置。</p>
+</blockquote>
+<p>《Real-time loop detec-tion with bags of binary words 》《Appearance-only SLAM at large scale with FAB-MAP》</p>
+<blockquote>
+<p>使用基于SURF描述符的词典方法去进行闭环检测SURF特征，SURF特征提取需要花费400 ms去进行。</p>
+</blockquote>
+<p>《Distinctive Image features from scale-invariant keypoints》</p>
+<blockquote>
+<p>使用SIFT特征执行全局定位，且用KD树来排列地图点。</p>
+</blockquote>
+<p>《Bags of binary words for fast place recognition in image sequences》</p>
+<blockquote>
+<p>提出了一种使用基于FAST特征检测与BRIEF二进制描述符词典，且添加了直接索引（direct index），直接索引的引入使得能够有效地获得图像之间的匹配点，从而加快闭环检测的几何验证。</p>
+</blockquote>
+<p>《Fast relocalisation andloop closing in keyframe-based SLAM》</p>
+<blockquote>
+<p>用基于ORB特征的词典方法进行位置识别，由于ORB特征具有旋转不变性且能处理尺度变化，该方法能识别位置从不同的视角。</p>
+</blockquote>
+<p>《ORB-SLAM: A Versatile and Accurate Monocular SLAM System》</p>
+<blockquote>
+<p>该文献的位置识别方法建于文献《Fast relocalisation andloop closing in keyframe-based SLAM》的主要思想上，即使用基于ORB特征的词典方法选出候选闭环，再通过相似性计算进行闭环的几何验证。</p>
+</blockquote>
+<h3 id="地图优化"><a href="#地图优化" class="headerlink" title="地图优化"></a>地图优化</h3><h4 id="简介-2"><a href="#简介-2" class="headerlink" title="简介"></a>简介</h4><p>对于一个在复杂且动态的环境下工作的机器人，3-D地图的快速生成是非常重要的，且创建的环境地图对之后的定位、路径规划及壁障的性能起到一个关键性的作用，从而精确的地图创建也是非常重要的。</p>
+<h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>闭环检测成功后，往地图里添加闭环约束，执行闭环校正。闭环问题可以描述为<strong>大规模的光束平差法（bundle adjustment）问题</strong>，即对相机位姿及所有的地图点3-D坐标进行优化，但是该优化计算复杂度太高，从而很难实现实时。</p>
+<h4 id="优化算法"><a href="#优化算法" class="headerlink" title="优化算法"></a>优化算法</h4><ul>
+<li>通过位姿图优化（pose graph optimization）方法来对闭环进行优化</li>
+</ul>
+<p>顶点为相机位姿，边表示位姿之间相对变换的图称为位姿图，位姿图优化即将闭环误差沿着图进行分配，即均匀分配到图上的所有位姿上。图优化通常由图优化框架g2o（general graph optimization）《A general framework for graph optimization 》里的LM（leven-berg-marquardt）算法实现。</p>
+<p>《Dense visual SLAM for RGB-D cameras》</p>
+<blockquote>
+<p>提出的RGB-D SLAM算法的位姿图里每个边具有一个权重，从而在优化过程中，不确定性高的边比不确定性低的边需要变化更多去补偿误差，并在最后，对图里的每个顶点进行额外的闭环检测且重新优化整个图。</p>
+</blockquote>
+<p>《Scale drift-aware large scale monocular SLAM》</p>
+<blockquote>
+<p>在闭环校正步骤使用了位姿图优化技术去实现旋转，平移及尺度漂浮的有效校正。</p>
+</blockquote>
+<p>《ORB-SLAM: A Versatile and Accurate Monocular SLAM System》</p>
+<blockquote>
+<p>在闭环检测成功后构建了本质图，并对该图进行位姿图优化。本质图包含所有的关键帧，但相比于covisibility图，减少了关键帧之间的边约束。本质图包含生成树、闭环连接及covisibility图里权重较大的边。</p>
+</blockquote>
+<h2 id="视觉SLAM主要发展趋势与研究热点"><a href="#视觉SLAM主要发展趋势与研究热点" class="headerlink" title="视觉SLAM主要发展趋势与研究热点"></a>视觉SLAM主要发展趋势与研究热点</h2><h3 id="多传感器融合"><a href="#多传感器融合" class="headerlink" title="多传感器融合"></a>多传感器融合</h3><h4 id="简介-3"><a href="#简介-3" class="headerlink" title="简介"></a>简介</h4><p>相机能够捕捉场景的丰富细节，而惯性测量单元（inertial measurement unit，IMU）有高的帧率且相对小的能够获得准确的短时间估计，这两个传感器能够相互互补，从而一起使用能够获得更好的结果。</p>
+<h4 id="发展-2"><a href="#发展-2" class="headerlink" title="发展"></a>发展</h4><p>最初的视觉与IMU结合的位姿估计是用<strong>滤波方法</strong>解决的，用IMU的测量值作为预测值，视觉的测量值用于更新。</p>
+<p>《A multi-state con-straint Kalman filter for vision-aided inertial navigation》</p>
+<blockquote>
+<p>提出了一种基于EKF的IMU与单目视觉的实时融合方法，提出一种测量模型能够表示一个静态特征被多个相机所观察时的几何约束，该测量模型是最优的且不需要在EKF的状态向量里包括特征的3-D坐标。</p>
+</blockquote>
+<p>《A dual-layer estima-tor architecture for long-term localization》</p>
+<blockquote>
+<p>将融合问题分为两个线程进行处理，连续图像之间的惯性测量和特征跟踪被局部地在第1个线程进行处理，提供高频率的位置估计，第2个线程包含一个间歇工作的光束法平差的迭代估计，能够减少线性误差的影响。许多结果都已证明在准确性上基于优化的视觉SLAM优于基于滤波的SLAM方法。</p>
+</blockquote>
+<p>《Keyframe-based visual-inertial slam using nonlinear opti-mization》</p>
+<blockquote>
+<p>将IMU的误差以全概率的形式融合到路标的重投影误差里，构成将被优化的联合非线性误差函数，其中通过关键帧来边缘化之前的状态去维持一个固定大小的优化窗口，保证实时操作。考虑到基于优化方法的视觉-惯导导航的计算复杂度问题，</p>
+</blockquote>
+<p>参考<a target="_blank" rel="noopener" href="https://www">https://www</a>. google. com/a-tap/projecttango/.</p>
+<blockquote>
+<p>通过预积分选出的关键帧之间的惯性测量来进行解决，预积分能够精确地概括数百个惯性测量到一个单独的相对运动约束，这个预积分的IMU模型能被完美地融合到视觉-惯性的因子图的框架下。该系统的实验结果表明该系统要比Google的Tango还要精确。</p>
+</blockquote>
+<h3 id="SLAM与深度学习的结合"><a href="#SLAM与深度学习的结合" class="headerlink" title="SLAM与深度学习的结合"></a>SLAM与深度学习的结合</h3><p>随着深度学习在计算机视觉领域的大成功，大家对深度学习在机器人领域的应用有很大的兴趣。SLAM是一个大系统，里面有很多子模块，例如闭环检测，立体匹配等，都可通过深度学习的使用来获得更优的结果。</p>
+<h4 id="发展-3"><a href="#发展-3" class="headerlink" title="发展"></a>发展</h4><p>《Stereo matching by training a convolutional neural network to compare image patches》</p>
+<blockquote>
+<p>提出了一种基于深度学习的立体匹配方法，用卷积神经网络来学习小图像块间的相似性，该卷积神经网络输出的结果用于线性化立体匹配代价。</p>
+</blockquote>
+<p>《On the per-formance of ConvNet features for place recognition》</p>
+<blockquote>
+<p>通过整合局部敏感散列法和新的语义搜寻空间划分的优化技术，使用卷积神经网络和大的地图达到实时的位置识别。</p>
+</blockquote>
+<p>《Exploring representation learning with CNNs for frame-to-frame egomotion estimation》</p>
+<blockquote>
+<p>使用卷积神经网络去学习视觉里程计的最佳的视觉特征和最优的估计器。</p>
+</blockquote>
+<p>《Modelling uncertainty in deep learning for camera relocalization》</p>
+<blockquote>
+<p>提出了一种重定位系统，使用贝叶斯卷积神经网络从单个彩色图像计算出六个自由度的相机位姿及其不确定性。</p>
+</blockquote>
+<h2 id="视觉SLAM的优缺点分析"><a href="#视觉SLAM的优缺点分析" class="headerlink" title="视觉SLAM的优缺点分析"></a>视觉SLAM的优缺点分析</h2><h3 id="单目视觉SLAM"><a href="#单目视觉SLAM" class="headerlink" title="单目视觉SLAM"></a>单目视觉SLAM</h3><h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><p>单目相机应用灵活、简单、价格低。</p>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><p>单目视觉SLAM在每个时刻只能获取一张图像，且只能依靠获得的图像数据计算环境物体的方向信息，无法直接获得可靠的深度信息，从而初始地图创建及特征点的深度恢复都比较困难。</p>
+<p>此外，尺度不确定性是单目SLAM的主要特点，它是主要的误差源之一，但是正是尺度不确定性才使得单目SLAM能够在大尺度和小尺度环境之间进行自由转换。</p>
+<h3 id="双目视觉SLAM"><a href="#双目视觉SLAM" class="headerlink" title="双目视觉SLAM"></a>双目视觉SLAM</h3><h4 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h4><p>双目视觉SLAM利用外极线几何约束的原理去匹配左右两个相机的特征，从而能够在当前帧速率的条件下直接提取完整的特征数据，因而应用比较广泛，它直接解决了系统地图特征的初始化问题。</p>
+<h4 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h4><p>但是系统设计比较复杂，系统成本比较高，且它的视角范围受到一定限制，不能够获取远处的场景，从而只能在一定的尺度范围内进行可靠的测量，从而缺乏灵活性。</p>
+<h3 id="RGBD-SLAM"><a href="#RGBD-SLAM" class="headerlink" title="RGBD SLAM"></a>RGBD SLAM</h3><h4 id="优点-2"><a href="#优点-2" class="headerlink" title="优点"></a>优点</h4><p>深度相机在获得彩色图像的同时获得深度图像，从而方便获得深度信息，且能够获得稠密的地图</p>
+<h4 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h4><p>成本高，体积大，有效探测距离太短，从而可应用环境很有限。</p>
+<h2 id="结束"><a href="#结束" class="headerlink" title="结束"></a>结束</h2><p>为了弥补视觉信息的不足，视觉传感器可以与惯性传感器（IMU）、激光等传感器融合，通过传感器之间的互补获得更加理想的结果。此外，为了能在实际环境中进行应用，SLAM的鲁棒性需要很高，从而足够在各种复杂环境下进行准确的处理，SLAM的计算复杂度也不能太高，从而达到实时效果。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/17633.html" title="视觉SLAM综述简介">https://lukeyalvin.top/posts/17633.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/29713.html" rel="prev" title="PAT1002_写出这个数">
+      <i class="fa fa-chevron-left"></i> PAT1002_写出这个数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/posts/41052.html" rel="next" title="tf坐标变换实践_静态坐标变化">
+      tf坐标变换实践_静态坐标变化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E7%BB%BC%E8%BF%B0%E7%AE%80%E4%BB%8B"><span class="nav-text">视觉SLAM综述简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D"><span class="nav-text">视觉SLAM方法介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%89-SLAM%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-text">视觉 SLAM的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-text">视觉SLAM的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E7%9A%84%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D"><span class="nav-text">视觉SLAM的方法介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%89%B9%E5%BE%81%E7%9A%84-SLAM-%E6%96%B9%E6%B3%95"><span class="nav-text">基于特征的 SLAM 方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%91%E5%B1%95"><span class="nav-text">发展</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E7%9A%84SLAM-%E6%96%B9%E6%B3%95"><span class="nav-text">直接的SLAM 方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B-1"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%91%E5%B1%95-1"><span class="nav-text">发展</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E8%A7%89-SLAM%E4%B8%BB%E8%A6%81%E6%A0%87%E5%BF%97%E6%80%A7%E6%88%90%E6%9E%9C"><span class="nav-text">视觉 SLAM主要标志性成果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MonoSLAM"><span class="nav-text">MonoSLAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DTAM"><span class="nav-text">DTAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PTAM"><span class="nav-text">PTAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ki-nectFusion"><span class="nav-text">Ki-nectFusion</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LSD-SLAM"><span class="nav-text">LSD-SLAM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ORB-SLAM"><span class="nav-text">ORB_SLAM</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SLAM%E7%9A%84%E4%B8%BB%E8%A6%81%E7%A0%94%E7%A9%B6%E5%AE%9E%E9%AA%8C%E5%AE%A4"><span class="nav-text">SLAM的主要研究实验室</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E8%A7%89-SLAM-%E5%85%B3%E9%94%AE%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-text">视觉 SLAM 关键性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E5%BE%81%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%8C%B9%E9%85%8D"><span class="nav-text">特征检测与匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%B8%A7%E7%9A%84%E9%80%89%E6%8B%A9"><span class="nav-text">关键帧的选择</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AD%E7%8E%AF%E6%A3%80%E6%B5%8B%EF%BC%88loop-closing%EF%BC%89%E6%96%B9%E6%B3%95"><span class="nav-text">闭环检测（loop closing）方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%B0%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-text">地图优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B-2"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-text">问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95"><span class="nav-text">优化算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E4%B8%BB%E8%A6%81%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF%E4%B8%8E%E7%A0%94%E7%A9%B6%E7%83%AD%E7%82%B9"><span class="nav-text">视觉SLAM主要发展趋势与研究热点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E4%BC%A0%E6%84%9F%E5%99%A8%E8%9E%8D%E5%90%88"><span class="nav-text">多传感器融合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B-3"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E5%B1%95-2"><span class="nav-text">发展</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SLAM%E4%B8%8E%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%BB%93%E5%90%88"><span class="nav-text">SLAM与深度学习的结合</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%91%E5%B1%95-3"><span class="nav-text">发展</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E8%A7%89SLAM%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%E5%88%86%E6%9E%90"><span class="nav-text">视觉SLAM的优缺点分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E7%9B%AE%E8%A7%86%E8%A7%89SLAM"><span class="nav-text">单目视觉SLAM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9"><span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9"><span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E7%9B%AE%E8%A7%86%E8%A7%89SLAM"><span class="nav-text">双目视觉SLAM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-1"><span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9-1"><span class="nav-text">缺点</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RGBD-SLAM"><span class="nav-text">RGBD SLAM</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%98%E7%82%B9-2"><span class="nav-text">优点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BC%BA%E7%82%B9-2"><span class="nav-text">缺点</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E6%9D%9F"><span class="nav-text">结束</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">362k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:29</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>

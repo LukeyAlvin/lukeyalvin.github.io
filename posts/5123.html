@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="$g2o $提供了许多关于$BA $的节点和边，我们不必自己从头实现所有的计算。在g2o&#x2F;types&#x2F;sba&#x2F;types_six_dof_expmap.h中则提供了李代数表达的节点和边。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="g2o的结构以及BA节点与边的定义">
+<meta property="og:url" content="https://lukeyalvin.top/posts/5123.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="$g2o $提供了许多关于$BA $的节点和边，我们不必自己从头实现所有的计算。在g2o&#x2F;types&#x2F;sba&#x2F;types_six_dof_expmap.h中则提供了李代数表达的节点和边。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/g2o中关于BA的节点与边/image-20220328125016497.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/g2o中关于BA的节点与边/image-20220328125308391.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/g2o中关于BA的节点与边/606958-20160321233900042-681579456.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/g2o中关于BA的节点与边/5c7df32d30e9d.png">
+<meta property="article:published_time" content="2022-03-28T03:38:08.097Z">
+<meta property="article:modified_time" content="2022-04-26T03:02:10.028Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="SLAM实践">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/g2o中关于BA的节点与边/image-20220328125016497.png">
+
+<link rel="canonical" href="https://lukeyalvin.top/posts/5123.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>g2o的结构以及BA节点与边的定义 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/5123.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          g2o的结构以及BA节点与边的定义
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-03-28 11:38:08" itemprop="dateCreated datePublished" datetime="2022-03-28T11:38:08+08:00">2022-03-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-04-26 11:02:10" itemprop="dateModified" datetime="2022-04-26T11:02:10+08:00">2022-04-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SLAM%E5%8D%81%E5%9B%9B%E8%AE%B2/" itemprop="url" rel="index"><span itemprop="name">SLAM十四讲</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/5123.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/5123.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>$g2o $提供了许多关于$BA $的节点和边，我们不必自己从头实现所有的计算。在<code>g2o/types/sba/types_six_dof_expmap.h</code>中则提供了李代数表达的节点和边。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="g2o的结构"><a href="#g2o的结构" class="headerlink" title="g2o的结构"></a>g2o的结构</h1><blockquote>
+<p>参考博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/gaoxiang12/p/5304272.html">深入理解图优化与g2o：g2o篇</a></p>
+</blockquote>
+<p>源码：<a target="_blank" rel="noopener" href="https://github.com/RainerKuemmerle/g2o">https://github.com/RainerKuemmerle/g2o</a></p>
+<p><img src="/images/g2o中关于BA的节点与边/image-20220328125016497.png" alt="image-20220328125016497"></p>
+<ul>
+<li><strong>cmake_modules：</strong>给cmake用来寻找库的文件。我们用g2o时也会用它里头的东西，例如FindG2O.cmake</li>
+<li><strong>doc：</strong>文档。包括g2o自带的说明书（难度挺大的一个说明文档）。</li>
+<li><strong>g2o：</strong>最重要的源代码都在这里！</li>
+<li><strong>script：</strong>在android等其他系统编译用的脚本</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/RainerKuemmerle/g2o/tree/master/g2o">https://github.com/RainerKuemmerle/g2o/tree/master/g2o</a></p>
+<p><img src="/images/g2o中关于BA的节点与边/image-20220328125308391.png" alt="image-20220328125308391"></p>
+<ul>
+<li><strong>apps：</strong>一些应用程序。好用的g2o_viewer就在这里。其他还有一些不常用的命令行工具等。</li>
+<li><strong>core：</strong>核心组件，很重要！基本的顶点、边、图结构的定义，算法的定义，求解器接口的定义在这里。</li>
+<li><strong>examples：</strong>一些例程，可以参照着这里的东西来写。不过注释不太多。</li>
+<li><strong>solvers：</strong>求解器的实现。主要来自choldmod, csparse。在使用g2o时要先选择其中一种。</li>
+<li><strong>stuff：</strong>对用户来讲可有可无的一些工具函数。</li>
+<li><strong>types：</strong>各种顶点和边，很重要！我们用户在构建图优化问题时，先要想好自己的顶点和边是否已经提供了定义。如果没有，要自己实现。如果有，就用g2o提供的即可。</li>
+</ul>
+<p><strong>就经验而言，solvers给人的感觉是大同小异，而 types 的选取，则是 g2o 用户主要关心的内容。然后 core 下面的内容，我们要争取弄的比较熟悉，才能确保使用中出现错误可以正确地应对。</strong></p>
+<p>g2o最基本的类结构：</p>
+<p><img src="/images/g2o中关于BA的节点与边/606958-20160321233900042-681579456.png" alt="img"></p>
+<p>　先看上半部分。SparseOptimizer 是我们最终要维护的东东。它是一个Optimizable Graph，从而也是一个Hyper Graph。一个 SparseOptimizer 含有很多个顶点 （都继承自 Base Vertex）和很多个边（继承自 BaseUnaryEdge, BaseBinaryEdge或BaseMultiEdge）。这些 Base Vertex 和 Base Edge 都是抽象的基类，而实际用的顶点和边，都是它们的派生类。我们用 SparseOptimizer.addVertex 和 SparseOptimizer.addEdge 向一个图中添加顶点和边，最后调用 SparseOptimizer.optimize 完成优化。</p>
+<p>　　在优化之前，需要指定我们用的求解器和迭代算法。从图中下半部分可以看到，一个 SparseOptimizer 拥有一个 Optimization Algorithm，继承自Gauss-Newton, Levernberg-Marquardt, Powell’s dogleg 三者之一（我们常用的是GN或LM）。同时，这个 Optimization Algorithm 拥有一个Solver，它含有两个部分。一个是 SparseBlockMatrix ，用于计算稀疏的雅可比和海塞； 一个是用于计算迭代过程中最关键的一步</p>
+<script type="math/tex; mode=display">
+HΔx=−b</script><p>这就需要一个线性方程的求解器。而这个求解器，可以从 PCG, CSparse, Choldmod 三者选一。</p>
+<p><strong>综上所述，在g2o中选择优化方法一共需要三个步骤：</strong></p>
+<ol>
+<li>创建一个线性求解器LinearSolver。从 PCG, CSparse, Choldmod中选，实际则来自 g2o/solvers 文件夹中定义的内容。</li>
+<li>创建BlockSolver，并用上面定义的线性求解器初始化。</li>
+<li>创建总求解器solver，并从GN/LM/DogLeg 中选一个作为迭代策略，再用上述块求解器BlockSolver初始化。</li>
+<li>创建图优化的核心：稀疏优化器（SparseOptimizer）。</li>
+<li>定义图的顶点和边，并添加到SparseOptimizer中。</li>
+<li>设置优化参数，开始执行优化。</li>
+</ol>
+<h1 id="g2o中定义的顶点和边"><a href="#g2o中定义的顶点和边" class="headerlink" title="g2o中定义的顶点和边"></a>g2o中定义的顶点和边</h1><p>$g2o $提供了许多关于$BA $的节点和边，我们不必自己从头实现所有的计算。<code>g2o/types/sba/types_six_dof_expmap.h</code>中则提供了李代数表达的节点和边。</p>
+<p>因为在不同的应用场景（二维空间，三维空间），有不同的待优化变量（位姿，空间点），还涉及不同的优化类型（李代数位姿、李群位姿），g2o本身内部定义了一些常用的顶点类型</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">VertexSE2 : <span class="keyword">public</span> BaseVertex&lt;<span class="number">3</span>, SE2&gt;  <span class="comment">//2D位姿顶点, (x,y,theta)</span></span><br><span class="line">VertexSE3 : <span class="keyword">public</span> BaseVertex&lt;<span class="number">6</span>, Isometry3&gt;  <span class="comment">//6d vector (x,y,z,qx,qy,qz) 请注意，我们省略了四元数的 w 部分</span></span><br><span class="line">VertexPointXY : <span class="keyword">public</span> BaseVertex&lt;<span class="number">2</span>, Vector2&gt;</span><br><span class="line">VertexPointXYZ : <span class="keyword">public</span> BaseVertex&lt;<span class="number">3</span>, Vector3&gt;</span><br><span class="line">VertexSBAPointXYZ : <span class="keyword">public</span> BaseVertex&lt;<span class="number">3</span>, Vector3&gt;</span><br><span class="line"></span><br><span class="line">VertexSE3Expmap : <span class="keyword">public</span> BaseVertex&lt;<span class="number">6</span>, SE3Quat&gt;</span><br><span class="line">VertexCam : <span class="keyword">public</span> BaseVertex&lt;<span class="number">6</span>, SBACam&gt;</span><br><span class="line">VertexSim3Expmap : <span class="keyword">public</span> BaseVertex&lt;<span class="number">7</span>, Sim3&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="顶点Vertex"><a href="#顶点Vertex" class="headerlink" title="顶点Vertex"></a>顶点Vertex</h2><p>g2o中顶点为<strong>待优化变量</strong>，边为<strong>误差项</strong>，综合之前所提到的非线性优化的应用：</p>
+<ul>
+<li><p>求解$PnP$</p>
+<ul>
+<li>待优化的变量是：相机的位姿以及所有的特征点的空间位置$P$</li>
+<li>误差项：重投影误差 $ξ^{*}=arg \underset{ξ}{min}\frac{1}{2}\sum^n_{i=1}\parallel u_i-\frac{1} {s_i}Kexp(ξ^{\land})P_i\parallel^2_2$</li>
+</ul>
+</li>
+<li><p>求解$ICP$</p>
+<ul>
+<li>待优化的变量是：相机的位姿以及所有的特征点的空间位置$P$</li>
+<li>误差项：重投影误差$\underset{\xi}{min}=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - exp(\xi^{\land})p^{\prime}_i) \parallel^2_2$</li>
+</ul>
+</li>
+</ul>
+<h3 id="VertexSE3Expmap"><a href="#VertexSE3Expmap" class="headerlink" title="VertexSE3Expmap"></a><code>VertexSE3Expmap</code></h3><p>VertexSE3Expmap(李代数位姿)</p>
+<p>继承于<code>BaseVertex</code>这个模板类<br>需要设置的模板参数：</p>
+<ul>
+<li>参数<code>6</code> ：表示它内部存储的优化变量维度。可以看到这是一个 6 维的李代数。，前三维表示旋转，后三维表示平移</li>
+<li>参数<code>SE3Quat</code> ：表示优化变量的类型。这里使用了 g2o 定义的相机位姿： SE3Quat。这个类内部使用了四元数加位移向量来存储位姿，但同时也支持李代数上的运算，例如对数映射（log 函数）和李代数上增量（update 函数）等操作。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">G2O_TYPES_SBA_API</span> <span class="title">VertexSE3Expmap</span> :</span> <span class="keyword">public</span> BaseVertex&lt;<span class="number">6</span>, SE3Quat&gt; </span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function">        <span class="title">VertexSE3Expmap</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br><span class="line">    <span class="comment">// 顶点重置函数，设定被优化变量的原始值</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span> </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate = <span class="built_in">SE3Quat</span>(); </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 顶点更新函数。主要用于优化过程中增量△x的计算</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">number_t</span>* update_)</span> </span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">          <span class="function">Eigen::Map&lt;<span class="keyword">const</span> Vector6&gt; <span class="title">update</span><span class="params">(update_)</span></span>;</span><br><span class="line">          <span class="built_in">setEstimate</span>(SE3Quat::<span class="built_in">exp</span>(update) * <span class="built_in">estimate</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    .....</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="参数设置"><a href="#参数设置" class="headerlink" title="参数设置"></a>参数设置</h4><p>使用时需要设置的参数，可以参考之前使用$PnP$优化第二个相机的位姿的时设置的参数内容：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">g2o::VertexSE3Expmap *pose = <span class="keyword">new</span> g2o::<span class="built_in">VertexSE3Expmap</span>();</span><br><span class="line">Eigen::Matrix3d R_mat;</span><br><span class="line">R_mat &lt;&lt; </span><br><span class="line">    R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">2</span>),</span><br><span class="line">    R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">2</span>),</span><br><span class="line">    R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">pose-&gt;<span class="built_in">setId</span>(<span class="number">0</span>); <span class="comment">// 设置Id号</span></span><br><span class="line">pose-&gt;<span class="built_in">setEstimate</span>(g2o::<span class="built_in">SE3Quat</span>( <span class="comment">// 设置待优化位姿R,t</span></span><br><span class="line">    R_mat,</span><br><span class="line">    Eigen::<span class="built_in">Vector3d</span>(t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">0</span>), t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">0</span>), t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">0</span>))、</span><br><span class="line">));</span><br><span class="line">optimizer.<span class="built_in">addVertex</span>(pose); <span class="comment">// 向一个图中添加顶点</span></span><br></pre></td></tr></table></figure>
+<h3 id="VertexPointXYZ"><a href="#VertexPointXYZ" class="headerlink" title="VertexPointXYZ"></a><code>VertexPointXYZ</code></h3><p>VertexPointXYZ(空间点位置)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">G2O_TYPES_SLAM3D_API</span> <span class="title">VertexPointXYZ</span> :</span> <span class="keyword">public</span> BaseVertex&lt;<span class="number">3</span>, Vector3&gt; </span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;</span><br><span class="line">    <span class="built_in">VertexPointXYZ</span>() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br><span class="line">	<span class="comment">// 顶点重置函数，设定被优化变量的原始值。</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span> </span>&#123; _estimate.<span class="built_in">fill</span>(<span class="number">0.</span>); &#125;</span><br><span class="line">	<span class="comment">// 顶点更新函数。主要用于优化过程中增量△x的计算</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">number_t</span>* update_)</span> </span>&#123;</span><br><span class="line">        <span class="function">Eigen::Map&lt;<span class="keyword">const</span> Vector3&gt; <span class="title">update</span><span class="params">(update_)</span></span>;</span><br><span class="line">        _estimate += update;</span><br><span class="line">    &#125;</span><br><span class="line">    ....</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="参数设置-1"><a href="#参数设置-1" class="headerlink" title="参数设置"></a>参数设置</h4><p>使用时需要设置的参数，可以参考之前使用$PnP$优化所有特征点的空间位置P时，设置的参数内容</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 优化所有特征点的空间位置 P</span></span><br><span class="line"><span class="keyword">int</span> index = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> Point3f p : points_3d)</span><br><span class="line">&#123;</span><br><span class="line">    g2o::VertexPointXYZ *point = <span class="keyword">new</span> g2o::<span class="built_in">VertexPointXYZ</span>();</span><br><span class="line">    point-&gt;<span class="built_in">setId</span>(index++); <span class="comment">// 设置Id号</span></span><br><span class="line">    point-&gt;<span class="built_in">setEstimate</span>(Eigen::<span class="built_in">Vector3d</span>(p.x, p.y, p.z));<span class="comment">// 设置待优化空间点3D位置XYZ</span></span><br><span class="line">    point-&gt;<span class="built_in">setMarginalized</span>(<span class="literal">true</span>); <span class="comment">// 是否边缘化（以便稀疏化求解）g2o中必须设置 marg 参见第十讲内容</span></span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(point); <span class="comment">// 向一个图中添加顶点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="边Edge"><a href="#边Edge" class="headerlink" title="边Edge"></a>边Edge</h2><p>BaseUnaryEdge，BaseBinaryEdge，BaseMultiEdge 分别表示一元边，两元边，多元边。一元边可以理解为一条边只连接一个顶点，两元边理解为一条边连接两个顶点，也就是我们常见的边啦，多元边理解为一条边可以连接多个（3个以上）顶点</p>
+<p><img src="/images/g2o中关于BA的节点与边/5c7df32d30e9d.png" alt></p>
+<h3 id="EdgeProjectXYZ2UV"><a href="#EdgeProjectXYZ2UV" class="headerlink" title="EdgeProjectXYZ2UV"></a>EdgeProjectXYZ2UV</h3><p>EdgeProjectXYZ2UV(重投影误差)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">G2O_TYPES_SBA_API</span> <span class="title">EdgeProjectXYZ2UV</span> :</span> <span class="keyword">public</span> BaseBinaryEdge&lt;<span class="number">2</span>, Vector2, VertexPointXYZ, VertexSE3Expmap&gt; </span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;</span><br><span class="line">    <span class="comment">//1. 默认初始化</span></span><br><span class="line">    <span class="built_in">EdgeProjectXYZ2UV</span>();</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br><span class="line">    <span class="comment">//2. 计算误差</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span>; <span class="comment">// 使用当前顶点的值计算的测量值与真实的测量值之间的误差</span></span><br><span class="line">    <span class="comment">//3. 线性增量函数，也就是雅克比矩阵J的计算方法</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">linearizeOplus</span><span class="params">()</span></span>; <span class="comment">// 在当前顶点的值下，该误差对优化变量的偏导数，也就是我们说的Jacobian</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">//相机参数</span></span><br><span class="line">  CameraParameters* _cam;  <span class="comment">// TODO make protected member?</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这是个二元边。第1个参数2是说观测值是2维的，也就是图像像素坐标x,y的差值，即$ z − h(ξ, P )$，对应观测值的类型是Vector2D，两个顶点也就是优化变量分别是三维点 VertexPointXYZ，和李群位姿VertexSE3Expmap</p>
+<h4 id="computeError"><a href="#computeError" class="headerlink" title="computeError()"></a>computeError()</h4><p>对应的<code>computeError()</code>的实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EdgeProjectXYZ2UV::computeError</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> VertexSE3Expmap* v1 = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">  <span class="keyword">const</span> VertexPointXYZ* v2 = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> VertexPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">  <span class="keyword">const</span> CameraParameters* cam =</span><br><span class="line">      <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> CameraParameters*&gt;(<span class="built_in">parameter</span>(<span class="number">0</span>));</span><br><span class="line">  <span class="comment">// 误差 = 观测 - 投影</span></span><br><span class="line">  _error = <span class="built_in">measurement</span>() - cam-&gt;<span class="built_in">cam_map</span>(v1-&gt;<span class="built_in">estimate</span>().<span class="built_in">map</span>(v2-&gt;<span class="built_in">estimate</span>()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p> <code>_vertices[0]</code>对应的是 VertexPointXYZ 类型的顶点，也就是三维点，<code>_vertices[1]</code>对应的是VertexSE3Expmap 类型的顶点，也就是位姿pose。因此前面 1 对应的就应该是 pose，0对应的应该就是三维点。</p>
+<p>cam_map 函数功能是把相机坐标系下三维点（输入）用内参转换为图像坐标（输出），具体代码如下所示:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Vector2 <span class="title">CameraParameters::cam_map</span><span class="params">(<span class="keyword">const</span> Vector3 &amp;trans_xyz)</span> <span class="keyword">const</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Vector2 proj = <span class="built_in">project</span>(trans_xyz);</span><br><span class="line">    Vector2 res;</span><br><span class="line">    res[<span class="number">0</span>] = proj[<span class="number">0</span>] * focal_length + principle_point[<span class="number">0</span>];</span><br><span class="line">    res[<span class="number">1</span>] = proj[<span class="number">1</span>] * focal_length + principle_point[<span class="number">1</span>];</span><br><span class="line">    <span class="keyword">return</span> res;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>.map的功能是把世界坐标系下三维点变换到相机坐标系</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Vector3 <span class="title">map</span><span class="params">(<span class="keyword">const</span> Vector3&amp; xyz)</span> <span class="keyword">const</span> </span>&#123; <span class="keyword">return</span> _r * xyz + <span class="keyword">_t</span>; &#125;</span><br></pre></td></tr></table></figure>
+<p>因此下面这个代码</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v1-&gt;<span class="built_in">estimate</span>().<span class="built_in">map</span>(v2-&gt;<span class="built_in">estimate</span>())</span><br></pre></td></tr></table></figure>
+<p>就是用V1估计的pose把V2代表的三维点，变换到相机坐标系下。</p>
+<h4 id="linearizeOplus"><a href="#linearizeOplus" class="headerlink" title="linearizeOplus()"></a>linearizeOplus()</h4><p>对应的<code>linearizeOplus()</code>的实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">EdgeProjectXYZ2UV::linearizeOplus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  VertexSE3Expmap* vj = <span class="keyword">static_cast</span>&lt;VertexSE3Expmap*&gt;(_vertices[<span class="number">1</span>]);</span><br><span class="line">  <span class="function">SE3Quat <span class="title">T</span><span class="params">(vj-&gt;estimate())</span></span>;</span><br><span class="line">  VertexPointXYZ* vi = <span class="keyword">static_cast</span>&lt;VertexPointXYZ*&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">  Vector3 xyz = vi-&gt;<span class="built_in">estimate</span>();</span><br><span class="line">  Vector3 xyz_trans = T.<span class="built_in">map</span>(xyz);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">number_t</span> x = xyz_trans[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">number_t</span> y = xyz_trans[<span class="number">1</span>];</span><br><span class="line">  <span class="keyword">number_t</span> z = xyz_trans[<span class="number">2</span>];</span><br><span class="line">  <span class="keyword">number_t</span> z_2 = z * z;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> CameraParameters* cam =</span><br><span class="line">      <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> CameraParameters*&gt;(<span class="built_in">parameter</span>(<span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">  Eigen::Matrix&lt;<span class="keyword">number_t</span>, <span class="number">2</span>, <span class="number">3</span>, Eigen::ColMajor&gt; tmp;</span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">0</span>, <span class="number">0</span>) = cam-&gt;focal_length;</span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">0</span>, <span class="number">1</span>) = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">0</span>, <span class="number">2</span>) = -x / z * cam-&gt;focal_length;</span><br><span class="line"></span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">1</span>, <span class="number">0</span>) = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">1</span>, <span class="number">1</span>) = cam-&gt;focal_length;</span><br><span class="line">  <span class="built_in">tmp</span>(<span class="number">1</span>, <span class="number">2</span>) = -y / z * cam-&gt;focal_length;</span><br><span class="line"></span><br><span class="line">  _jacobianOplusXi = <span class="number">-1.</span> / z * tmp * T.<span class="built_in">rotation</span>().<span class="built_in">toRotationMatrix</span>();</span><br><span class="line"></span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">0</span>) = x * y / z_2 * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">1</span>) = -(<span class="number">1</span> + (x * x / z_2)) * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">2</span>) = y / z * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">3</span>) = <span class="number">-1.</span> / z * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">4</span>) = <span class="number">0</span>;</span><br><span class="line">  _jacobianOplusXj(<span class="number">0</span>, <span class="number">5</span>) = x / z_2 * cam-&gt;focal_length;</span><br><span class="line"></span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">0</span>) = (<span class="number">1</span> + y * y / z_2) * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">1</span>) = -x * y / z_2 * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">2</span>) = -x / z * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">3</span>) = <span class="number">0</span>;</span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">4</span>) = <span class="number">-1.</span> / z * cam-&gt;focal_length;</span><br><span class="line">  _jacobianOplusXj(<span class="number">1</span>, <span class="number">5</span>) = y / z_2 * cam-&gt;focal_length;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>成员变量<code>_jacobianOplusXi</code>是<strong>误差到空间点的导数</strong>，<code>_jacobianOplusXj</code>是误<strong>差到相机位姿的导数</strong>，以李代数的左乘扰动表达。稍有差别的是，g2o 的相机里用 $f$ 统一描述 $f_x , f_y$ ，并且李代数定义顺序不同（g2o 是旋转在前，平移在后；我们是平移在前，旋转在后），所以矩阵前三列和后三列与我们的定义是颠倒的。此外都是一致的。</p>
+<p>李代数定义的$J$：（）</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial e}{\partial \delta \xi}&=
+\frac{\partial e}{\partial P^′}
+\frac{\partial P^′}{\partial \delta \xi}\\&=-
+\begin{bmatrix}
+\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
+&-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
+\\
+0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+&-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&-\frac{f_yX^′}{Z^{′}}
+\end{bmatrix}\\&=
+J
+\end{align*}</script><p>而g2o中的$J$定义的方式如下：（旋转在前，平移在后）</p>
+<script type="math/tex; mode=display">
+-
+\begin{bmatrix}
+-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
+&\frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
+\\
+-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&-\frac{f_yX^′}{Z^{′}}
+&0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
+\end{bmatrix}</script><p>值得一提的是，我们亦可自己实现相机位姿节点，并使用<code>Sophus::SE3</code>来表达位姿，提供类似的求导过程。然而，既然 g2o 已经提供了这样的类，在没有额外要求的情况下，自己重新实现就没有必要了。</p>
+<p>使用时需要设置的参数，以$PnP$中重投影误差为例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 2.设置边(每个 3D 点在第二个相机中的投影)</span></span><br><span class="line">index = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> Point2f p : points_2d)</span><br><span class="line">&#123;</span><br><span class="line">    g2o::EdgeProjectXYZ2UV *edge = <span class="keyword">new</span> g2o::<span class="built_in">EdgeProjectXYZ2UV</span>();</span><br><span class="line">    edge-&gt;<span class="built_in">setId</span>(index); <span class="comment">//定义边的编号（决定了在H矩阵中的位置）</span></span><br><span class="line">    edge-&gt;<span class="built_in">setVertex</span>(<span class="number">0</span>, <span class="keyword">dynamic_cast</span>&lt;g2o::VertexPointXYZ *&gt;(optimizer.<span class="built_in">vertex</span>(index)));</span><br><span class="line">    edge-&gt;<span class="built_in">setVertex</span>(<span class="number">1</span>, pose); <span class="comment">// 定义顶点</span></span><br><span class="line">    edge-&gt;<span class="built_in">setMeasurement</span>(Eigen::<span class="built_in">Vector2d</span>(p.x, p.y)); <span class="comment">// 定义观测值</span></span><br><span class="line">    edge-&gt;<span class="built_in">setParameterId</span>(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    edge-&gt;<span class="built_in">setInformation</span>(Eigen::Matrix2d::<span class="built_in">Identity</span>()) ; <span class="comment">// 定义协方差矩阵的逆</span></span><br><span class="line">    optimizer.<span class="built_in">addEdge</span>(edge);</span><br><span class="line">    index++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="自定义顶点类型"><a href="#自定义顶点类型" class="headerlink" title="自定义顶点类型"></a>自定义顶点类型</h1><p>一般情况下，如果我们需要用的顶点已经提供，则直接使用即可，但是有时候我们需要的顶点类型这里面没有，就得自己定义了。重新定义顶点一般需要考虑重写如下函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 顶点重置函数，设定被优化变量的原始值。</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span></span>;</span><br><span class="line"><span class="comment">// 顶点更新函数。主要用于优化过程中增量△x的计算</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">number_t</span>* update)</span></span>;</span><br><span class="line"><span class="comment">// 读盘、存盘函数，一般情况下不需要进行读/写操作的话，仅仅声明一下就可以</span></span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br></pre></td></tr></table></figure>
+<p><code>virtual void setToOriginImpl();</code>顶点重置函数，设定被优化变量的原始值。</p>
+<p><code>virtual void oplusImpl(const number_t* update);</code>顶点更新函数。主要用于优化过程中增量△x的计算。我们根据增量方程计算出增量之后，就是通过这个函数对估计值进行调整的。</p>
+<p>自定义顶点的格式：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">myVertex</span>:</span> <span class="keyword">public</span> g2::BaseVertex&lt;Dim, Type&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">    <span class="title">myVertex</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setOriginImpl</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    _estimate = <span class="built_in">Type</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span>* update)</span> <span class="keyword">override</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">    _estimate += <span class="comment">/*update*/</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="自定义边的类型"><a href="#自定义边的类型" class="headerlink" title="自定义边的类型"></a>自定义边的类型</h1><p>在使用BA求解ICP的实践中,使用的是3D-3D的边,由于g2o本身没有提供3D-3D的边,因此需自定义一个3D-3D的边:</p>
+<p>自定义边格式</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">myEdge</span> :</span> <span class="keyword">public</span> g2o::BaseUnaryEdge&lt;n,Dim, Type&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 结构体包含eigen成员必须进行宏定义 EIGEN_MAKE_ALIGNED_OPERATOR_NEW, 保证内存对齐</span></span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">myEdge</span>()&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 再添加边之前需要设定好该边连接的节点的索引以及观测值和信息矩阵，</span></span><br><span class="line">    <span class="comment">// 这个函数则是使用该边连接的节点和观测值来计算误差</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 计算雅克比矩阵，这个函数是可选的，如果给出了则进行解析求导，不给则进行数值求导</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">linearizeOplus</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="comment">// 属性</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以构建3D-3D的边为例:</p>
+<p>主要考虑两个函数的实现</p>
+<ul>
+<li><p><code>virtual void computeError()</code></p>
+<p> 在添加边之前需要设定好该边连接的节点的索引以及观测值和信息矩阵，这个函数则是使用该边连接的节点和观测值来计算误差</p>
+</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">const</span> g2o::VertexSE3Expmap *pose = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> g2o::VertexSE3Expmap *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">    <span class="comment">// measurement is p, point is p&#x27;</span></span><br><span class="line">    _error = _measurement - pose-&gt;<span class="built_in">estimate</span>().<span class="built_in">map</span>(_point); <span class="comment">//.map的功能是把世界坐标系下三维点变换到相机坐标系</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里误差的定义方式,是考虑相邻两帧图像之间的重投影误差,比如我们通过特征点匹配,确定了两个匹配好的特征点,$p_i$和$p_i^{\prime}$他们的关系为:</p>
+<script type="math/tex; mode=display">
+p_i = Rp_i^{\prime}+t</script><p>由于一些噪声,我们发现依据所求得的相机位姿$R,t$并没有达到理想的准确度,即$Rp_i^{\prime}+t \neq p_i$,他们的差值我们就定义为误差项:</p>
+<script type="math/tex; mode=display">
+e_i = p_i - (Rp_i^{\prime}+t)</script><p>因此,我们把估计的$p_i^{\prime}$的世界坐标系下三维点转换成相机坐标系,并与$p_i$做差</p>
+<ul>
+<li><code>virtual void linearizeOplus()</code></li>
+</ul>
+<p>计算雅克比矩阵，这个函数是可选的，如果给出了则进行解析求导，不给则进行数值求导,但是就优化效率而言,前者计算速度是更快的</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算雅克比矩阵，这个函数是可选的，如果给出了则进行解析求导，不给则进行数值求导</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">linearizeOplus</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// VertexSE3Expmap，这个表示李代数的位姿；</span></span><br><span class="line">        g2o::VertexSE3Expmap *pose = <span class="keyword">static_cast</span>&lt;g2o::VertexSE3Expmap *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="function">g2o::SE3Quat <span class="title">T</span><span class="params">(pose-&gt;estimate())</span></span>;          <span class="comment">// 顶点的当前估计</span></span><br><span class="line">        Eigen::Vector3d xyz_trans = T.<span class="built_in">map</span>(_point); <span class="comment">// .map的功能是把世界坐标系下三维点变换到相机坐标系</span></span><br><span class="line">        <span class="keyword">double</span> x = xyz_trans[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">double</span> y = xyz_trans[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">double</span> z = xyz_trans[<span class="number">2</span>];</span><br><span class="line"></span><br><span class="line">        <span class="comment">//_jacobianOplusXi是误差关于世界坐标系下坐标点的偏导</span></span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">0</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">1</span>) = -z;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">2</span>) = y;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">3</span>) = <span class="number">-1</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">4</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">0</span>, <span class="number">5</span>) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">0</span>) = z;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">1</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">2</span>) = -x;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">3</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">4</span>) = <span class="number">-1</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">1</span>, <span class="number">5</span>) = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">0</span>) = -y;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">1</span>) = x;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">2</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">3</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">4</span>) = <span class="number">0</span>;</span><br><span class="line">        _jacobianOplusXi(<span class="number">2</span>, <span class="number">5</span>) = <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    Eigen::Vector3d _point;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>目前代码待理解……</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/5123.html" title="g2o的结构以及BA节点与边的定义">https://lukeyalvin.top/posts/5123.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/12311.html" rel="prev" title="ch7_求解ICP并使用BA优化">
+      <i class="fa fa-chevron-left"></i> ch7_求解ICP并使用BA优化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/posts/46698.html" rel="next" title="ch8_使用LK光流法">
+      ch8_使用LK光流法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#g2o%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-text">g2o的结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#g2o%E4%B8%AD%E5%AE%9A%E4%B9%89%E7%9A%84%E9%A1%B6%E7%82%B9%E5%92%8C%E8%BE%B9"><span class="nav-text">g2o中定义的顶点和边</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B6%E7%82%B9Vertex"><span class="nav-text">顶点Vertex</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#VertexSE3Expmap"><span class="nav-text">VertexSE3Expmap</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE"><span class="nav-text">参数设置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VertexPointXYZ"><span class="nav-text">VertexPointXYZ</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE-1"><span class="nav-text">参数设置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%B9Edge"><span class="nav-text">边Edge</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#EdgeProjectXYZ2UV"><span class="nav-text">EdgeProjectXYZ2UV</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#computeError"><span class="nav-text">computeError()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#linearizeOplus"><span class="nav-text">linearizeOplus()</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E9%A1%B6%E7%82%B9%E7%B1%BB%E5%9E%8B"><span class="nav-text">自定义顶点类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BE%B9%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-text">自定义边的类型</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">362k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:29</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>
