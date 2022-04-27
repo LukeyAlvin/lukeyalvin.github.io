@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://lukeyalvin.top/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425153047596.png">
 <meta property="article:published_time" content="2022-04-25T09:25:33.008Z">
-<meta property="article:modified_time" content="2022-04-26T03:29:12.362Z">
+<meta property="article:modified_time" content="2022-04-26T06:53:39.022Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta name="twitter:card" content="summary">
@@ -229,7 +229,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-26 11:29:12" itemprop="dateModified" datetime="2022-04-26T11:29:12+08:00">2022-04-26</time>
+                <time title="修改时间：2022-04-26 14:53:39" itemprop="dateModified" datetime="2022-04-26T14:53:39+08:00">2022-04-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -268,14 +268,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>1.1k</span>
+              <span>1.8k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>2 分钟</span>
             </span>
 
         </div>
@@ -306,6 +306,29 @@
 \underset{q,p,f}{\arg\min}\sum^m_{i=1}\sum^m_{j=1}||\pi(q_{wc_i},p_{wc_i},f_{j})-z^{c_i}_{f_j} ||_{\sum_{ij} }\tag{1}</script><p>其中函数$\pi(\cdot)$表示投影函数，$\sum_{ij}$表示范数，然后这个误差函数可以通过之前学习的Ceres或g2o等库来进行求解。具体算法后文会介绍，比如高斯牛顿法，LM算法等。</p>
 <p>②然后就是构建IMU的误差$z_{b_1b_2}$，这个构建的过程主要就是通过预积分，通过上图可以发现，图像中$b_3$与$b_2$之间的小点就是IMU的数据，这些数据通过预积分的操作，就可以把这么多IMU数据变成一个约束$z_{b_2b_3}$。关于此知识点，高博在《视觉SLAM14讲》中并未提及，这也是本章介绍的重点。</p>
 <h1 id="Ⅱ-最小二乘问题的求解"><a href="#Ⅱ-最小二乘问题的求解" class="headerlink" title="Ⅱ.最小二乘问题的求解"></a>Ⅱ.最小二乘问题的求解</h1><p>最小二乘在之前的文章中有提及过，只不过叙述的是线性最小二乘，如果对最小二乘的概念理解不够透彻，从线性最小二乘入手不失为一种比较好的方式：<a href="https://lukeyalvin.top/2022/04/04/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/">线性最小二乘</a></p>
+<p>最小二乘的定义：找到一个 $n$ 维的变量 $x^*\in\mathbb{R} ^n$，使得损失函数$ F (x)$ 取局部最小值：</p>
+<script type="math/tex; mode=display">
+F(x)=\frac{1}{2}\sum^m_{i=1}(f_i(x))^2</script><p>其中$ f_i $是残差函数，比如测量值和预测值之间的差，且有 $m ≥ n$。局部最小值指对任意 $\parallel x − x ^∗ \parallel &lt; \delta$有 $F (x^∗ ) ≤ F (x)$</p>
+<p>假设损失函数是可导的且平滑的曲线，在$x$处进行二阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+F(x+\Delta x)=F(x)+J\Delta x+\frac{1}{2}\Delta x^TH\Delta x+O(\parallel \Delta x\parallel^3)\tag{2}</script><p>忽略泰勒展开的高阶项，损失函数变成了二次函数，可以轻易得到如下性质：</p>
+<blockquote>
+<p>如果在点 $x_s $处有导数为 $0$ ，则称这个点为稳定点。在点 $x_s $ 处对应的 Hessian 为$H$：</p>
+</blockquote>
+<ul>
+<li>如果$H$是正定矩阵，即它的特征值都大于  $0$，则在 $x_s $处有$ F (x) $为局部最小值;</li>
+<li>如果$H$是负定矩阵，即它的特征值都小于  $0$，则在 $x_s $处有$ F (x) $为局部最大值;</li>
+<li>如果$H$是不定矩阵，即它的特征值大于  $0$ 也有小于  $0$ 的，则 $x_s $处为鞍点。</li>
+</ul>
+<h2 id="A-基础：最速下降法、牛顿法"><a href="#A-基础：最速下降法、牛顿法" class="headerlink" title="A.基础：最速下降法、牛顿法"></a>A.基础：最速下降法、牛顿法</h2><h3 id="1-下降法"><a href="#1-下降法" class="headerlink" title="1.下降法"></a>1.下降法</h3><p>下降法包括梯度下降法以及最速下降法，<strong>梯度下降法</strong>和<strong>最速下降法</strong>都是针对<strong>无约束优化问题</strong>的<strong>搜索方向选择算法</strong>，他们的主要区别就是每一步选择迭代方向$d$的做法不同。</p>
+<h4 id="梯度下降法："><a href="#梯度下降法：" class="headerlink" title="梯度下降法："></a><strong>梯度下降法：</strong></h4><p>找一个下降方向$d$使损失函数随$ x $的迭代逐渐减小，直到$ x$ 收敛到$ x^∗$ ：</p>
+<script type="math/tex; mode=display">
+F(x_{k+1})<F(x_k)</script><p>因此整个过程分为两个部分：第一，找下降方向<strong>单位向量$d$</strong>，第二，确定下降步长$\alpha$.这两者共同决定了该搜索算法的好坏。</p>
+<p>假设$\alpha$足够小，我们可以对损失函数$F (x) $进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+F(x+\alpha d)\approx F(x)+\alpha Jd</script><p>其中下降方向满足：$Jd&lt;0$，</p>
+<p>通过 line search 方法找到下降的步长：$\alpha^*=\arg\min_{\alpha&gt;0}\{F(x+\alpha d)\}$</p>
+<h4 id="最速下降法："><a href="#最速下降法：" class="headerlink" title="最速下降法："></a><strong>最速下降法：</strong></h4><p>通过对梯度下降法的介绍，我们知道其迭代过程中最重要的就是为下次迭代选择一个合适的方向$d$，人们利用了<strong>梯度方向是函数值增长最快的方向</strong>的思想，来让迭代点沿着负梯度方向前进，保证函数的 “最速” 下降。</p>
 
     </div>
 
@@ -383,7 +406,10 @@
     <a href="/posts/19228.html" rel="prev" title="二、IMU传感器">
       <i class="fa fa-chevron-left"></i> 二、IMU传感器
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/posts/3766cfd.html" rel="next" title="LeGO-LOAM论文翻译">
+      LeGO-LOAM论文翻译 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -442,7 +468,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E5%9F%BA%E4%BA%8EBA%E7%9A%84-VIO-%E8%9E%8D%E5%90%88"><span class="nav-text">Ⅰ.基于BA的 VIO 融合</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E9%97%AE%E9%A2%98%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-text">Ⅱ.最小二乘问题的求解</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E5%9F%BA%E4%BA%8EBA%E7%9A%84-VIO-%E8%9E%8D%E5%90%88"><span class="nav-text">Ⅰ.基于BA的 VIO 融合</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E9%97%AE%E9%A2%98%E7%9A%84%E6%B1%82%E8%A7%A3"><span class="nav-text">Ⅱ.最小二乘问题的求解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E5%9F%BA%E7%A1%80%EF%BC%9A%E6%9C%80%E9%80%9F%E4%B8%8B%E9%99%8D%E6%B3%95%E3%80%81%E7%89%9B%E9%A1%BF%E6%B3%95"><span class="nav-text">A.基础：最速下降法、牛顿法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%8B%E9%99%8D%E6%B3%95"><span class="nav-text">1.下降法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%9A"><span class="nav-text">梯度下降法：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E9%80%9F%E4%B8%8B%E9%99%8D%E6%B3%95%EF%BC%9A"><span class="nav-text">最速下降法：</span></a></li></ol></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -458,7 +484,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-count">51</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -471,7 +497,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-count">25</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -784,12 +810,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">362k</span>
+    <span title="站点总字数">376k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:29</span>
+    <span title="站点阅读时长">5:42</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
