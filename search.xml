@@ -1,6 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>前端里程计方案-基于直接匹配</title>
+    <url>/posts/eb43aafd.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>本文主要介绍两种基于直接匹配的前端里程计方案，ICP以及NDT，重点介绍公式推导以及代码实现。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="ICP"><a href="#ICP" class="headerlink" title="ICP"></a><a href="https://lukeyalvin.top/posts/12311.html">ICP</a></h1><p>ICP即迭代最近点$（Iterative\ Closest\  Point）$的实现以及公式推导在视觉SLAM中已经提及，并进行了相关的公式推导和代码实现，详细查看：<a href="https://lukeyalvin.top/posts/12311.html">求解ICP</a>，这里不做具体展示。</p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161431509.png" alt="image-20220428161431509" style="zoom: 67%;"></p>
+<h1 id="经典NDT"><a href="#经典NDT" class="headerlink" title="经典NDT"></a>经典NDT</h1><p><img src="/images/前端里程计方案-基于直接匹配/image-20220428210054855.png" alt="image-20220428210054855" style="zoom:50%;"></p>
+<p>由于ICP迭代法一般般需要提供一个较好的初值，也就是需要粗配准，最终可能导致迭代结果可能会陷入局部最优，导致配准失败，往往达不到我们想要的效果。目前，实际工程之中，大多数使用另一种比较好的配准算法，NDT配准。</p>
+<p>所谓NDT就是正态分布变换，作用与ICP一样用来估计两个点云之间的刚体变换。NDT算法主要的思路就是<strong>将目标点云刻画成多个概率分布</strong>，然后通过位姿变换关系将待配准点云转换到目标点云坐标系下，计算转换后待配准点云的总概率，并将此概率的负值作为目标函数，通过高斯牛顿迭代法优化该目标函数以求获得负的最小概率值(即最大概率值)．</p>
+<p>由于其在配准过程中<strong>不利用对应点的特征计算和匹配</strong>，所以时间比其他方法快。这个配准算法耗时稳定，跟初值相关不大，初值误差大时，也能很好的纠正过来。因此，NDT算法因其具有较强的鲁棒性而被广泛的应用。</p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161900963.png" alt="image-20220428161900963" style="zoom: 50%;"></p>
+<center>NDT算法流程</center>
+
+<p>对点云进行相应的预处理之后，我们将空间划分为栅格（2D图像中的正方形或3D中的立方体），并统计落在栅格中的点，如图所示</p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428170225779.png" alt="image-20220428170225779" style="zoom:50%;"></p>
+<p>同样的，我们设上一帧点集和当前点集分别为：</p>
+<script type="math/tex; mode=display">
+X=\{x_1,x_2,...,x_{N_x}\} \\
+Y=\{y_1,y_2,...,y_{N_y}\}</script><p>求$X$的均值：</p>
+<script type="math/tex; mode=display">
+\mu=\frac{1}{N_x}\sum^{N_x}_{i=1}x_i</script><p>求$X$的协方差：</p>
+<script type="math/tex; mode=display">
+\Sigma=\frac{1}{N_x-1}\sum^{N_x}_{i=1}(x_i-\mu)(x_i-\mu)^T</script><p>根据预测的位姿$R,t$，对点进行旋转和平移，得到上一帧的点云投影到当前帧下的点云$y_i^{\prime}$：</p>
+<script type="math/tex; mode=display">
+y_i^{\prime}=T(p,y_i)=Ry_i+t</script><blockquote>
+<p> 其中对于2D模型的点：$p=[t_x\ t_y\ \phi_z]^T$，对于3D模型的点：$p=[t_x\ t_y\ t_z\ \phi_x\ \phi_y\ \phi_z]^T$</p>
+</blockquote>
+<p>将当前点集$X$的均值$\mu$和协方差$\sum$，与投影点集$y_i^\prime$的每一个点做联系，构建如下的概率分布：</p>
+<script type="math/tex; mode=display">
+f(X,y_i^\prime)=\frac{1}{\sqrt{2\pi}\sqrt{|\Sigma|} }\exp(-\frac{(y_i^\prime-\mu)^T\Sigma^{-1}(y_i^\prime-\mu)}{2})\tag{1}</script><p>然后求所有点的<strong>联合概率分布：</strong></p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Psi&=\prod_{i=1}^{N_y}f(X,y_i^\prime)\\
+&=\prod_{i=1}^{N_y}\frac{1}{\sqrt{2\pi}\sqrt{|\Sigma|} }\exp(-\frac{(y_i^\prime-\mu)^T\Sigma^{-1}(y_i^\prime-\mu)}{2})
+\end{align*}\tag{2}</script><p>取对数，简化问题：</p>
+<script type="math/tex; mode=display">
+\ln\Psi=\sum^{N_y}_{i=1}(-\frac{(y_i^\prime-\mu)^T\Sigma^{-1}(y_i^\prime-\mu)}{2}+\ln(\frac{1}{\sqrt{2\pi}\sqrt{|\Sigma|} }))\tag{3}</script><p>去除常数项：</p>
+<script type="math/tex; mode=display">
+\max\Psi=\max\ln\Psi=\min\Psi_1=\min\sum^{N_y}_{i=1}(y_i^\prime-\mu)^T{\Sigma}^{-1}(y_i^\prime-\mu)\tag{4}</script><p>所以我们的目标函数就变成了：$\min\sum^{N_y}_{i=1}(y_i^\prime-\mu)^T{\Sigma}^{-1}(y_i^\prime-\mu)$，而接下来的任务就是根据这个目标函数求得对应的参数$R,t$。</p>
+<p>令：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+e_i(p)&=y_i^\prime-\mu\\
+F_i(p)&=\sum^{N_y}_{i=1}(y_i^\prime-\mu)^T{\Sigma}^{-1}(y_i^\prime-\mu)\\
+&=e_i(p)^T\Sigma^{-1}e_i(p)
+\end{align*}\tag{5}</script><p>因此目标函数为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&\min\sum^{N_y}_{i=1}(y_i^\prime-\mu)^T{\Sigma}^{-1}(y_i^\prime-\mu)\\
+&=\min\sum^{N_y}_{i=1}F_i(p)
+\end{align*}\tag{6}</script><p>迭代优化，即找到$\Delta p$使得下式中的值达到最小：</p>
+<script type="math/tex; mode=display">
+\min\sum^{N_y}_{i=1}F_i(p+\Delta p)=\sum^{N_y}_{i=1}e_i(p+\Delta p)^T\Sigma^{-1}e_i(p+\Delta p)\tag{7}</script><p>其中对$e_i(p+\Delta p)$进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+e_i(p+\Delta p)&\approx e_i(p)+\frac{de_i}{dp}\Delta p\\
+&=e_i(p)+J_i\Delta p
+\end{align*}\tag{8}</script><p>故而：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+F_i(p+\Delta p)&=e_i(p+\Delta p)^T\Sigma^{-1}e_i(p+\Delta p)\\
+&\approx (e_i(p)+J_i\Delta p)^T\Sigma^{-1}(e_i(p)+J_i\Delta p)\\
+&=e_i(p)^T\Sigma^{-1}e_i(p)+2e_i(p)^T\Sigma^{-1}J_i\Delta p+\Delta p^TJ_i^T\Sigma^{-1}J_i\Delta p\\
+&=F_i(p)+2b_i^T\Delta p+\Delta p^TH_i\Delta p
+\end{align*}\tag{9}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+b_i^T=e_i(p)^T\Sigma^{-1}J_i，\ H_i=J_i^T\Sigma^{-1}J_i\tag{10}</script><p>因此，目标函数随自变量的变化为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Delta F_i(p)
+&=F_i(p+\Delta p)-F_i(p)\\
+&=2b_i^T\Delta p+\Delta p^TH_i\Delta p
+\end{align*}\tag{11}</script><p>上述优化问题转换为：找到$\Delta p$使得$\Delta F_i(p)$取得极小值，令其导数为零：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{d\Delta F_i(p)}{d\Delta p}&=2b_i+2H_i\Delta p=0\\
+即：H_i\Delta p&=-b_i
+\end{align*}\tag{12}</script><p>根据$(10)$中的定义，只需要求$J_i$，即可求得$\Delta p $</p>
+<script type="math/tex; mode=display">
+J_i=\frac{de_i}{dp}</script><h2 id="2D场景"><a href="#2D场景" class="headerlink" title="2D场景"></a>2D场景</h2><p>已知对于2D场景$p=[t_x\ t_y\ \phi_z]^T$，</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+y_i^{\prime}&=T(p,y_i)\\
+&=Ry_i+t\\
+&=\begin{bmatrix}
+\cos\phi_z&-\sin\phi_z\\
+\sin\phi_z&\cos\phi_z
+\end{bmatrix}y_i+\begin{bmatrix}t_x\\t_y\end{bmatrix}\\
+e_i&=y_i^{\prime}-\mu
+\end{align*}</script><p>雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+J_i=\begin{bmatrix}
+1&0&-y_{i1}\sin\phi_z-y_{i2}\cos\phi_z\\
+0&1&y_{i1}\cos\phi_z-y_{i2}\sin\phi_z\end{bmatrix}</script><h2 id="3D场景"><a href="#3D场景" class="headerlink" title="3D场景"></a>3D场景</h2><p>已知对于3D场景$p=[t_x\ t_y\ t_z\ \phi_x\ \phi_y\ \phi_z]^T$，</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+y_i^{\prime}&=T(p,y_i)\\
+&=Ry_i+t\\
+&=R_xR_yR_zy_i+t\\
+&=
+\begin{bmatrix}
+c_yc_z&-c_ys_z&s_y\\
+c_xs_z+s_xs_yc_z&c_xc_z-s_xs_ys_z&-s_xc_y\\
+s_xs_z-c_xs_yc_z&c_xs_ys_z+s_xc_z&c_xc_y
+\end{bmatrix}y_i+\begin{bmatrix}t_x\\t_y\\t_z\end{bmatrix}\\
+e_i&=y_i^{\prime}-\mu
+\end{align*}</script><p>雅可比矩阵：</p>
+<script type="math/tex; mode=display">
+J_i=\begin{bmatrix}
+1&0&0&0&c&f\\
+0&1&0&a&d&g\\
+0&0&1&b&e&h
+\end{bmatrix}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+a&=y_{i1}(-s_xs_z+c_xs_yc_z)+y_{i2}(-s_xc_z-c_xs_ys_z)+y_{i3}(-c_xc_y)\\
+b&=y_{i1}(c_xs_z+s_xs_yc_z)+y_{i2}(c_xc_z-s_xs_ys_z)+y_{i3}(-s_xc_y)\\
+c&=y_{i1}(-s_yc_z)+y_{i2}(s_ys_z)+y_{i3}(c_y)\\
+d&=y_{i1}(s_xc_yc_z)+y_{i2}(-s_xc_ys_z)+y_{i3}(s_xs_y)\\
+e&=y_{i1}(-c_xc_yc_z)+y_{i2}(c_xc_ys_z)+y_{i3}(-c_xs_y)\\
+f&=y_{i1}(-c_ys_z)+y_{i2}(-c_yc_z)\\
+g&=y_{i1}(c_xc_z-s_xs_ys_z)+y_{i2}(-c_xs_z-s_xs_yc_z)\\
+h&=y_{i1}(s_xc_z+c_xs_ys_z)+y_{i2}(c_xs_yc_z-s_xs_z)
+\end{align*}</script>]]></content>
+      <categories>
+        <category>激光SLAM</category>
+      </categories>
+      <tags>
+        <tag>激光SLAM</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>LeGO-LOAM论文翻译</title>
     <url>/posts/3766cfd.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -110,9 +247,10 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <h1 id="Ⅴ-结论与讨论"><a href="#Ⅴ-结论与讨论" class="headerlink" title="Ⅴ.结论与讨论"></a>Ⅴ.结论与讨论</h1><p>我们提出了 LeGO-LOAM，一种轻量级和地面优化的激光雷达里程计和建图方法，用于在复杂环境中执行 UGV 的实时姿态估计。 LeGO-LOAM 是轻量级的，因为它可以在嵌入式系统上使用并实现实时性能。LeGO-LOAM 也是地面优化的，利用地面分离、点云分割和改进的 L-M 优化。在此过程中过滤掉可能代表不可靠特征的无价值点。两步 L-M 优化分别计算姿势变换的不同分量。所提出的方法在室外环境中收集的一系列 UGV 数据集上进行了评估。结果表明，与最先进的算法 LOAM 相比，LeGO-LOAM 可以达到相似或更好的精度。LeGO-LOAM 的计算时间也大大减少。未来的工作包括探索其在其他类型车辆中的应用。尽管 LeGO-LOAM 特别针对地面车辆的姿态估计进行了优化，但它的应用可能会扩展到其他车辆，例如无人机 (unmanned aerial vehicles，UAVs)，只需稍作改动。将 LeGO-LOAM 应用于 UAV 时，我们不会假设地面存在于扫描中。扫描的点云将在没有地面提取的情况下被分割。对于$ F_e、\mathbb{F}_e$ 和 $\mathbb{F}_p $的选择，特征提取过程是相同的。不是从标记为地面点的点中提取 $F_p$ 的平面特征，而是从所有分割点中选择 $F_p$ 中的特征，然后将使用原始的 L-M 方法来获得两次扫描之间的转换，而不是使用两步优化方法。尽管在这些变化之后计算时间会增加，但 LeGO-LOAM 仍然是有效的，因为在分割后在嘈杂的室外环境中会省略大量的点。估计的特征对应的准确性可能会提高，因为它们受益于分割。此外，使用 LeGO-LOAM 在线执行循环闭合的能力使其成为长时间导航任务的有用工具。</p>
 ]]></content>
       <categories>
-        <category>文献阅读</category>
+        <category>文献阅读,激光SLAM</category>
       </categories>
       <tags>
+        <tag>激光SLAM</tag>
         <tag>文献阅读</tag>
         <tag>LeGO-LOAM</tag>
       </tags>
@@ -785,7 +923,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
       </tags>
   </entry>
   <entry>
-    <title>loam_velodyney源代码深度解析</title>
+    <title>LOAM源代码深度解析</title>
     <url>/posts/49015.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -990,10 +1128,11 @@ A=\begin{bmatrix}
 <p><a href="https://blog.csdn.net/nksjc/article/details/76401092">3D 激光 SLAM -&gt;loam_velodyne 论文与代码解析</a></p>
 ]]></content>
       <categories>
-        <category>SLAM项目实践</category>
+        <category>SLAM项目实践,激光SLAM</category>
       </categories>
       <tags>
         <tag>LOAM</tag>
+        <tag>激光SLAM</tag>
       </tags>
   </entry>
   <entry>
@@ -1035,15 +1174,16 @@ A=\begin{bmatrix}
 <p><img src="/images/loam-velodyne源码编译与数据集运行/image-20220418094922467.png" alt="image-20220418094922467"></p>
 ]]></content>
       <categories>
-        <category>SLAM项目实践</category>
+        <category>SLAM项目实践,激光SLAM</category>
       </categories>
       <tags>
         <tag>ALOAM</tag>
         <tag>LOAM</tag>
+        <tag>激光SLAM</tag>
       </tags>
   </entry>
   <entry>
-    <title>LOAM深度剖析</title>
+    <title>LOAM论文深度剖析</title>
     <url>/posts/33314.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -1332,15 +1472,16 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
 <p><a href="https://zhuanlan.zhihu.com/p/29939195">LOAM:3D激光里程计及环境建图的方法和实现（三）</a></p>
 ]]></content>
       <categories>
-        <category>文献阅读</category>
+        <category>文献阅读,激光SLAM</category>
       </categories>
       <tags>
         <tag>LOAM</tag>
+        <tag>激光SLAM</tag>
         <tag>文献阅读</tag>
       </tags>
   </entry>
   <entry>
-    <title>LOAM翻译</title>
+    <title>LOAM论文翻译</title>
     <url>/posts/36439.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -1447,7 +1588,7 @@ f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{10}</script><p>最后，我�
 f(T^L_{k+1})=d,\tag{11}</script><p>其中每一行$f$对应一个特征点，$d$包含相应的距离。我们计算$f$关于$T^L_{k+1}$的雅可比矩阵，记作$J$，其中$J =\partial f /\partial T^L_{k+1}$。然后，$(11)$通过非线性迭代，使$d$趋近于$0$，</p>
 <script type="math/tex; mode=display">
 T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>$\lambda$是由<code>Levenberg-Marquardt</code>方法确定的因子。</p>
-<h2 id="D-激光雷达里程计算法"><a href="#D-激光雷达里程计算法" class="headerlink" title="D.激光雷达里程计算法"></a>D.激光雷达里程计算法</h2><p><img src="/posts/36439.htm/%E5%9B%BE%E7%89%871.png" alt="图片1"></p>
+<h2 id="D-激光雷达里程计算法"><a href="#D-激光雷达里程计算法" class="headerlink" title="D.激光雷达里程计算法"></a>D.激光雷达里程计算法</h2><p><img src="/images/loam论文翻译/%E5%9B%BE%E7%89%871.png" alt="图片1"></p>
 <p>激光雷达里程计算法如算法1所示。该算法以上次扫描的点云$\overline{P}_k$、当前扫描的增长点云$P_{k+1}$和上次递归的位姿变换$T^L_{k+1}$作为输入。如果启动了新的扫描，$T^L_{k+1}$将被设置为零(第$4-6$行)。然后，算法从$P_{k+1}$中提取特征点构造第$7$行$\xi_{k+1}$和$H_{k+1}$。对于每个特征点，我们可以在$\overline{P}_k$(第$9-19$行)中找到对应。运动估计适应于鲁棒拟合[27]。在第$ 15 $行，该算法为每个特征点分配一个平方权值。 与其对应的距离较大的特征点被分配较小的权重，距离大于阈值的特征点被视为异常值并分配零权重。然后，在第$ 16 $行，为一次迭代更新位姿变换。 当发现收敛或满足最大迭代次数时，非线性优化终止。 如果算法到达扫描结束，则使用扫描期间估计的运动将$P_{k+1}$重新投影到时间戳 $t_{k+2}$。 否则，仅返回变换$T^L_{k+1}$ 用于下一轮递归。</p>
 <h1 id="VI-激光雷达建图"><a href="#VI-激光雷达建图" class="headerlink" title="VI.激光雷达建图"></a>VI.激光雷达建图</h1><p><img src="/images/loam论文翻译/image-20220410153350151.png" alt="image-20220410153350151" style="zoom:50%;"></p>
 <blockquote>
@@ -1498,10 +1639,11 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>由于当前的方法不能识别闭环，我们未来的工作包括开发一种通过闭环来修复运动估计漂移的方法。此外，我们将我们方法的输出与卡尔曼滤波器中的 IMU 集成，以进一步减少运动估计漂移。</p>
 ]]></content>
       <categories>
-        <category>文献阅读</category>
+        <category>文献阅读,激光SLAM</category>
       </categories>
       <tags>
         <tag>LOAM</tag>
+        <tag>激光SLAM</tag>
         <tag>文献阅读</tag>
       </tags>
   </entry>
@@ -3163,9 +3305,13 @@ e_i = p_i - (Rp_i^{\prime}+t)</script><p>因此,我们把估计的$p_i^{\prime}$
           </blockquote>
 <span id="more"></span>
 <p>和 $PnP$ 类似，$ICP $的求解也分为两种方式：利用线性代数的求解（主要是$ SVD$），以及利用非线性优化方式的求解（类似于 $Bundle Adjustment$）。</p>
-<h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
+<h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><p>ICP的原理主要是通过两组匹配好的点云，进行运动估计，求得$R,t$的过程。我们知道对于两组匹配好的点云理想情况下应该可以达到完全重合，但是实际上则会有偏差，而重合的程度就是一个评价标椎，我们通过求解ICP，可以得到相对优的$R,t$，也就是进行最优的运动估计，这就是ICP的原理以及作用。</p>
+<p><img src="/images/求解ICP并使用BA优化/image-20220428151935615.png" alt="image-20220428151935615"></p>
+<p>重合程度就是一个$loss\ function$，</p>
+<p><img src="/images/求解ICP并使用BA优化/image-20220428161453025.png" alt="image-20220428161453025" style="zoom:67%;"></p>
+<h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
 <script type="math/tex; mode=display">
-P = {p_1 , . . . , p_n } \\ P^′= {p^′_1 , . . . , p^′_n }</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
+P = \{p_1 , . . . , p_n \} \\ P^′= \{p^′_1 , . . . , p^′_n \}</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
 <script type="math/tex; mode=display">
 ∀i, p_i = Rp^′_i + t.</script><p>定义第 $i$对点的误差项：</p>
 <script type="math/tex; mode=display">
@@ -3182,7 +3328,8 @@ p=\frac{1}{n}\sum^n_{i=1}(p_i)，p^{\prime}=\frac{1}{n}\sum^n_{i=1}(p^{\prime}_i
 \\&= \frac{1}{2}\sum^n_{i=1}(\parallel p_i -p- R(p^{\prime}_i-p^{\prime}) \parallel^2+
 \parallel p- Rp^{\prime}+t\parallel^2
 \\&+2(p_i -p-R(p^{\prime}_i-p^{\prime})^T(p-Rp^{\prime}-t))
-\end{align*}</script><p>其中：</p>
+\end{align*}</script><p>这里第一步加减质心的作用就是为了第二步，第二步将两组点的每一个点云分别减去各自的质心，作用将$R,t$解耦。之后就可以得到第三步的式子。</p>
+<p>第三步中：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 p_i-p-R(p^{\prime}_i-p^{\prime})&=(Rp^{\prime}_i+t)-(Rp^{\prime}+t)-R(p^{\prime}_i-p^{\prime})\\
@@ -3194,7 +3341,7 @@ p_i-p-R(p^{\prime}_i-p^{\prime})&=(Rp^{\prime}_i+t)-(Rp^{\prime}+t)-R(p^{\prime}
 \underset{R,t}{min}J&=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - (Rp^′_i + t)) \parallel^2\\
 &=\frac{1}{2}\sum^n_{i=1}\parallel p_i -p- R(p^{\prime}_i-p^{\prime}) \parallel^2+
 \parallel p- Rp^{\prime}+t\parallel^2
-\end{align*}</script><p>仔细观察左右两项，我们发现左边只和旋转矩阵 R 相关，而右边既有 R 也有 t，但只和质心相关。只要我们获得了 R，令第二项为零就能得到 t。于是，ICP 可以分为以下三个步骤求解：</p>
+\end{align*}</script><p>仔细观察左右两项，我们发现左边只和旋转矩阵 R 相关，而右边既有 R 也有 t，但只和质心相，这就完成了解耦的过程。只要我们获得了 R，令第二项为零就能得到 t。于是，ICP 可以分为以下三个步骤求解：</p>
 <p>1.计算两组点的质心位置 $p$, $p^{\prime}$，然后计算每个点的去质心坐标：</p>
 <script type="math/tex; mode=display">
 q_i = p_i − p,\\
@@ -3207,13 +3354,27 @@ t^∗ = p − Rp^{\prime} .</script><p>计算$R$：</p>
 \frac{1}{2}\sum^n_{i=1}\parallel q_i - Rq_i^{\prime} \parallel^2
 =\frac{1}{2}\sum^n_{i=1}q_i^{T}q_i+q_i^{\prime T}R^TRq_i^{\prime}-2q^T_iRq_i^{\prime}</script><p>第一项和$ R$ 无关，第二项由于 $R^T R = I$，亦与 $R $无关。因此，实际上优化目标函数变为：</p>
 <script type="math/tex; mode=display">
-\sum^n_{i=1}-q_i^{T}Rq_i^{\prime}=\sum^n_{i=1}-tr(Rq_i^{\prime}q_i^{T})=-tr(R\sum^n_{i=1}q_i^{\prime}q_i^{T})</script><p>定义：</p>
+\sum^n_{i=1}-q_i^{T}Rq_i^{\prime}\overset{(1)}{=}
+\sum^n_{i=1}-tr(q_i^{T}Rq_i^{\prime})\overset{(2)}{=}
+\sum^n_{i=1}-tr(Rq_i^{\prime}q_i^{T})=
+-tr(R\sum^n_{i=1}q_i^{\prime}q_i^{T})\overset{(3)}{=}-tr(RW)</script><blockquote>
+<p><strong>等式(1)：</strong>由于${q_i^{T} }_{(1\times 3)} R_{(3\times 3)} {q_i^{\prime} }_{(3\times 1)}$最终求得的是一个数，而对于一个常数来说，它的迹仍然是它本身。</p>
+<p><strong>等式(2)：</strong></p>
 <script type="math/tex; mode=display">
-W=\sum^n_{i=1}q_i^{\prime}q_i^{T}</script><p>$W $是一个$ 3 × 3 $的矩阵，对$ W$ 进行 $SVD$ 分解，得：</p>
+tr(AB)=\sum^m_{i=1}\sum^n_{j=1}a_{ij}b_{ji}=\sum^m_{i=1}\sum^n_{j=1}b_{ji}a_{ij}=tr(BA)</script><p><strong>等式(3)：</strong></p>
 <script type="math/tex; mode=display">
-W = UΣV^T</script><p>$Σ $为奇异值组成的对角矩阵，对角线元素从大到小排列，而 $U $和$ V$ 为正交矩阵。当 $W$ 满秩时，$R$ 为：</p>
+W=\sum^n_{i=1}q_i^{\prime}q_i^{T}</script></blockquote>
+<p>至此，我们知道优化函数就是$-tr(RW)$， <span style="color:red;">所以说我们需要求得最合适的$R$，使得$tr(RW)$达到最大值。</span></p>
+<p>这里我们需要引入一个<strong>定理：</strong></p>
+<p><span style="color:green;">定理：若有正定矩阵$AA^T$，则对于任意正交矩阵$B$，有$\tr(AA^T)\geq \tr(BAA^T)$</span></p>
+<p>我们已知$R$是正交矩阵，$W $是一个$ 3 × 3 $的矩阵，对$ W$ 进行 $SVD$ 分解，得：</p>
 <script type="math/tex; mode=display">
-R = UV^T</script><p>解得 $R$后,按照$t^∗ = p − Rp^{\prime} .$求解 t 即可</p>
+W = UΣV^T</script><p>$Σ $为奇异值组成的对角矩阵，对角线元素从大到小排列，而 $U $和$ V$ 为正交矩阵。当 $W$ 满秩时，令$R$ 为：</p>
+<script type="math/tex; mode=display">
+R = VU^T</script><p>这样：</p>
+<script type="math/tex; mode=display">
+RW=VU^TUΣV^T=VΣV^T=VΣ^{\frac{1}{2} }Σ^{\frac{1}{2} }V^T=VΣ^{\frac{1}{2} }(VΣ^{\frac{1}{2} })^T</script><p>此时，满足定理，使得$RW$达到了最大值。</p>
+<p>解得 $R$后,按照$t^∗ = p − Rp^{\prime} .$求解 $t$ 即可。</p>
 <h2 id="非线性优化方法"><a href="#非线性优化方法" class="headerlink" title="非线性优化方法"></a>非线性优化方法</h2><p>求解$ ICP$ 的另一种方式是使用非线性优化，以迭代的方式去找最优值。该方法和我们前面讲述的 $PnP $非常相似。以李代数表达位姿时，目标函数可以写成：</p>
 <script type="math/tex; mode=display">
 \underset{\xi}{min}=\frac{1}{2}\sum^n_{i=1}\parallel (p_i - exp(\xi^{\land})p^{\prime}_i) \parallel^2_2</script><p>单个误差项关于位姿导数已经在前面推导过了，使用李代数扰动模型即可:</p>

@@ -25,7 +25,7 @@
 
   <meta name="description" content="对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="loam_velodyney源代码深度解析">
+<meta property="og:title" content="LOAM源代码深度解析">
 <meta property="og:url" content="https://lukeyalvin.top/posts/49015.html">
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="对于LOAM的论文以及原理清晰之后，我们还需要对论文算法的具体实现做深度剖析，做到将论文的每一部分与代码相对应，并学习LOAM实现的方式。">
@@ -45,9 +45,10 @@
 <meta property="og:image" content="https://lukeyalvin.top/images/LOAM源代码解析/image-20220416150539893.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/LOAM源代码解析/image-20220416145505400.png">
 <meta property="article:published_time" content="2022-04-13T13:08:50.276Z">
-<meta property="article:modified_time" content="2022-04-26T02:53:19.255Z">
+<meta property="article:modified_time" content="2022-04-28T13:04:30.656Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="LOAM">
+<meta property="article:tag" content="激光SLAM">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://lukeyalvin.top/images/LOAM源代码解析/rosgraph_loam-16498556914162.png">
 
@@ -64,7 +65,7 @@
   };
 </script>
 
-  <title>loam_velodyney源代码深度解析 | Lukey Alvin</title>
+  <title>LOAM源代码深度解析 | Lukey Alvin</title>
   
 
 
@@ -224,7 +225,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          loam_velodyney源代码深度解析
+          LOAM源代码深度解析
         </h1>
 
         <div class="post-meta">
@@ -241,7 +242,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-26 10:53:19" itemprop="dateModified" datetime="2022-04-26T10:53:19+08:00">2022-04-26</time>
+                <time title="修改时间：2022-04-28 21:04:30" itemprop="dateModified" datetime="2022-04-28T21:04:30+08:00">2022-04-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -249,7 +250,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/SLAM%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5/" itemprop="url" rel="index"><span itemprop="name">SLAM项目实践</span></a>
+                  <a href="/categories/SLAM%E9%A1%B9%E7%9B%AE%E5%AE%9E%E8%B7%B5-%E6%BF%80%E5%85%89SLAM/" itemprop="url" rel="index"><span itemprop="name">SLAM项目实践,激光SLAM</span></a>
                 </span>
             </span>
 
@@ -535,7 +536,7 @@ A=\begin{bmatrix}
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://lukeyalvin.top/posts/49015.html" title="loam_velodyney源代码深度解析">https://lukeyalvin.top/posts/49015.html</a>
+    <a href="https://lukeyalvin.top/posts/49015.html" title="LOAM源代码深度解析">https://lukeyalvin.top/posts/49015.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -566,6 +567,7 @@ A=\begin{bmatrix}
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/LOAM/" rel="tag"> <i class="fa fa-tag"></i> LOAM</a>
+              <a href="/tags/%E6%BF%80%E5%85%89SLAM/" rel="tag"> <i class="fa fa-tag"></i> 激光SLAM</a>
           </div>
 
         
@@ -655,20 +657,20 @@ A=\begin{bmatrix}
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-count">52</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-count">26</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -981,12 +983,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">376k</span>
+    <span title="站点总字数">381k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:42</span>
+    <span title="站点阅读时长">5:46</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
