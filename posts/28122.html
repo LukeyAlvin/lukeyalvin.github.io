@@ -294,7 +294,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="/images/对极约束求解相机运动/image-20220325110120640.png" alt="image-20220325110120640" style="zoom:50%;"></p>
+<p><img src="/images/对极约束求解相机运动/image-20220325110120640.png" alt="image-20220325110120640" style="zoom:50%;" /></p>
 <p>设 $P$ 的空间位置为：</p>
 <script type="math/tex; mode=display">
 P=[X,Y,Z]^{T}</script><p>由于像素坐标与世界坐标的关系为：</p>
@@ -357,7 +357,7 @@ x_2^{T}t^{\land}Rx_1=0</script><p>首先，要知道像素坐标转相机归一�
 <p>由于 $E$ 本身具有尺度等价性，它分解得到的$ t, R $也有一个尺度等价性。而$ R ∈ SO(3) $自身具有约束，所以我们认为 $t $具有一个尺度。换言之，在分解过程中，对$ t $乘以任意非零常数，分解都是成立的。因此，我们通常把 $t $进行归一化，让它的长度等于 1。</p>
 </blockquote>
 <p>这也是由于单目相机本身的缺点，在单目 SLAM 中，仅通过单张图像无法获得像素的深度信息，我们需要通过三角测量（Triangulation）（或三角化）的方法来估计地图点的深度。</p>
-<p><img src="/images/对极约束求解相机运动/image-20220325110908224.png" alt="image-20220325110908224" style="zoom:50%;"></p>
+<p><img src="/images/对极约束求解相机运动/image-20220325110908224.png" alt="image-20220325110908224" style="zoom:50%;" /></p>
 <p>按照对极几何中的定义，设 $x_1 , x_2 $为两个特征点的归一化坐标，满足：</p>
 <script type="math/tex; mode=display">
 \begin{align*}

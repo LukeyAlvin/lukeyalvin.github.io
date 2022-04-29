@@ -298,7 +298,7 @@
 <h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><p>ICP的原理主要是通过两组匹配好的点云，进行运动估计，求得$R,t$的过程。我们知道对于两组匹配好的点云理想情况下应该可以达到完全重合，但是实际上则会有偏差，而重合的程度就是一个评价标椎，我们通过求解ICP，可以得到相对优的$R,t$，也就是进行最优的运动估计，这就是ICP的原理以及作用。</p>
 <p><img src="/images/求解ICP并使用BA优化/image-20220428151935615.png" alt="image-20220428151935615"></p>
 <p>重合程度就是一个$loss\ function$，</p>
-<p><img src="/images/求解ICP并使用BA优化/image-20220428161453025.png" alt="image-20220428161453025" style="zoom:67%;"></p>
+<p><img src="/images/求解ICP并使用BA优化/image-20220428161453025.png" alt="image-20220428161453025" style="zoom:67%;" /></p>
 <h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
 <script type="math/tex; mode=display">
 P = \{p_1 , . . . , p_n \} \\ P^′= \{p^′_1 , . . . , p^′_n \}</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>

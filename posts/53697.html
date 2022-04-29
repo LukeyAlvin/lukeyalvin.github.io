@@ -293,7 +293,7 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>已添加eigen库的路径到IncludePath，include<Eigen dense>也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </Eigen></p>
+            <p>已添加eigen库的路径到IncludePath，include<Eigen/Dense>也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -306,7 +306,7 @@
 </blockquote>
 </li>
 </ol>
-<p><img src="/images/eigen报错/image-20220426123147968.png" alt="image-20220426123147968" style="zoom:33%;"></p>
+<p><img src="/images/eigen报错/image-20220426123147968.png" alt="image-20220426123147968" style="zoom:33%;" /></p>
 <p>vscode中c_cpp_properties.json的”includePath”告诉vscode插件在哪里找到头文件，便于进行源码查看和debug，并没有告诉gcc编译器这个路径。</p>
 <ol>
 <li>添加eigen库的路径到编译参数”args”.（tasks.json）</li>
@@ -316,19 +316,19 @@
 <p>“-I”,</p>
 <p>“/usr/include/eigen3”</p>
 </blockquote>
-<p><img src="/images/eigen报错/image-20220426123215807.png" alt="image-20220426123215807" style="zoom:50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123215807.png" alt="image-20220426123215807" style="zoom:50%;" /></p>
 <h1 id="方案二-使用命令"><a href="#方案二-使用命令" class="headerlink" title="方案二:使用命令"></a>方案二:使用命令</h1><p>命令<code>g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</code>的意思就是编译代码,指定头文件位置,并输出可执行文件</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</span><br><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ ./main </span><br><span class="line">1 2 3</span><br><span class="line">4 5 6</span><br></pre></td></tr></table></figure>
 <h1 id="方案三-使用CMake"><a href="#方案三-使用CMake" class="headerlink" title="方案三:使用CMake"></a>方案三:使用CMake</h1><p>用vscode编写这类的调用第三方，其实最好的方式是用cmake，</p>
 <p>首先，配置c_cpp_properties.json中的includepath，这里配置的目的只是为了在vscode里没有红色波浪线，看起来美观。</p>
 <p>这里和方案一的第一步是一样的!</p>
 <p>项目结构如下：</p>
-<p><img src="/images/eigen报错/image-20220426123236573.png" alt="image-20220426123236573" style="zoom: 50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123236573.png" alt="image-20220426123236573" style="zoom: 50%;" /></p>
 <p>CMakeLists.txt内容如下：</p>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span> (VERSION <span class="number">2.8</span>.<span class="number">11</span>)</span><br><span class="line"><span class="keyword">project</span> (demo)</span><br><span class="line"><span class="keyword">find_package</span>(Eigen3 REQUIRED)</span><br><span class="line"><span class="keyword">include_directories</span>(/usr/<span class="keyword">include</span>/eigen3)</span><br><span class="line"><span class="keyword">add_executable</span> (eigenMatrix eigenMatrix.cpp)</span><br></pre></td></tr></table></figure>
 <p>运行代码:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">./eigenMatrix</span><br></pre></td></tr></table></figure>
-<p><img src="/images/eigen报错/image-20220426123337819.png" alt="image-20220426123337819" style="zoom:50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123337819.png" alt="image-20220426123337819" style="zoom:50%;" /></p>
 
     </div>
 

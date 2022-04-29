@@ -297,7 +297,7 @@
           </blockquote>
 <span id="more"></span>
 <p>素材：</p>
-<p><img src="/images/特征提取/FE.PNG" alt="FE" style="zoom:50%;"></p>
+<p><img src="/images/特征提取/FE.PNG" alt="FE" style="zoom:50%;" /></p>
 <p>相关函数参考文档：<a target="_blank" rel="noopener" href="http://www.opencv.org.cn/opencvdoc/2.3.2/html/modules/features2d/doc/features2d.html">features2d. 二维图像特征框架</a></p>
 <p>特征匹配的步骤：</p>
 <ul>
@@ -316,11 +316,11 @@
 <p>CMakeLists.txt</p>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( feature_extraction )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>( CMAKE_BUILD_TYPE <span class="string">&quot;Release&quot;</span> )</span><br><span class="line"><span class="keyword">set</span>( CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++14 -O3&quot;</span> )</span><br><span class="line"><span class="keyword">find_package</span>( OpenCV <span class="number">3.1</span> REQUIRED )</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_directories</span>( </span><br><span class="line">    <span class="variable">$&#123;OpenCV_INCLUDE_DIRS&#125;</span> </span><br><span class="line">    <span class="string">&quot;/usr/include/eigen3/&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">add_executable</span>( feature_extraction feature_extraction.cpp  )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( feature_extraction <span class="variable">$&#123;OpenCV_LIBS&#125;</span> )</span><br></pre></td></tr></table></figure>
 <p>特征点检测</p>
-<p><img src="/images/特征提取/outimg1.png" alt="outimg1" style="zoom: 50%;"></p>
+<p><img src="/images/特征提取/outimg1.png" alt="outimg1" style="zoom: 50%;" /></p>
 <p>所有匹配点对</p>
-<p><img src="/images/特征提取/img_match.png" alt="img_match" style="zoom: 50%;"></p>
+<p><img src="/images/特征提取/img_match.png" alt="img_match" style="zoom: 50%;" /></p>
 <p>优化后匹配点对</p>
-<p><img src="/images/特征提取/img_goodmatch.png" alt="img_goodmatch" style="zoom:50%;"></p>
+<p><img src="/images/特征提取/img_goodmatch.png" alt="img_goodmatch" style="zoom:50%;" /></p>
 
     </div>
 

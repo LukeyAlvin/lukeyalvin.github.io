@@ -44,9 +44,10 @@
 <meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/image-20220411204829280.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/image-20220411210656962.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/Linear_interpolation.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/image-20220429100816545.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/image-20220416101236496.png">
 <meta property="article:published_time" content="2022-04-11T03:06:44.036Z">
-<meta property="article:modified_time" content="2022-04-28T13:03:38.694Z">
+<meta property="article:modified_time" content="2022-04-29T02:29:40.639Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="LOAM">
 <meta property="article:tag" content="激光SLAM">
@@ -244,7 +245,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-28 21:03:38" itemprop="dateModified" datetime="2022-04-28T21:03:38+08:00">2022-04-28</time>
+                <time title="修改时间：2022-04-29 10:29:40" itemprop="dateModified" datetime="2022-04-29T10:29:40+08:00">2022-04-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -325,12 +326,12 @@
 <p><strong>已知一段点云序列$P_k,k\in Z^+$ ，计算在前$k$个时期内的雷达位姿以及构建全局地图。</strong></p>
 <h1 id="Ⅲ-特征提取（点云注册）"><a href="#Ⅲ-特征提取（点云注册）" class="headerlink" title="Ⅲ.特征提取（点云注册）"></a>Ⅲ.特征提取（点云注册）</h1><h2 id="A-线束模型"><a href="#A-线束模型" class="headerlink" title="A.线束模型"></a>A.线束模型</h2><p>要读懂代码中特征提取中的一些处理，需要弄清楚<code>VLP16</code>扫描时的运动模型,论文中称单个线束为一个<code>Scan</code>，对全部$16$线组成的一帧点云称为一个<code>Sweep</code>，虽然是用的多线激光雷达,但是LOAM是针对单个<code>Scan</code>提取特征点的，这里主要考虑到线束间角分辨率(竖直分辨率)与单个线内点间角分辨率(水平分辨率)存在的差异。以VLP$16$为例, 竖直分辨率约为$2^\circ$，而水平分辨率最大为$0.4^\circ$。</p>
 <p>角分辨率越大， 代表越远的物体，反射的两点距离越大，中间丢失的信息越多。因此， LOAM没有针对Scan和<code>Scan</code>之间的点的关联性提取和描述特征， 而是直接针对单个<code>Scan</code>提取特征。</p>
-<p><img src="/images/loam论文深度解析/image-20220413152223146.png" alt="image-20220413152223146" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413152223146.png" alt="image-20220413152223146" style="zoom:50%;" /></p>
 <p><strong>一个Sweep数据的采集如何完成的？</strong></p>
 <p>一帧内所有的点， 都是按顺序穿行扫描的，比如开始的时候水平的第一个角度为$0^\circ$左右，扫描水平角度为$0^\circ$上的竖直方向所有$16$个点（对应$16$个<code>Scan</code>）的深度，并且这$16$个点也是串行按顺序排列的，然后转到下一个水平角度；设水平分辨率为$0.4^\circ$，则下一个水平角度为$0.4^\circ$，其次水平角度为$0.8^\circ$，依次顺时针扫完一圈(论文中是$[-\pi,\pi]$)，这就完成了一个<code>Sweep</code>数据的采集。</p>
-<p><img src="/images/loam论文深度解析/image-20220413162337900.png" alt="image-20220413162337900" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413162337900.png" alt="image-20220413162337900" style="zoom:50%;" /></p>
 <p>由于从驱动得到的一个<code>Sweep</code>是以点云的形式输出（也就是一堆点，每个点有$XYZ$的信息，点和点之间无其他关系信息），因此我们并不知道每个点属于哪个<code>Scan</code>， 对应哪个水平角度。因此，我们需要根据上面的扫描模型去计算每个点的竖直角度和水平角度。点坐标与竖直角度/水平角度的换算关系如下图所示。[详细翻阅<a target="_blank" rel="noopener" href="https://velodynelidar.com/wp-content/uploads/2019/12/63-9243-Rev-E-VLP-16-User-Manual.pdf">vlp-16 sensor coordinate system文档</a>]</p>
-<p><img src="/images/loam论文深度解析/image-20220413151359585.png" alt="image-20220413151359585" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413151359585.png" alt="image-20220413151359585" style="zoom:50%;" /></p>
 <p>通过这个图很容易就能理解如何确定某个点属于哪个<code>Scan</code>，我们使用激光点的垂直距离除以它的水平距离，就可以得到雷达到该点的射线和水平面的夹角，用过这个夹角我们就可以很容易的判断该点属于哪个<code>Scan</code>。但是，实际上，在多线雷达（比如$32$线，$64$线），由于竖直方向的点更密集，<code>Scan</code>与<code>Scan</code>之间的距离很小，很容易出现把<code>Scan10</code>分配到<code>Scan13</code>这样的误差。当然，如果有条件，可以修改数据存储格式，建议把某个点属于哪个<code>Scan</code>直接保存的该点对应的数据中去。</p>
 <p>摘取对应代码（src/loam_velodyne/src/scanRegistration.cpp）：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cloudSize; i++) &#123;</span><br><span class="line">    <span class="comment">//坐标轴交换，velodyne lidar的坐标系也转换到z轴向前，x轴向左的右手坐标系</span></span><br><span class="line">    point.x = laserCloudIn.points[i].y;</span><br><span class="line">    point.y = laserCloudIn.points[i].z;</span><br><span class="line">    point.z = laserCloudIn.points[i].x;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//计算点的仰角(根据lidar文档垂直角计算公式),根据仰角排列激光线号，velodyne每两个scan之间间隔2度</span></span><br><span class="line">    <span class="keyword">float</span> angle = <span class="built_in">atan</span>(point.y / <span class="built_in">sqrt</span>(point.x * point.x + point.z * point.z)) * <span class="number">180</span> / M_PI;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -340,7 +341,7 @@
 <li>平面点：在三维空间中处于平滑平面上的点，其和周围点的大小差距不大，曲率较低，平滑度较低。</li>
 <li>边缘点：在三维空间中处于尖锐边缘上的点，其和周围点的大小差距较大，曲率较高，平滑度较高。</li>
 </ul>
-<p><img src="/images/loam论文深度解析/image-20220411152638255.png" alt="image-20220411152638255" style="zoom:33%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411152638255.png" alt="image-20220411152638255" style="zoom:33%;" /></p>
 <p>可以发现，LOAM没有使用特征描述子(连曲率都没有参与后续的匹配)。从代码中的边缘点与平面点的曲率判断阈值可以看出，LOAM提取的边缘点和平面点特征点的曲率，并没有特别大的差别，这使得LOAM有较强的场景适应性，在场景中比较曲折的区域，边缘点点会占据主导,而在较为平缓的区域，平面点点占据主导。 在激光扫描到的一块区域，总会提取出几个特征点。</p>
 <hr>
 <p>定义<strong>平面光滑度</strong>$c$：</p>
@@ -359,7 +360,7 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <p>这样操作的主要作用是，在进行后面的优化的时候，我们能根据这样的“等级”划分获得更明显</p>
 </blockquote>
 <h2 id="C-不可靠点的删除"><a href="#C-不可靠点的删除" class="headerlink" title="C.不可靠点的删除"></a>C.不可靠点的删除</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
-<p><img src="/images/loam论文深度解析/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;" /></p>
 <p>选取点的三要素：</p>
 <ul>
 <li>选择的边缘点或平面点的数量不能超过子区域的最大值</li>
@@ -367,9 +368,9 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <li>它不能在大致平行于激光束的表面上，也不能在被遮挡区域的边界上。</li>
 </ul>
 <p>经过特征点的提取，就可以得到论文中的帧数据对应的特征信息（边缘点和平面点分别用黄色和红色标记。）：</p>
-<p><img src="/images/loam论文深度解析/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;" /></p>
 <h1 id="Ⅳ-特征点匹配"><a href="#Ⅳ-特征点匹配" class="headerlink" title="Ⅳ.特征点匹配"></a>Ⅳ.特征点匹配</h1><p>将点云重新投影到扫描的末端。蓝色线段表示扫描$k$时感知到的点云 $P_k$，在$k$次扫描结束时，经过<strong>畸变校正</strong>之后将$P_k$重新投影到时间戳$t_{k+1}$，得到绿色线段$\overline{P}_k$。然后，在$k+1$次扫描时，重投影点云数据(经过畸变校正)$\overline{P}_k$和新感知的点云$P_{k+1}$(橙色线段)一起估计激光雷达运动。</p>
-<p><img src="/images/loam论文深度解析/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;" /></p>
 <p>我们根据论文中的描述：</p>
 <ul>
 <li><p>$P_k$是$k$时刻激光雷达感知的点云集合， 根据上文的特征提取规则，得到边缘点的集合$\xi_{k}$和平面点的集合$H_{k}$；</p>
@@ -386,10 +387,10 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <h2 id="A-激光雷达数据的畸变"><a href="#A-激光雷达数据的畸变" class="headerlink" title="A.激光雷达数据的畸变"></a>A.激光雷达数据的畸变</h2><p>激光雷达数据产生的畸变又叫<strong>激光雷达自运动畸变</strong>，对于多数激光雷达而言，尽管激光的发射与接收很快，但构成点云的每一个点仍非同一时刻生成的。一般我们会将$100ms $(对应典型值$10Hz$) 内累积的数据作为一帧点云输出。若在这$100ms$内，激光雷达本体或安装所在的机体发生绝对位置的变化，那么<strong>此帧点云中每一个点的坐标系就是不同的。</strong>直观上看，这一帧点云数据就会发生一定的“变形”，不能真实对应所探测到的环境信息，类似于拍照时手抖了，拍出来的照片就会糊。这便是激光雷达的自运动畸变。</p>
 <p>举一个例子，激光雷达对面有一面平行的墙面，理想状况下激光处于位置A或者位置B位置墙面的点云应该一样，但实际上，由于在这$100ms$内，激光雷达本身在运动，所以这一帧的墙面的点云中，某些点的坐标系就变得不同了，进而失去了原始平行墙面的特征，所以说，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑。</p>
 <p>如果是一堵平行的墙面，理想状况下激光处于A或者B位置测量到的同一点云的距离应该一样，但是实际中，激光雷达的位置发生了变化，所以这一帧的墙面的点云中，每一个点的坐标系就是不同的，失去了原始平行墙面的特征，进行激光SLAM时，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑</p>
-<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;" /></p>
 <h2 id="B-将点与线和面匹配的原因"><a href="#B-将点与线和面匹配的原因" class="headerlink" title="B.将点与线和面匹配的原因"></a>B.将点与线和面匹配的原因</h2><p>理想情况下，没有畸变，激光雷达在短时间里获取的相邻帧数据是<strong>含有大量同一特征点</strong>的，也就是$P_k$和$P_{k+1}$中很多特征点只是雷达在不同位置下观察的同一个点。所以只要找到一个变化关系$T$使得$P_k$和$P_{k+1}$对应的点的匹配，这个$T$就是表示激光雷达的帧间运动。为了减少计算量，增加鲁棒性，不直接使用点与点的匹配，而是使用边缘点和对应的线特征，平面点和对应的面特征，这样也可以得到变换关系 $T$。</p>
 <p>但是实际情况下，激光雷达的点云数据是含有畸变的，所以作者将矫正的$P_k$重新投影到时间戳$t_{k+1}$，得到$\overline{P}_k$。我们的目的就是：从$\overline{P}_k$中找到与$\xi_{k+1}$中的点对应的边线，从平面图中找到与$H_{k+1}$中的点对应的平面贴片(patch)。那么现在就是一边进行矫正，一边进行匹配，然后进行迭代。迭代过程中，$T$的值不断变化，直到寻找到一个$T$使得<strong>所有点和对应特征区域距离和最小</strong>。</p>
-<h2 id="C-点和对应特征区域距离的计算"><a href="#C-点和对应特征区域距离的计算" class="headerlink" title="C.点和对应特征区域距离的计算"></a>C.点和对应特征区域距离的计算</h2><p><img src="/images/loam论文深度解析/image-20220411202023128.png" alt="image-20220411202023128" style="zoom:50%;"></p>
+<h2 id="C-点和对应特征区域距离的计算"><a href="#C-点和对应特征区域距离的计算" class="headerlink" title="C.点和对应特征区域距离的计算"></a>C.点和对应特征区域距离的计算</h2><p><img src="/images/loam论文深度解析/image-20220411202023128.png" alt="image-20220411202023128" style="zoom:50%;" /></p>
 <p>其中：$i\in \tilde{\xi}_{k+1}$，$j,l,m\in \overline{P}_k$</p>
 <p>图$7(a)$给出了寻找边缘点对应的边线的过程。设$i$是属于$\tilde{\xi}_{k+1}$的点，即$ i \in \tilde{\xi}_{k+1}$。边线由两个点表示。设$j$是$i$在$\overline{P}_k$中的最近邻，$j\in \overline{P}_k$，设$l$是$i$在连续两次扫描$j$时的最近邻，$(j, l)$构成$i$的对应关系。然后，为了验证$j$和$l$都是边缘点，我们根据公式$(1)$来检查局部表面的平滑度。这里，我们特别要求$j$和$l$来自不同的扫描，考虑到一次扫描不能包含来自同一边线的多个点。</p>
 <p>图$7(b)$显示了寻找平面贴片(patch)作为平面点对应的过程。设$ i$ 为$\tilde{H}_{k+1}$中的一个点，即$i \in  \tilde{H}_{k+1}$。平面贴片(patch)由三个点表示。与上一段类似，我们在$\overline{P}_k$中找到$ i $的最近邻，记为$j$。 然后，我们找到另外两个点 $l$ 和$ m$，作为$ i $的最近邻，一个在$j $的同一扫描中，另一个在 $j $的两次连续扫描中。 这保证了三个点是非共线的。 为了验证 $j$、$l$和 $m$ 都是平面点，我们根据$ (1) $再次检查局部表面的平滑度。</p>
@@ -409,14 +410,14 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <script type="math/tex; mode=display">
 S=OD·AB=|\overrightarrow{OA}×\overrightarrow {OB}|=|\overrightarrow{OA}|·|\overrightarrow{OB}|·sin\theta</script><p>如果我们需要求高：</p>
 <script type="math/tex; mode=display">
-OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}</script><p><img src="/images/loam论文深度解析/image-20220411204216656.png" alt="image-20220411204216656" style="zoom: 25%;"></p>
+OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}</script><p><img src="/images/loam论文深度解析/image-20220411204216656.png" alt="image-20220411204216656" style="zoom: 25%;" /></p>
 <p>所以对于：</p>
-<p><img src="/images/loam论文深度解析/image-20220411204829280.png" alt="image-20220411204829280" style="zoom: 50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411204829280.png" alt="image-20220411204829280" style="zoom: 50%;" /></p>
 <p>得到点到线的距离$d_\xi$为：</p>
 <script type="math/tex; mode=display">
 d_{\xi}=\frac{|(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,j)})×(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,l)})|}
 {|\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)}|}. \tag{2}</script><h3 id="b-点到面的距离"><a href="#b-点到面的距离" class="headerlink" title="b.点到面的距离"></a>b.点到面的距离</h3><p> 主要原理是<strong>点与平面内一点形成的向量与该平面的单位法向量的点积的模即为该点到平面的距离</strong>。</p>
-<p><img src="/images/loam论文深度解析/image-20220411210656962.png" alt="image-20220411210656962" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411210656962.png" alt="image-20220411210656962" style="zoom:50%;" /></p>
 <script type="math/tex; mode=display">
 d_\mathcal{H}=\frac
 {\begin{vmatrix}
@@ -434,12 +435,13 @@ y=y_0+\frac{y_1-y_0}{x_1-x_0}(x-x_0)</script><p>线性插值经常用于已知�
 <script type="math/tex; mode=display">
 R_T=f(x)-p(x)</script><p>其中 $p$ 表示上面定义的线性插值多项式</p>
 <script type="math/tex; mode=display">
-p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0). \tag{4}</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
+p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x-x_0). \tag{4}</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
 <script type="math/tex; mode=display">
 |R_T|\leq \frac{(x_1-x_0)^2}{8}\underset{x_0\leq x\leq x_1}{max}|f^{\prime\prime}(x)|</script><h2 id="B-运动估计"><a href="#B-运动估计" class="headerlink" title="B.运动估计"></a>B.运动估计</h2><p>激光雷达运动在扫描期间以<strong>恒定的角速度和线速度建模</strong>。这允许我们在一个扫描中对在不同时间接收到的点进行线性插值。</p>
 <p>假设$t$是当前的时间戳，$t_{k+1}$是扫描$k+1$的开始时间。</p>
 <p>设$T^L_{k+1}$为$[t_{k+1}, t]$之间的激光雷达位姿变换。$T^L_{k+1}$包含$6$自由度激光雷达的刚性运动，$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中我们用$T^L_{k+1}(1:3)$表示 $t_x$、$t_y$和$t_z$，它们分别是$\left\{L\right\}$沿$x-$、$y-$和$z-$轴的平移，我们用$T^L_{k+1}(4:6)$表示$θ_x$、$θ_y$和$θ_z$，它们是旋转角度，遵循右手规则。</p>
 <p>给定点$i，i \in P_k$，设$t_i$为其时间戳，设为$[t_{k+1}, t_i]$之间的$T^L_{(k+1,i)}$位姿变换。</p>
+<p><img src="/images/loam论文深度解析/image-20220429100816545.png" alt="image-20220429100816545" style="zoom:67%;" /></p>
 <p>$T^L_{(k+1,i)}$可以通过$T^L_{k+1}$的线性插值得到：</p>
 <script type="math/tex; mode=display">
 \begin{align}
@@ -459,7 +461,7 @@ w=\frac{T^L_{(k+1,i)}(4:6)}{\parallel T^L_{(k+1,i)}(4:6) \parallel}. \tag{9}</sc
 <script type="math/tex; mode=display">
 f_{\xi}(X^L_{(k+1,i)},T^L_{k+1})=d_\xi,i\in \xi_{k+1}.\tag{10}</script><p>合$(3)(5)-(8)$，我们可以在$H_{k+1}$中的一个平面点与对应的平面贴片(patch)建立另一个几何关系，</p>
 <script type="math/tex; mode=display">
-f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{11}</script><p>最后，我们用<code>Levenberg-Marquardt</code>方法[26]求解激光雷达运动。将$\xi_{k+1}$和$H_{k+1}$中每个特征点$(9)$和$(10)$叠加，得到一个非线性函数:</p>
+f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{11}</script><p>最后，我们用<code>Levenberg-Marquardt</code>方法[26]求解激光雷达运动。将$\xi_{k+1}$和$H_{k+1}$中每个特征点$(10)$和$(11)$叠加，得到一个非线性函数:</p>
 <script type="math/tex; mode=display">
 f(T^L_{k+1})=d,\tag{12}</script><p>其中每一行$f$对应一个特征点，$d$包含相应的距离。我们计算$f$关于$T^L_{k+1}$的雅可比矩阵，记作$J$，其中$J =\partial f /\partial T^L_{k+1}$。然后，$(12)$通过非线性迭代，使$d$趋近于$0$，</p>
 <script type="math/tex; mode=display">

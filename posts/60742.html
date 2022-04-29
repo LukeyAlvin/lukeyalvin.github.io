@@ -295,7 +295,7 @@
           </blockquote>
 <span id="more"></span>
 <h1 id="Ⅰ-基于BA的-VIO-融合"><a href="#Ⅰ-基于BA的-VIO-融合" class="headerlink" title="Ⅰ.基于BA的 VIO 融合"></a>Ⅰ.基于BA的 VIO 融合</h1><p>BA为问题早在学习《视觉SLAM十四讲》的时候我们就接触过，当时提到的PnP问题，涉及到的重投影误差，如下图所示，我们通过对相机的位姿进行优化，就可以得到最小的误差$e$，这个问题就是一个BA问题。类似的还有直接法中的光度误差。</p>
-<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png" alt="image-20220425154741376.png" style="zoom:50%;"></p>
+<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png" alt="image-20220425154741376.png" style="zoom:50%;" /></p>
 <p>所谓的 Bundle Adjustment，是指从视觉重建中提炼出最优的 3D 模型和相机参数（内参数和外参数）。从每一个特征点反射出来的几束光线（bundles of light rays），在我们把相机姿态和特征点空间位置做出最优的调整 (adjustment) 之后，最后收束到相机光心的这个过程，简称为 BA。</p>
 <p>但是在实际的VIO中不仅涉及到类似的重投影误差问题，还需要考虑IMU的优化问题，如图所示，图中：$q_{bc},p_{bc}$分别表示相机坐标系到机器人本体坐标系的旋转四元数和平移向量。$f_i,f_j$则是我们观察到的特征点的3D坐标。$z_{f_j}^{c_i}$z在相机不同的位姿$c_1,c_2,c_3$下的观测值。</p>
 <p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425153047596.png" alt="image-20220425153047596"></p>

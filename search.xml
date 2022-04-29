@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>前端里程计方案-基于直接匹配</title>
+    <title>前端里程计方案-基于直接匹配的ICP&amp;NDT</title>
     <url>/posts/eb43aafd.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -11,16 +11,15 @@
           </blockquote>
 <span id="more"></span>
 <h1 id="ICP"><a href="#ICP" class="headerlink" title="ICP"></a><a href="https://lukeyalvin.top/posts/12311.html">ICP</a></h1><p>ICP即迭代最近点$（Iterative\ Closest\  Point）$的实现以及公式推导在视觉SLAM中已经提及，并进行了相关的公式推导和代码实现，详细查看：<a href="https://lukeyalvin.top/posts/12311.html">求解ICP</a>，这里不做具体展示。</p>
-<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161431509.png" alt="image-20220428161431509" style="zoom: 67%;"></p>
-<h1 id="经典NDT"><a href="#经典NDT" class="headerlink" title="经典NDT"></a>经典NDT</h1><p><img src="/images/前端里程计方案-基于直接匹配/image-20220428210054855.png" alt="image-20220428210054855" style="zoom:50%;"></p>
-<p>由于ICP迭代法一般般需要提供一个较好的初值，也就是需要粗配准，最终可能导致迭代结果可能会陷入局部最优，导致配准失败，往往达不到我们想要的效果。目前，实际工程之中，大多数使用另一种比较好的配准算法，NDT配准。</p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161431509.png" alt="image-20220428161431509" style="zoom: 67%;" /></p>
+<h1 id="经典NDT"><a href="#经典NDT" class="headerlink" title="经典NDT"></a>经典NDT</h1><p>由于ICP迭代法一般般需要提供一个较好的初值，也就是需要粗配准，最终可能导致迭代结果可能会陷入局部最优，导致配准失败，往往达不到我们想要的效果。目前，实际工程之中，大多数使用另一种比较好的配准算法，NDT配准。</p>
 <p>所谓NDT就是正态分布变换，作用与ICP一样用来估计两个点云之间的刚体变换。NDT算法主要的思路就是<strong>将目标点云刻画成多个概率分布</strong>，然后通过位姿变换关系将待配准点云转换到目标点云坐标系下，计算转换后待配准点云的总概率，并将此概率的负值作为目标函数，通过高斯牛顿迭代法优化该目标函数以求获得负的最小概率值(即最大概率值)．</p>
 <p>由于其在配准过程中<strong>不利用对应点的特征计算和匹配</strong>，所以时间比其他方法快。这个配准算法耗时稳定，跟初值相关不大，初值误差大时，也能很好的纠正过来。因此，NDT算法因其具有较强的鲁棒性而被广泛的应用。</p>
-<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161900963.png" alt="image-20220428161900963" style="zoom: 50%;"></p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428161900963.png" alt="image-20220428161900963" style="zoom: 50%;" /></p>
 <center>NDT算法流程</center>
 
 <p>对点云进行相应的预处理之后，我们将空间划分为栅格（2D图像中的正方形或3D中的立方体），并统计落在栅格中的点，如图所示</p>
-<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428170225779.png" alt="image-20220428170225779" style="zoom:50%;"></p>
+<p><img src="/images/前端里程计方案-基于直接匹配/image-20220428170225779.png" alt="image-20220428170225779" style="zoom:50%;" /></p>
 <p>同样的，我们设上一帧点集和当前点集分别为：</p>
 <script type="math/tex; mode=display">
 X=\{x_1,x_2,...,x_{N_x}\} \\
@@ -129,7 +128,8 @@ e&=y_{i1}(-c_xc_yc_z)+y_{i2}(c_xc_ys_z)+y_{i3}(-c_xs_y)\\
 f&=y_{i1}(-c_ys_z)+y_{i2}(-c_yc_z)\\
 g&=y_{i1}(c_xc_z-s_xs_ys_z)+y_{i2}(-c_xs_z-s_xs_yc_z)\\
 h&=y_{i1}(s_xc_z+c_xs_ys_z)+y_{i2}(c_xs_yc_z-s_xs_z)
-\end{align*}</script>]]></content>
+\end{align*}</script><h1 id="其他NDT"><a href="#其他NDT" class="headerlink" title="其他NDT"></a>其他NDT</h1><p><img src="/images/前端里程计方案-基于直接匹配/image-20220428210054855.png" alt="image-20220428210054855" style="zoom: 67%;" /></p>
+]]></content>
       <categories>
         <category>激光SLAM</category>
       </categories>
@@ -142,7 +142,7 @@ h&=y_{i1}(s_xc_z+c_xs_ys_z)+y_{i2}(c_xs_yc_z-s_xs_z)
     <url>/posts/3766cfd.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>LOAM是Ji Zhang于2014年提出的使用激光雷达完成定位与三维建图的算法，即Lidar Odometry and Mapping。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了翻译。</p>
+            <p>LeGO-LOAM是Tixiao Shan 和 Brendan Englot于2018年提出的使用激光雷达完成定位与三维建图的算法，全称为：Lightweight and Groud-Optimized Lidar Odometry and Mapping on Variable Terrain，从标题可以看出 LeGO-LOAM 为应对<strong>可变地面</strong>进行了地面优化，同时保证了轻量级。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -182,7 +182,7 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>我们在这里介绍一种两步 L-M 优化方法。最佳变换 $T $分两步找到：</p>
 <p>$(1)$ 通过匹配$F^t_p$中的平面特征及其在 $\mathbb{F}^{t-1}_p$ 中的对应关系来估计$ [t_z, θ_{roll}, θ_{pitch}]$</p>
 <p>$(2) $然后使用 $F^t_e$中的边缘特征及其在 $\mathbb{F}^{t-1}_e$ 中的对应关系，并同时使用 $[t_z, θ_{roll}, θ_{pitch}]$ 作为约束一起来估计剩余的 $[t_x, t_y, θ_{yaw}]$。需要注意的是，虽然$[t_x, t_y, θ_{yaw}]$也可以从第一个优化步骤中获得，但它们的准确度较低，得到的结果也不能继续放在第二步中使用。最后，通过融合 $[t_z, θ_{roll}, θ_{pitch}]$ 和$[t_x, t_y, θ_{yaw}]$找到两个连续扫描之间的$ 6D$ 变换。通过使用所提出的两步优化方法，我们观察到在计算时间减少约 $35\% $的同时可以实现类似的精度（表 III）。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427165436363.png" alt="image-20220427165436363" style="zoom: 33%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427165436363.png" alt="image-20220427165436363" style="zoom: 33%;" /></p>
 <blockquote>
 <p>图 3：激光雷达里程计模块的两步优化。首先通过匹配从地面点提取的平面特征来获得$[t_z, θ_{roll}, θ_{pitch}]$。 $[t_x, t_y, θ_{yaw}]$然后使用从分割点提取的边缘特征进行估计，同时应用$[t_z, θ_{roll}, θ_{pitch}]$作为约束。</p>
 </blockquote>
@@ -194,7 +194,7 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>$^1$LeGO-LOAM 的代码可在 <a href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">https://github.com/RobustFieldAutonomyLab/LeGO-LOAM</a> 获得</p>
 </blockquote>
 <h2 id="A-小型-UGV-测试"><a href="#A-小型-UGV-测试" class="headerlink" title="A. 小型 UGV 测试"></a>A. 小型 UGV 测试</h2><p>我们在植被覆盖的室外环境中手动驱动机器人。我们首先展示了在这种环境下特征提取的定性比较。使用这两种方法从同一扫描中提取的边缘和平面特征如图 4 所示。这些特征对应于第 III 节中发送到激光雷达建图模块的$\{\mathbb{F}^{t}_e, \mathbb{F}^{t}_p\}$。如图$4(d)$ 所示，LeGO-LOAM 的特征数量在点云分割后大大减少。从树叶返回的大部分点被丢弃，因为它们在多次扫描中不是稳定的特征。另一方面，由于从草地返回的点也非常嘈杂，因此在评估后会得出较大的粗曲率值。因此，使用原始 的LOAM， 不可避免地会从这些点中提取边缘特征。如图$4(c)$ 所示，从地面提取的边缘特征通常不可靠。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090416034.png" alt="image-20220427090416034" style="zoom: 80%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090416034.png" alt="image-20220427090416034" style="zoom: 80%;" /></p>
 <blockquote>
 <p>图 4：在植被覆盖的室外环境中，从两种不同的激光雷达里程计和制图框架获得的边缘和平面特征。边缘和平面特征分别为绿色和粉红色。从 LOAM 获得的特征显示在$ (b) $和$ (c) $中。从 LeGO-LOAM 获得的特征如 $(d) $和$ (e)$ 所示。标签 (i) 表示树，(ii) 表示石墙， (iii) 表示机器人。</p>
 </blockquote>
@@ -203,12 +203,12 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <blockquote>
 <p>$^2$<a href="https://youtu.be/O3tz_ftHV48">https://youtu.be/O3tz_ftHV48</a></p>
 </blockquote>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090607185.png" alt="image-20220427090607185" style="zoom:80%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090607185.png" alt="image-20220427090607185" style="zoom:80%;" /></p>
 <blockquote>
 <p>图 5：LOAM 和 LeGO-LOAM 在图 $4(a) $所示地形上的地图。 $(a) $中用白色箭头标记的树代表同一棵树。</p>
 </blockquote>
 <h2 id="B-大规模-UGV-测试"><a href="#B-大规模-UGV-测试" class="headerlink" title="B. 大规模 UGV 测试"></a>B. 大规模 UGV 测试</h2><p>接下来，我们在三个大规模数据集上对 LOAM 和 LeGO-LOAM 进行定量比较，这将被称为实验$ 1、2 $和$ 3$。前两个是在史蒂文斯理工学院校园收集的，那里有许多建筑物、树木、道路和人行道。这些实验及其环境如图 6(a) 所示。实验 3 跨越了一条森林覆盖的远足小径，其中有树木、柏油路和被草和土壤覆盖的小径。执行实验 3 的环境如图 8 所示。每个实验的详细信息列在表 I 中。为了进行公平比较，每个实验显示的所有性能和准确度结果均在每个数据集的 10 次实时回放试验中平均得出。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427102855741.png" alt="image-20220427102855741" style="zoom: 50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427102855741.png" alt="image-20220427102855741" style="zoom: 50%;" /></p>
 <p>1)实验1：第一个实验旨在证明LOAM和LeGO-LOAM都可以在具有平滑运动的城市环境中实现低漂移姿态估计。我们避免了激进的偏航动作，并且我们避免驾驶机器人穿过只能获得一些稳定特征的稀疏区域。在整个数据记录过程中，机器人在平坦的道路上运行。机器人的初始位置，如图6(b)所示，位于斜坡上。机器人以平均 1.35m/s 的平均速度行驶 807 秒后返回同一位置。</p>
 <p>为了评估这两种方法的姿态估计精度，我们比较了最终姿态和初始姿态之间的平移和旋转差异。这里，通过所有实验，初始位姿定义为$ [0, 0, 0, 0, 0, 0]$。如表 V 所示，LOAM 和 LeGO-LOAM 在两种不同的硬件安排上都实现了相似的低漂移姿态估计。当在 Jetson 上运行时，来自 LeGO-LOAM 的最终地图如图 6(b) 所示。</p>
 <p><img src="/images/LeGO-LOAM论文翻译/image-20220427101541012.png" alt="image-20220427101541012"></p>
@@ -221,26 +221,26 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>图 $7$：实验$ 2 $中 LOAM 在穿过史蒂文斯校园的人行道上发生故障的场景（上图 $(a)$ 中最左侧的人行道）。人行道的一端由附近建筑物的特征支撑。人行道的另一端主要被嘈杂的物体包围，即草和树。如果没有点云分割，将从这些对象中提取不可靠的边缘和平面特征。图像 $(b)$ 和 $(d)$ 显示 LOAM 在经过人行道后失效。</p>
 </blockquote>
 <p>3)实验 3：实验 3 的数据集是从森林远足小径记录的，其中 UGV 以 1.3m/s 的平均速度行驶。机器人行驶 35 分钟后返回初始位置。这种环境下的海拔变化约为 19 米。UGV 在三个路面上行驶：泥土覆盖的小径、沥青和被草覆盖的地面。这些表面的代表性图像分别显示在图 8 的底部。树木或灌木丛始终存在于道路的至少一侧。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427101634370.png" alt="image-20220427101634370" style="zoom:67%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427101634370.png" alt="image-20220427101634370" style="zoom:67%;" /></p>
 <blockquote>
 <p>图 8：实验$3$ LeGO-LOAM 建图结果。</p>
 </blockquote>
 <p>我们首先在这种环境下测试 LOAM 的准确性。生成的地图在所使用的两台计算机上的不同位置存在分歧。相对于 UGV 初始位置的最终平移和旋转误差在 Jetson 上为 69.40m 和 27.38°，在笔记本电脑上为 62.11m 和 8.50°。图 9(a) 和 (b) 显示了对两种硬件安排进行 10 次试验的结果轨迹。</p>
 <p>当 LeGO-LOAM 应用于该数据集时，Jetson 上的最终相对平移和旋转误差为 13.93m 和 7.73°，笔记本电脑上为 14.87m 和 7.96°。 Jetson 上 LeGO-LOAM 的最终点云图如图 8 所示，叠加在卫星图像上。在图 8 的中心放大的局部地图显示，来自 LeGO-LOAM 的点云图与开放中可见的三棵树匹配得很好。在两台计算机上从 LeGO-LOAM 获得的所有路径之间显示出高度一致性。图 9(c) 和 (d) 显示了在每台计算机上运行的十次试验。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427103924914.png" alt="image-20220427103924914" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427103924914.png" alt="image-20220427103924914" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 9：LOAM 和 LeGO-LOAM 在 10 次试验和 2 台计算机上生成的路径，以及实验 3 数据集。</p>
 </blockquote>
 <h2 id="C-基准测试结果"><a href="#C-基准测试结果" class="headerlink" title="C. 基准测试结果"></a>C. 基准测试结果</h2><p><strong>1)特征数量比较</strong>：我们在表II中展示了两种方法的特征提取比较。每次扫描的特征内容平均超过每个数据集的 10 次试验。点云分割后，对于集合$ F_e、F_p、\mathbb{F}_e $和$\mathbb{F}_p$，需要 LeGO-LOAM 处理的特征数量分别减少了至少$ 29\%、40\%、68\%$ 和 $72\%$。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105750858.png" alt="image-20220427105750858" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105750858.png" alt="image-20220427105750858" style="zoom:50%;" /></p>
 <p><strong>2)迭代次数比较：</strong>应用提出的两步L-M优化方法的结果如表III所示。我们首先使用 LeGO-LOAM 应用原始 L-M 优化，这意味着我们最小化从边缘和平面特征一起获得的距离函数。然后我们对 LeGO-LOAM 应用两步 L-M 优化：①$F_p$中的平面特征用于获得$[t_z, θ_{roll}, θ_{pitch}]$，②利用$F_e$中的边缘特征得到$[t_x, t_y, θ_{yaw}]$。记录 L-M 方法在处理一次扫描后终止时的平均迭代次数以进行比较。当使用两步优化时，第一步优化在实验 1 和 2 的两次迭代中完成。虽然第二步优化的迭代次数与原始L-M方法的数量相似，但处理的特征较少。因此，在使用两步 L-M 优化后，激光雷达里程计的运行时间减少了 $34\%$ 至 $48\%$。两步优化的运行时间如表 IV 所示。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105906074.png" alt="image-20220427105906074" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105906074.png" alt="image-20220427105906074" style="zoom:50%;" /></p>
 <p><strong>3)运行时间比较：</strong>LOAM 和$\rm{LeGO-LOAM}$ 的每个模块在两台计算机上的运行时间如表 IV 所示。使用所提出的框架，<strong>特征提取</strong>和<strong>激光雷达里程计</strong>模块的运行时间在 LeGO-LOAM 中减少了一个数量级。请注意，在 Jetson 上,这两个模块在 LOAM 中的运行时间超过 100 毫秒。导致许多扫描被跳过，因为 LOAM 在嵌入式系统上无法实现实时性能。使用 LeGO-LOAM 时，激光雷达建图的运行时间也减少了至少 $60\%$。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427110536203.png" alt="image-20220427110536203" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427110536203.png" alt="image-20220427110536203" style="zoom:50%;" /></p>
 <p><strong>4)位姿误差比较：</strong>通过在所有实验中将初始位姿设置为$[0, 0, 0, 0, 0, 0]$，我们通过将最终位姿与初始位姿进行比较来计算相对位姿估计误差。表 V 列出了两台计算机上两种方法的旋转误差（以度为单位）和平移误差（以米为单位）。通过使用所提出的框架，LeGO-LOAM 可以以更少的计算时间实现相当或更好的位置估计精度。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111646072.png" alt="image-20220427111646072" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111646072.png" alt="image-20220427111646072" style="zoom:50%;" /></p>
 <h2 id="D-使用-KITTI-数据集的闭环测试"><a href="#D-使用-KITTI-数据集的闭环测试" class="headerlink" title="D. 使用 KITTI 数据集的闭环测试"></a>D. 使用 KITTI 数据集的闭环测试</h2><p>我们的最终实验将 LeGO-LOAM 应用于 KITTI 数据集 [21]。由于在 [20] 中对 KITTI 数据集的 LOAM 测试以 10% 的实时速度运行，我们只探索 LeGO-LOAM 及其在嵌入式系统实时应用中的潜力，其中行程长度足够大需要完整的 SLAM 解决方案。LeGO-LOAM 在 Jetson 上使用序列 00 的结果如图 10 所示。为了在 Jetson 上实现实时性能，我们将 HDL-64E 的扫描下采样到与第 III 节中使用的相同范围图像VLP-16。换言之，每次扫描的 75% 的点在处理前都被省略掉了。 ICP在这里用于在位姿图中的节点之间添加约束。然后使用 iSAM2 [24] 优化该图。最后，我们使用优化后的图来校正传感器位姿和地图。更多闭环测试可以在视频附件中找到。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111714790.png" alt="image-20220427111714790" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111714790.png" alt="image-20220427111714790" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 10：LeGO-LOAM，KITTI 数据集闭环测试，使用 Jetson。颜色变化表示海拔变化。</p>
 </blockquote>
@@ -266,7 +266,7 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
           </blockquote>
 <span id="more"></span>
 <h1 id="Ⅰ-基于BA的-VIO-融合"><a href="#Ⅰ-基于BA的-VIO-融合" class="headerlink" title="Ⅰ.基于BA的 VIO 融合"></a>Ⅰ.基于BA的 VIO 融合</h1><p>BA为问题早在学习《视觉SLAM十四讲》的时候我们就接触过，当时提到的PnP问题，涉及到的重投影误差，如下图所示，我们通过对相机的位姿进行优化，就可以得到最小的误差$e$，这个问题就是一个BA问题。类似的还有直接法中的光度误差。</p>
-<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png" alt="image-20220425154741376.png" style="zoom:50%;"></p>
+<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png" alt="image-20220425154741376.png" style="zoom:50%;" /></p>
 <p>所谓的 Bundle Adjustment，是指从视觉重建中提炼出最优的 3D 模型和相机参数（内参数和外参数）。从每一个特征点反射出来的几束光线（bundles of light rays），在我们把相机姿态和特征点空间位置做出最优的调整 (adjustment) 之后，最后收束到相机光心的这个过程，简称为 BA。</p>
 <p>但是在实际的VIO中不仅涉及到类似的重投影误差问题，还需要考虑IMU的优化问题，如图所示，图中：$q_{bc},p_{bc}$分别表示相机坐标系到机器人本体坐标系的旋转四元数和平移向量。$f_i,f_j$则是我们观察到的特征点的3D坐标。$z_{f_j}^{c_i}$z在相机不同的位姿$c_1,c_2,c_3$下的观测值。</p>
 <p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425153047596.png" alt="image-20220425153047596"></p>
@@ -329,9 +329,9 @@ F(x+\alpha d)\approx F(x)+\alpha Jd</script><p>其中下降方向满足：$Jd&lt
 &=w^{\land} r
 \end{align*}\tag{1}</script><p>其中$w$是角速度，它是一个矢量，即$w=\begin{bmatrix}0\\0\\ \dot\theta\end{bmatrix}=\dot\theta z$,其中$|\dot\theta|$是角速度的大小。对公式$(1)$取模：</p>
 <script type="math/tex; mode=display">
-|\dot r|=|w||r|sin\phi=a|\dot\theta|</script><p><img src="/posts/19228.htm/image-20220422093936869.png" alt="image-20220422093936869"></p>
+|\dot r|=|w||r|sin\phi=a|\dot\theta|</script><p><img src="image-20220422093936869.png" alt="image-20220422093936869"></p>
 <h2 id="B-旋转坐标系下的运动学"><a href="#B-旋转坐标系下的运动学" class="headerlink" title="B.旋转坐标系下的运动学"></a>B.旋转坐标系下的运动学</h2><p>如图，考虑两个坐标系，一个是世界坐标系(惯性坐标系)$W$，它本身是静止不动的；一个是机器人本体坐标系$B$，它本身在做角速度为$w_B$的纯旋转，设质量块在坐标系$B$下做速度为$v_B$，加速度为$a_B$的匀加速直线运动，它在$B$坐标系下坐标为$r_B=(x_1,x_2,x_3)^T$，设从坐标系世界坐标系$W$到是机器人本体坐标系$B$只考虑旋转的时候，旋转矩阵$R_{WB}$。</p>
-<p><img src="/posts/19228.htm/image-20220422155242434.png" alt="image-20220422155242434"></p>
+<p><img src="image-20220422155242434.png" alt="image-20220422155242434"></p>
 <p>这里定义一些变量：</p>
 <blockquote>
 <p>①设物体在坐标系$B$下做速度为$v_B$，加速度为$a_B$，对应在坐标系$W$下的速度为$v_W$，加速度为$a_W$</p>
@@ -404,22 +404,22 @@ w_W^{\land}\dot r_W&=w_W^{\land}(v+w_W^{\land}r_W)\\
 <p>整个过程的作用是什么？</p>
 <p>我们在已知$B$坐标系下的物体的加速度、速度以及旋转轴的角速度，我们就可以求得对应世界坐标系下的相应的物理量，那么相应的求可以求得世界坐标系下的位姿（速度积分得到位姿）、四元数（根据角速度）。</p>
 <h1 id="Ⅱ-IMU-测量模型及运动模型"><a href="#Ⅱ-IMU-测量模型及运动模型" class="headerlink" title="Ⅱ.IMU 测量模型及运动模型"></a>Ⅱ.IMU 测量模型及运动模型</h1><h2 id="A-加速度计工作原理"><a href="#A-加速度计工作原理" class="headerlink" title="A.加速度计工作原理"></a>A.加速度计工作原理</h2><p>测量原理可以用一个简单的质量块 + 弹簧 + 指示计来表示:</p>
-<p><img src="/posts/19228.htm/image-20220422191601477.png" alt="image-20220422191601477.png"></p>
+<p><img src="image-20220422191601477.png" alt="image-20220422191601477.png"></p>
 <p>注意这里的加速度计测量值$a_m$为弹簧拉力对应的加速度，所以有：</p>
 <script type="math/tex; mode=display">
 a_m=\frac{f}{m}=a-g\tag{5}</script><p>其中$f $为弹簧拉力，$a$ 为物体在惯性系下的加速度，$g$为重力加速度。</p>
 <p>另外，实际的加速度计大都是$MEMS $加速度计，它利用电容或者电阻桥来等原理来测量$ a_m$</p>
 <p>其原理可以参考：<a href="https://m.elecfans.com/article/596137.html"><strong>MEMS 加速度传感器的原理与构造介绍</strong></a></p>
 <p>通常情况下我们假设地球表面为惯性参考系，但是对于高端的测量单元来说，这种精度远远不够（需要考虑地球自转的影响），所以就将惯性参考系的原点记为地球的质心，而位于地球表面的坐标系称为地面参考系或东北天坐标系（ENU坐标系）, 如下图所示。在此坐标系下$g=(0,0,-9.81)^T$</p>
-<p><img src="/posts/19228.htm/image-20220422192532908.png" alt="image-20220422192532908.png"></p>
+<p><img src="image-20220422192532908.png" alt="image-20220422192532908.png"></p>
 <p>假设 IMU 坐标系就是 ENU 坐标系，$R_{WB }= I$，静止时有$a=0,a_m=-g$，自由落体时有$a=g,a_m=0$</p>
 <h2 id="B-陀螺仪测量原理"><a href="#B-陀螺仪测量原理" class="headerlink" title="B.陀螺仪测量原理"></a>B.陀螺仪测量原理</h2><p>陀螺仪侦测的是角速度。其工作原理基于科里奥利力的原理：当一个物体在坐标系中直线移动时，假设坐标系做一个旋转，那么在旋转的过程中，物体会感受到一个垂直的力和垂直方向的加速度。</p>
 <p>按测量原理分有<strong>振动陀螺</strong>，<strong>光纤陀螺</strong>等。</p>
-<p><img src="/posts/19228.htm/陀螺仪.gif" alt="陀螺仪.gif"></p>
+<p><img src="陀螺仪.gif" alt="陀螺仪.gif"></p>
 <p>低端 MEMS 陀螺上一般采用振动陀螺原理，通过测量 科氏力（Coriolis force ）来间接得到角速度。MEMS 陀螺仪：一个主动运动轴 + 一个敏感轴，比如，如图示，高速运动的物体速度为$v$，在旋转坐标系下，物体会受到科氏力的影响，我们通过求科氏力就可以求得角速度$w$的大小。</p>
-<p><img src="/posts/19228.htm/image-20220422195814350.png" alt="image-20220422195814350.png"></p>
+<p><img src="image-20220422195814350.png" alt="image-20220422195814350.png"></p>
 <p>但是实际制作的过程中我们不只是使用一个质量块，而是使用两个质量块，就是<strong>音叉陀螺仪</strong>，如图所示，叉子的中间为旋转轴，叉子左右两个质量块，做方反的正弦运动，质量块受到的科氏力方向相反。</p>
-<p><img src="/posts/19228.htm/image-20210905220130.png" alt="20210905220130.png"></p>
+<p><img src="image-20210905220130.png" alt="20210905220130.png"></p>
 <p>当两个完全相同的质量块的运动方向相反，但是旋转相同的时候，它们就会受到相反的科氏力以及相同的外部加速度影响力。将两个质量块所受到该方向上的力做差，就会得到两倍的科氏力。</p>
 <p><strong>但是为啥要用这么做呢? 一个质量块不行么？</strong></p>
 <p>①利用二倍的科氏力对应的电压指数更大，测量也变得更准确；②因为有可能在科氏力方向上物体本身具有一定的加速度，所以利用音叉陀螺仪构成差分模型，可以将两个外部力相互抵消（科氏力方向物体本身的加速度），消除自身的影响，是的获得的科氏力更准。</p>
@@ -435,12 +435,12 @@ v_{err}=b_at,\ \ \ p_{err}=\frac{1}{2}b_at^2</script><p>这里的$p_{err}$指的
 <li><strong>Scale</strong></li>
 </ul>
 <p>scale 可以看成是实际数值和传感器输出值之间的比值。</p>
-<p><img src="/posts/19228.htm/image-20220422204953295.png" alt="image-20220422204953295.png"></p>
+<p><img src="image-20220422204953295.png" alt="image-20220422204953295.png"></p>
 <ul>
 <li><strong>Nonorthogonality/Misalignment Errors</strong></li>
 </ul>
 <p>特别的在多轴的IMU传感器中，由于制作工艺的问题，有可能对导致$xyz$轴并不是严格意义的正交，如下图所示，$z$轴并不是严格意义上与$xOy$平面垂直，则会影响对应的$x,y$上的分量。</p>
-<p><img src="/posts/19228.htm/image-20220422204127003.png" alt="image-20220422204127003.png"></p>
+<p><img src="image-20220422204127003.png" alt="image-20220422204127003.png"></p>
 <p>加上之前的scale的影响：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -553,11 +553,11 @@ w[k]\sim N(0,1)\\
 <p>具体的流程如下：</p>
 <p>①保持传感器绝对静止获取数据。</p>
 <p>②对数据进行分段，设定时间段的时长，如下图所示。</p>
-<p><img src="/posts/19228.htm/image-20220423162306358.png" alt="image-20220423162306358"></p>
+<p><img src="image-20220423162306358.png" alt="image-20220423162306358"></p>
 <p>③将传感器数据按照时间段进行平均。</p>
 <p>④计算方差，绘制艾伦曲线。</p>
 <p>得到的艾伦曲线如下图所示：</p>
-<p><img src="/posts/19228.htm/image-20220423162352964.png" alt="image-20220423162352964"></p>
+<p><img src="image-20220423162352964.png" alt="image-20220423162352964"></p>
 <p>从艾伦方差曲线中可以辨识出 IMU 的五种噪声，分别为：量化噪声、角度随机游走、零偏不稳定性噪声，角速率随机游走，速率斜坡，一般在 IMU 噪声辨识中用的比较多的是中间 3 种。</p>
 <h2 id="C-误差模型"><a href="#C-误差模型" class="headerlink" title="C .误差模型"></a>C .误差模型</h2><h3 id="1-加速度计的误差模型"><a href="#1-加速度计的误差模型" class="headerlink" title="1.加速度计的误差模型"></a>1.加速度计的误差模型</h3><p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
 <p>理论测量值：</p>
@@ -565,13 +565,13 @@ w[k]\sim N(0,1)\\
 a_m^B=R_{BG}(a^G-g^G)
 \tag{16}</script><p>如果考虑高斯白噪声，bias，以及尺度因子(通常假设尺度因子为单位矩阵。)，则为：</p>
 <script type="math/tex; mode=display">
-a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{17}</script><p><img src="/posts/19228.htm/image-20220423171217806.png" alt="image-20220423171217806.png"></p>
+a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{17}</script><p><img src="image-20220423171217806.png" alt="image-20220423171217806.png"></p>
 <h3 id="2-陀螺仪的误差模型"><a href="#2-陀螺仪的误差模型" class="headerlink" title="2.陀螺仪的误差模型"></a>2.陀螺仪的误差模型</h3><p>考虑尺度因子，高斯白噪声，以及 bias, 陀螺仪的误差模型如下：</p>
 <script type="math/tex; mode=display">
 w^B_m=S_gw^B+n_g+nb_g\tag{18}</script><p>低端传感器，考虑加速度对陀螺仪的影响，即 g-灵敏度：</p>
 <script type="math/tex; mode=display">
 w^B_m=S_gw^B+S_{ga}a^B+n_g+nb_g\tag{19}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
-<p><img src="/posts/19228.htm/image-20220423190440715.png" alt="image-20220423190440715"></p>
+<p><img src="image-20220423190440715.png" alt="image-20220423190440715"></p>
 <h1 id="Ⅳ-运动模型离散时间处理"><a href="#Ⅳ-运动模型离散时间处理" class="headerlink" title="Ⅳ.运动模型离散时间处理"></a>Ⅳ.运动模型离散时间处理</h1><p>忽略 scale 的影响，只考虑白噪声和 bias 随机游走：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -723,12 +723,12 @@ w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
 <ul>
 <li>典型 6 轴 IMU 本身由一个陀螺仪和一个加速度计组成，分别测量自身的角速度和加速度，并以较高频率（≥ 100Hz）返回。</li>
 </ul>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;" /></p>
 <ul>
 <li>但是IMU，受自身温度、零偏、振动等因素干扰，积分得到的平移和旋转容易漂移</li>
 </ul>
 <p>手机等电子产品多使用价格低廉的 MEMS IMU（如 MPU 6050），自动驾驶类则多使用几万元的 IMU（如 Apollo 中使用的 Novatel SPAN-IGM-A1）</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;" /></p>
 <p>视觉 Visual Odometry</p>
 <ul>
 <li>以图像形式记录数据，频率较低（15 − 60Hz 居多）</li>
@@ -747,13 +747,13 @@ w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
 <tbody>
 <tr>
 <td style="text-align:center">优势</td>
-<td style="text-align:center">快速响应<br>不受成像质量影响<br>角速度普遍比较准确<br>可估计绝对尺度</td>
-<td style="text-align:center">（静止）不产生漂移<br>直接测量旋转与平移</td>
+<td style="text-align:center">快速响应<br/>不受成像质量影响<br/>角速度普遍比较准确<br/>可估计绝对尺度</td>
+<td style="text-align:center">（静止）不产生漂移<br/>直接测量旋转与平移</td>
 </tr>
 <tr>
 <td style="text-align:center">劣势</td>
-<td style="text-align:center">存在零偏<br>低精度 IMU 积分位姿发散<br>高精度价格昂贵</td>
-<td style="text-align:center">受图像遮挡、运动物体干扰<br>单目视觉无法测量尺度<br>单目纯旋转运动无法估计<br>快速运动时易丢失</td>
+<td style="text-align:center">存在零偏<br/>低精度 IMU 积分位姿发散<br/>高精度价格昂贵</td>
+<td style="text-align:center">受图像遮挡、运动物体干扰<br/>单目视觉无法测量尺度<br/>单目纯旋转运动无法估计<br/>快速运动时易丢失</td>
 </tr>
 </tbody>
 </table>
@@ -771,12 +771,12 @@ w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
 <li><strong>松耦合</strong></li>
 </ul>
 <p>松耦合将 IMU 定位与视觉/GNSS 的位姿直接进行融合，融合过程对二者本身不产生影响，作为后处理方式输出。典型方案为卡尔曼滤波器。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;" /></p>
 <ul>
 <li><strong>紧耦合</strong></li>
 </ul>
 <p>紧耦合则是使用两个传感器的原始数据共同估计一组变量，传感器噪声也是相互影响的，紧耦合算法上比较复杂，但充分利用了传感器数据，可以实现更好的效果，是目前研究的重点。典型方案为 MSCKF 和非线性优化。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;" /></p>
 <p><strong>为什么要使用紧耦合？</strong></p>
 <ul>
 <li>单纯凭（单目）视觉或 IMU 都不具备估计 Pose 的能力：视觉存在尺度不确定性、IMU 存在零偏导致漂移；</li>
@@ -945,7 +945,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
 <p>(具体查看：<a href="https://lukeyalvin.top/2022/04/11/loam%E8%AE%BA%E6%96%87%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/#A-%E7%BA%BF%E6%9D%9F%E6%A8%A1%E5%9E%8B">loam论文深度解析-Ⅲ.特征提取（点云注册）A.线束模型</a>)</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// lidar扫描线是否旋转过半</span></span><br><span class="line"><span class="keyword">bool</span> halfPassed = <span class="literal">false</span>;</span><br><span class="line"><span class="keyword">int</span> count = cloudSize;</span><br><span class="line">PointType point;</span><br><span class="line">std::vector&lt;pcl::PointCloud&lt;PointType&gt;&gt; <span class="built_in">laserCloudScans</span>(N_SCANS);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cloudSize; i++)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//坐标轴交换，velodyne lidar的坐标系也转换到z轴向前，x轴向左的右手坐标系</span></span><br><span class="line">    point.x = laserCloudIn.points[i].y;</span><br><span class="line">    point.y = laserCloudIn.points[i].z;</span><br><span class="line">    point.z = laserCloudIn.points[i].x;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//计算点的仰角(根据lidar文档垂直角计算公式),根据仰角排列激光线号，velodyne每两个scan之间间隔2度</span></span><br><span class="line">    <span class="keyword">float</span> angle = <span class="built_in">atan</span>(point.y / <span class="built_in">sqrt</span>(point.x * point.x + point.z * point.z)) * <span class="number">180</span> / M_PI;</span><br><span class="line">    <span class="keyword">int</span> scanID;</span><br><span class="line">    <span class="comment">//仰角四舍五入(加减0.5截断效果等于四舍五入)</span></span><br><span class="line">    <span class="keyword">int</span> roundedAngle = <span class="built_in"><span class="keyword">int</span></span>(angle + (angle &lt; <span class="number">0.0</span> ? <span class="number">-0.5</span> : +<span class="number">0.5</span>));</span><br><span class="line">    <span class="keyword">if</span> (roundedAngle &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">    	scanID = roundedAngle;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">    	scanID = roundedAngle + (N_SCANS - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//过滤点，只挑选[-15度，+15度]范围内的点,scanID属于[0,15]</span></span><br><span class="line">    <span class="keyword">if</span> (scanID &gt; (N_SCANS - <span class="number">1</span>) || scanID &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        count--;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>【解析】这里8-11行的坐标轴变换，有点绕，作者的意思就是把velodyne lidar的坐标系也转换到z轴向前，x轴向左的右手坐标系：</p>
-<p><img src="/images/LOAM源代码解析/image-20220414153416294.png" alt="image-20220414153416294" style="zoom:50%;"></p>
+<p><img src="/images/LOAM源代码解析/image-20220414153416294.png" alt="image-20220414153416294" style="zoom:50%;" /></p>
 <p>然后就是利用勾股定理与三角函数相关的知识求出仰角$Pitch=atan(z/\sqrt{x^2+y^2})$，即可根据该角度判断点云属于哪条<code>Scan</code>，这样就可以计算出每个点的<code>scanID</code>。</p>
 <hr>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//扫描周期, velodyne频率10Hz，周期0.1s</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">double</span> scanPeriod = <span class="number">0.1</span>;</span><br><span class="line"><span class="keyword">typedef</span> pcl::PointXYZI PointType;</span><br><span class="line">PointType point;</span><br><span class="line">...</span><br><span class="line"><span class="comment">//-0.5 &lt; relTime &lt; 1.5（点旋转的角度与整个周期旋转角度的比率, 即点云中点的相对时间）</span></span><br><span class="line"><span class="keyword">float</span> relTime = (ori - startOri) / (endOri - startOri);</span><br><span class="line"><span class="comment">//点强度=线号+点相对时间（即一个整数+一个小数，整数部分是线号，小数部分是该点的相对时间）,匀速扫描：根据当前扫描的角度和扫描周期计算相对扫描起始位置的时间</span></span><br><span class="line">point.intensity = scanID + scanPeriod * relTime;</span><br></pre></td></tr></table></figure>
@@ -1045,7 +1045,7 @@ d_\xi=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}=
 <p>在$\overline{\mathcal{P} }_k$中找到$ i $的最近邻，记为$j$。 然后，我们找到另外两个点 $l$ 和$ m$，作为$ i $的最近邻，一个在$j $的同一扫描中，另一个在 $j $的两次连续扫描中，其中 $j,l,m\in \overline{\mathcal{P} }_k$。所以关键就是这三个点要怎么找，只有找到这三个点之后才能确定一个面，进而才能做点面匹配。</p>
 <p>同样参考点线匹配，这段代码也是首先通过kd-tree最近点查找，找到点$j $，然后在选择同一线号上的距离最近的点$l$ 以及不同线号上的距离最近的点$ m$。</p>
 <p>找到三个点之后，求解点到面的距离。这里的公式就不赘述了。上图：</p>
-<p><img src="/images/LOAM源代码解析/image-20220415200837885.png" alt="image-20220415200837885" style="zoom:50%;"></p>
+<p><img src="/images/LOAM源代码解析/image-20220415200837885.png" alt="image-20220415200837885" style="zoom:50%;" /></p>
 <p>所以：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -1155,7 +1155,7 @@ A=\begin{bmatrix}
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="string">&quot;includePath&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;/opt/ros/noetic/include/**&quot;</span>,</span><br><span class="line">                <span class="string">&quot;/home/alvin/workspace/slam_ws/LOAM/LOAM_WS/src/loam_velodyne/include/**&quot;</span>,</span><br><span class="line">                <span class="string">&quot;/usr/include/**&quot;</span></span><br><span class="line">                ],</span><br></pre></td></tr></table></figure>
 <p>LOAM_WS/src下运行:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 窗口1 </span></span><br><span class="line"><span class="built_in">source</span> ./devel/setup.bash</span><br><span class="line">roslaunch loam_velodyne loam_velodyne.launch</span><br><span class="line"><span class="comment"># 窗口2 </span></span><br><span class="line"><span class="built_in">source</span> ./devel/setup.bash</span><br><span class="line">rosbag play nsh_indoor_outdoor.bag <span class="comment"># 这里下载的数据集放在了工作空间下</span></span><br></pre></td></tr></table></figure>
-<p><img src="/images/loam-velodyne源码编译与数据集运行/image-20220412211213586.png" alt="image-20220412211213586" style="zoom:50%;"></p>
+<p><img src="/images/loam-velodyne源码编译与数据集运行/image-20220412211213586.png" alt="image-20220412211213586" style="zoom:50%;" /></p>
 <p>错误：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">[ERROR] [1628642694.176070835]: Error transforming odometry <span class="string">&#x27;Odometry&#x27;</span> from frame <span class="string">&#x27;/camera_init&#x27;</span> to frame <span class="string">&#x27;camera_init&#x27;</span></span><br><span class="line">[ERROR] [1628642694.509388228]: Error transforming odometry <span class="string">&#x27;Odometry&#x27;</span> from frame <span class="string">&#x27;/camera_init&#x27;</span> to frame <span class="string">&#x27;camera_init&#x27;</span></span><br></pre></td></tr></table></figure>
 <p>解决办法参考：<a href="https://link.zhihu.com/?target=https%3A//github.com/laboshinl/loam_velodyne/issues/157">https://github.com/laboshinl/lo</a></p>
@@ -1208,12 +1208,12 @@ A=\begin{bmatrix}
 <p><strong>已知一段点云序列$P_k,k\in Z^+$ ，计算在前$k$个时期内的雷达位姿以及构建全局地图。</strong></p>
 <h1 id="Ⅲ-特征提取（点云注册）"><a href="#Ⅲ-特征提取（点云注册）" class="headerlink" title="Ⅲ.特征提取（点云注册）"></a>Ⅲ.特征提取（点云注册）</h1><h2 id="A-线束模型"><a href="#A-线束模型" class="headerlink" title="A.线束模型"></a>A.线束模型</h2><p>要读懂代码中特征提取中的一些处理，需要弄清楚<code>VLP16</code>扫描时的运动模型,论文中称单个线束为一个<code>Scan</code>，对全部$16$线组成的一帧点云称为一个<code>Sweep</code>，虽然是用的多线激光雷达,但是LOAM是针对单个<code>Scan</code>提取特征点的，这里主要考虑到线束间角分辨率(竖直分辨率)与单个线内点间角分辨率(水平分辨率)存在的差异。以VLP$16$为例, 竖直分辨率约为$2^\circ$，而水平分辨率最大为$0.4^\circ$。</p>
 <p>角分辨率越大， 代表越远的物体，反射的两点距离越大，中间丢失的信息越多。因此， LOAM没有针对Scan和<code>Scan</code>之间的点的关联性提取和描述特征， 而是直接针对单个<code>Scan</code>提取特征。</p>
-<p><img src="/images/loam论文深度解析/image-20220413152223146.png" alt="image-20220413152223146" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413152223146.png" alt="image-20220413152223146" style="zoom:50%;" /></p>
 <p><strong>一个Sweep数据的采集如何完成的？</strong></p>
 <p>一帧内所有的点， 都是按顺序穿行扫描的，比如开始的时候水平的第一个角度为$0^\circ$左右，扫描水平角度为$0^\circ$上的竖直方向所有$16$个点（对应$16$个<code>Scan</code>）的深度，并且这$16$个点也是串行按顺序排列的，然后转到下一个水平角度；设水平分辨率为$0.4^\circ$，则下一个水平角度为$0.4^\circ$，其次水平角度为$0.8^\circ$，依次顺时针扫完一圈(论文中是$[-\pi,\pi]$)，这就完成了一个<code>Sweep</code>数据的采集。</p>
-<p><img src="/images/loam论文深度解析/image-20220413162337900.png" alt="image-20220413162337900" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413162337900.png" alt="image-20220413162337900" style="zoom:50%;" /></p>
 <p>由于从驱动得到的一个<code>Sweep</code>是以点云的形式输出（也就是一堆点，每个点有$XYZ$的信息，点和点之间无其他关系信息），因此我们并不知道每个点属于哪个<code>Scan</code>， 对应哪个水平角度。因此，我们需要根据上面的扫描模型去计算每个点的竖直角度和水平角度。点坐标与竖直角度/水平角度的换算关系如下图所示。[详细翻阅<a href="https://velodynelidar.com/wp-content/uploads/2019/12/63-9243-Rev-E-VLP-16-User-Manual.pdf">vlp-16 sensor coordinate system文档</a>]</p>
-<p><img src="/images/loam论文深度解析/image-20220413151359585.png" alt="image-20220413151359585" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220413151359585.png" alt="image-20220413151359585" style="zoom:50%;" /></p>
 <p>通过这个图很容易就能理解如何确定某个点属于哪个<code>Scan</code>，我们使用激光点的垂直距离除以它的水平距离，就可以得到雷达到该点的射线和水平面的夹角，用过这个夹角我们就可以很容易的判断该点属于哪个<code>Scan</code>。但是，实际上，在多线雷达（比如$32$线，$64$线），由于竖直方向的点更密集，<code>Scan</code>与<code>Scan</code>之间的距离很小，很容易出现把<code>Scan10</code>分配到<code>Scan13</code>这样的误差。当然，如果有条件，可以修改数据存储格式，建议把某个点属于哪个<code>Scan</code>直接保存的该点对应的数据中去。</p>
 <p>摘取对应代码（src/loam_velodyne/src/scanRegistration.cpp）：</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; cloudSize; i++) &#123;</span><br><span class="line">    <span class="comment">//坐标轴交换，velodyne lidar的坐标系也转换到z轴向前，x轴向左的右手坐标系</span></span><br><span class="line">    point.x = laserCloudIn.points[i].y;</span><br><span class="line">    point.y = laserCloudIn.points[i].z;</span><br><span class="line">    point.z = laserCloudIn.points[i].x;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//计算点的仰角(根据lidar文档垂直角计算公式),根据仰角排列激光线号，velodyne每两个scan之间间隔2度</span></span><br><span class="line">    <span class="keyword">float</span> angle = <span class="built_in">atan</span>(point.y / <span class="built_in">sqrt</span>(point.x * point.x + point.z * point.z)) * <span class="number">180</span> / M_PI;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -1223,7 +1223,7 @@ A=\begin{bmatrix}
 <li>平面点：在三维空间中处于平滑平面上的点，其和周围点的大小差距不大，曲率较低，平滑度较低。</li>
 <li>边缘点：在三维空间中处于尖锐边缘上的点，其和周围点的大小差距较大，曲率较高，平滑度较高。</li>
 </ul>
-<p><img src="/images/loam论文深度解析/image-20220411152638255.png" alt="image-20220411152638255" style="zoom:33%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411152638255.png" alt="image-20220411152638255" style="zoom:33%;" /></p>
 <p>可以发现，LOAM没有使用特征描述子(连曲率都没有参与后续的匹配)。从代码中的边缘点与平面点的曲率判断阈值可以看出，LOAM提取的边缘点和平面点特征点的曲率，并没有特别大的差别，这使得LOAM有较强的场景适应性，在场景中比较曲折的区域，边缘点点会占据主导,而在较为平缓的区域，平面点点占据主导。 在激光扫描到的一块区域，总会提取出几个特征点。</p>
 <hr>
 <p>定义<strong>平面光滑度</strong>$c$：</p>
@@ -1242,7 +1242,7 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <p>这样操作的主要作用是，在进行后面的优化的时候，我们能根据这样的“等级”划分获得更明显</p>
 </blockquote>
 <h2 id="C-不可靠点的删除"><a href="#C-不可靠点的删除" class="headerlink" title="C.不可靠点的删除"></a>C.不可靠点的删除</h2><p>如图所示，对位于平行于激光束的表面上的点，以及被遮挡区域(虚线橙线段)的边界上的点，可以被检测为边缘点。它们都是不可靠的。</p>
-<p><img src="/images/loam论文深度解析/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;" /></p>
 <p>选取点的三要素：</p>
 <ul>
 <li>选择的边缘点或平面点的数量不能超过子区域的最大值</li>
@@ -1250,9 +1250,9 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <li>它不能在大致平行于激光束的表面上，也不能在被遮挡区域的边界上。</li>
 </ul>
 <p>经过特征点的提取，就可以得到论文中的帧数据对应的特征信息（边缘点和平面点分别用黄色和红色标记。）：</p>
-<p><img src="/images/loam论文深度解析/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;" /></p>
 <h1 id="Ⅳ-特征点匹配"><a href="#Ⅳ-特征点匹配" class="headerlink" title="Ⅳ.特征点匹配"></a>Ⅳ.特征点匹配</h1><p>将点云重新投影到扫描的末端。蓝色线段表示扫描$k$时感知到的点云 $P_k$，在$k$次扫描结束时，经过<strong>畸变校正</strong>之后将$P_k$重新投影到时间戳$t_{k+1}$，得到绿色线段$\overline{P}_k$。然后，在$k+1$次扫描时，重投影点云数据(经过畸变校正)$\overline{P}_k$和新感知的点云$P_{k+1}$(橙色线段)一起估计激光雷达运动。</p>
-<p><img src="/images/loam论文深度解析/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;" /></p>
 <p>我们根据论文中的描述：</p>
 <ul>
 <li><p>$P_k$是$k$时刻激光雷达感知的点云集合， 根据上文的特征提取规则，得到边缘点的集合$\xi_{k}$和平面点的集合$H_{k}$；</p>
@@ -1269,10 +1269,10 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <h2 id="A-激光雷达数据的畸变"><a href="#A-激光雷达数据的畸变" class="headerlink" title="A.激光雷达数据的畸变"></a>A.激光雷达数据的畸变</h2><p>激光雷达数据产生的畸变又叫<strong>激光雷达自运动畸变</strong>，对于多数激光雷达而言，尽管激光的发射与接收很快，但构成点云的每一个点仍非同一时刻生成的。一般我们会将$100ms $(对应典型值$10Hz$) 内累积的数据作为一帧点云输出。若在这$100ms$内，激光雷达本体或安装所在的机体发生绝对位置的变化，那么<strong>此帧点云中每一个点的坐标系就是不同的。</strong>直观上看，这一帧点云数据就会发生一定的“变形”，不能真实对应所探测到的环境信息，类似于拍照时手抖了，拍出来的照片就会糊。这便是激光雷达的自运动畸变。</p>
 <p>举一个例子，激光雷达对面有一面平行的墙面，理想状况下激光处于位置A或者位置B位置墙面的点云应该一样，但实际上，由于在这$100ms$内，激光雷达本身在运动，所以这一帧的墙面的点云中，某些点的坐标系就变得不同了，进而失去了原始平行墙面的特征，所以说，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑。</p>
 <p>如果是一堵平行的墙面，理想状况下激光处于A或者B位置测量到的同一点云的距离应该一样，但是实际中，激光雷达的位置发生了变化，所以这一帧的墙面的点云中，每一个点的坐标系就是不同的，失去了原始平行墙面的特征，进行激光SLAM时，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑</p>
-<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;" /></p>
 <h2 id="B-将点与线和面匹配的原因"><a href="#B-将点与线和面匹配的原因" class="headerlink" title="B.将点与线和面匹配的原因"></a>B.将点与线和面匹配的原因</h2><p>理想情况下，没有畸变，激光雷达在短时间里获取的相邻帧数据是<strong>含有大量同一特征点</strong>的，也就是$P_k$和$P_{k+1}$中很多特征点只是雷达在不同位置下观察的同一个点。所以只要找到一个变化关系$T$使得$P_k$和$P_{k+1}$对应的点的匹配，这个$T$就是表示激光雷达的帧间运动。为了减少计算量，增加鲁棒性，不直接使用点与点的匹配，而是使用边缘点和对应的线特征，平面点和对应的面特征，这样也可以得到变换关系 $T$。</p>
 <p>但是实际情况下，激光雷达的点云数据是含有畸变的，所以作者将矫正的$P_k$重新投影到时间戳$t_{k+1}$，得到$\overline{P}_k$。我们的目的就是：从$\overline{P}_k$中找到与$\xi_{k+1}$中的点对应的边线，从平面图中找到与$H_{k+1}$中的点对应的平面贴片(patch)。那么现在就是一边进行矫正，一边进行匹配，然后进行迭代。迭代过程中，$T$的值不断变化，直到寻找到一个$T$使得<strong>所有点和对应特征区域距离和最小</strong>。</p>
-<h2 id="C-点和对应特征区域距离的计算"><a href="#C-点和对应特征区域距离的计算" class="headerlink" title="C.点和对应特征区域距离的计算"></a>C.点和对应特征区域距离的计算</h2><p><img src="/images/loam论文深度解析/image-20220411202023128.png" alt="image-20220411202023128" style="zoom:50%;"></p>
+<h2 id="C-点和对应特征区域距离的计算"><a href="#C-点和对应特征区域距离的计算" class="headerlink" title="C.点和对应特征区域距离的计算"></a>C.点和对应特征区域距离的计算</h2><p><img src="/images/loam论文深度解析/image-20220411202023128.png" alt="image-20220411202023128" style="zoom:50%;" /></p>
 <p>其中：$i\in \tilde{\xi}_{k+1}$，$j,l,m\in \overline{P}_k$</p>
 <p>图$7(a)$给出了寻找边缘点对应的边线的过程。设$i$是属于$\tilde{\xi}_{k+1}$的点，即$ i \in \tilde{\xi}_{k+1}$。边线由两个点表示。设$j$是$i$在$\overline{P}_k$中的最近邻，$j\in \overline{P}_k$，设$l$是$i$在连续两次扫描$j$时的最近邻，$(j, l)$构成$i$的对应关系。然后，为了验证$j$和$l$都是边缘点，我们根据公式$(1)$来检查局部表面的平滑度。这里，我们特别要求$j$和$l$来自不同的扫描，考虑到一次扫描不能包含来自同一边线的多个点。</p>
 <p>图$7(b)$显示了寻找平面贴片(patch)作为平面点对应的过程。设$ i$ 为$\tilde{H}_{k+1}$中的一个点，即$i \in  \tilde{H}_{k+1}$。平面贴片(patch)由三个点表示。与上一段类似，我们在$\overline{P}_k$中找到$ i $的最近邻，记为$j$。 然后，我们找到另外两个点 $l$ 和$ m$，作为$ i $的最近邻，一个在$j $的同一扫描中，另一个在 $j $的两次连续扫描中。 这保证了三个点是非共线的。 为了验证 $j$、$l$和 $m$ 都是平面点，我们根据$ (1) $再次检查局部表面的平滑度。</p>
@@ -1292,14 +1292,14 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <script type="math/tex; mode=display">
 S=OD·AB=|\overrightarrow{OA}×\overrightarrow {OB}|=|\overrightarrow{OA}|·|\overrightarrow{OB}|·sin\theta</script><p>如果我们需要求高：</p>
 <script type="math/tex; mode=display">
-OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}</script><p><img src="/images/loam论文深度解析/image-20220411204216656.png" alt="image-20220411204216656" style="zoom: 25%;"></p>
+OD = \frac{S}{|\overrightarrow{AB}|}=\frac{|\overrightarrow{OA}×\overrightarrow {OB}|}{|\overrightarrow{AB}|}</script><p><img src="/images/loam论文深度解析/image-20220411204216656.png" alt="image-20220411204216656" style="zoom: 25%;" /></p>
 <p>所以对于：</p>
-<p><img src="/images/loam论文深度解析/image-20220411204829280.png" alt="image-20220411204829280" style="zoom: 50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411204829280.png" alt="image-20220411204829280" style="zoom: 50%;" /></p>
 <p>得到点到线的距离$d_\xi$为：</p>
 <script type="math/tex; mode=display">
 d_{\xi}=\frac{|(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,j)})×(\tilde{X}^L_{(k+1,i)}-\overline{X}^L_{(k,l)})|}
 {|\overline{X}^L_{(k,j)}-\overline{X}^L_{(k,l)}|}. \tag{2}</script><h3 id="b-点到面的距离"><a href="#b-点到面的距离" class="headerlink" title="b.点到面的距离"></a>b.点到面的距离</h3><p> 主要原理是<strong>点与平面内一点形成的向量与该平面的单位法向量的点积的模即为该点到平面的距离</strong>。</p>
-<p><img src="/images/loam论文深度解析/image-20220411210656962.png" alt="image-20220411210656962" style="zoom:50%;"></p>
+<p><img src="/images/loam论文深度解析/image-20220411210656962.png" alt="image-20220411210656962" style="zoom:50%;" /></p>
 <script type="math/tex; mode=display">
 d_\mathcal{H}=\frac
 {\begin{vmatrix}
@@ -1317,12 +1317,13 @@ y=y_0+\frac{y_1-y_0}{x_1-x_0}(x-x_0)</script><p>线性插值经常用于已知�
 <script type="math/tex; mode=display">
 R_T=f(x)-p(x)</script><p>其中 $p$ 表示上面定义的线性插值多项式</p>
 <script type="math/tex; mode=display">
-p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x_1-x_0). \tag{4}</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
+p(x)=f(x_0)+\frac{f(x_1)-f(x_0)}{x_1-x_0}(x-x_0). \tag{4}</script><p>根据罗尔定理，我们可以证明：如果 f 有二阶连续导数，那么误差范围是：</p>
 <script type="math/tex; mode=display">
 |R_T|\leq \frac{(x_1-x_0)^2}{8}\underset{x_0\leq x\leq x_1}{max}|f^{\prime\prime}(x)|</script><h2 id="B-运动估计"><a href="#B-运动估计" class="headerlink" title="B.运动估计"></a>B.运动估计</h2><p>激光雷达运动在扫描期间以<strong>恒定的角速度和线速度建模</strong>。这允许我们在一个扫描中对在不同时间接收到的点进行线性插值。</p>
 <p>假设$t$是当前的时间戳，$t_{k+1}$是扫描$k+1$的开始时间。</p>
 <p>设$T^L_{k+1}$为$[t_{k+1}, t]$之间的激光雷达位姿变换。$T^L_{k+1}$包含$6$自由度激光雷达的刚性运动，$T^L_{k+1} = [t_x, t_y, t_z， θ_x， θ_y， θ_z]^T$，其中我们用$T^L_{k+1}(1:3)$表示 $t_x$、$t_y$和$t_z$，它们分别是$\left\{L\right\}$沿$x-$、$y-$和$z-$轴的平移，我们用$T^L_{k+1}(4:6)$表示$θ_x$、$θ_y$和$θ_z$，它们是旋转角度，遵循右手规则。</p>
 <p>给定点$i，i \in P_k$，设$t_i$为其时间戳，设为$[t_{k+1}, t_i]$之间的$T^L_{(k+1,i)}$位姿变换。</p>
+<p><img src="/images/loam论文深度解析/image-20220429100816545.png" alt="image-20220429100816545" style="zoom:67%;" /></p>
 <p>$T^L_{(k+1,i)}$可以通过$T^L_{k+1}$的线性插值得到：</p>
 <script type="math/tex; mode=display">
 \begin{align}
@@ -1342,7 +1343,7 @@ w=\frac{T^L_{(k+1,i)}(4:6)}{\parallel T^L_{(k+1,i)}(4:6) \parallel}. \tag{9}</sc
 <script type="math/tex; mode=display">
 f_{\xi}(X^L_{(k+1,i)},T^L_{k+1})=d_\xi,i\in \xi_{k+1}.\tag{10}</script><p>合$(3)(5)-(8)$，我们可以在$H_{k+1}$中的一个平面点与对应的平面贴片(patch)建立另一个几何关系，</p>
 <script type="math/tex; mode=display">
-f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{11}</script><p>最后，我们用<code>Levenberg-Marquardt</code>方法[26]求解激光雷达运动。将$\xi_{k+1}$和$H_{k+1}$中每个特征点$(9)$和$(10)$叠加，得到一个非线性函数:</p>
+f_H(X^L_{(k+1,i)},T^L_{k+1})=d_H,i\in H_{k+1}.\tag{11}</script><p>最后，我们用<code>Levenberg-Marquardt</code>方法[26]求解激光雷达运动。将$\xi_{k+1}$和$H_{k+1}$中每个特征点$(10)$和$(11)$叠加，得到一个非线性函数:</p>
 <script type="math/tex; mode=display">
 f(T^L_{k+1})=d,\tag{12}</script><p>其中每一行$f$对应一个特征点，$d$包含相应的距离。我们计算$f$关于$T^L_{k+1}$的雅可比矩阵，记作$J$，其中$J =\partial f /\partial T^L_{k+1}$。然后，$(12)$通过非线性迭代，使$d$趋近于$0$，</p>
 <script type="math/tex; mode=display">
@@ -1512,7 +1513,7 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
 <p>有了假设和符号，我们的激光雷达里程测量和建图问题可以定义为:</p>
 <p>​    <strong>问题:</strong>给定一个激光雷达云序列$i, i\in P_k$，计算每次扫描$k$时激光雷达的帧间运动(ego-motion)，用$P_k$构建遍历环境的地图。</p>
 <h1 id="IV-系统总览"><a href="#IV-系统总览" class="headerlink" title="IV.系统总览"></a>IV.系统总览</h1><h2 id="A-激光雷达硬件"><a href="#A-激光雷达硬件" class="headerlink" title="A.激光雷达硬件"></a>A.激光雷达硬件</h2><p>本文的研究是在基于Hokuyo UTM-30LX激光扫描仪的定制3D激光雷达上进行验证的，但并不限于此。通过本文，我们将使用从激光雷达收集的数据来说明该方法。该激光扫描仪的视场为$180^◦$，分辨率为$0.25^◦$以及$40$行/秒扫描速率。所述激光扫描仪与电机相连，电机被控制以$180^◦/s$的角速度旋转，在$−90^◦$和$90^◦$之间，激光扫描仪的水平方向为零。对于这个特定的单位，扫描是从$−90^◦$旋转到$90^◦$或在相反的方向(持续1秒)。这里，请注意，对于一个连续旋转的激光雷达，扫描只是一个简单的半球面旋转。板载编码器以$0.25^◦$的分辨率测量电机旋转角度，利用该分辨率将激光点投影到激光雷达坐标$\left\{L\right\}$中。</p>
-<p><img src="/images/loam论文翻译/image-20220410153045839.png" alt="image-20220410153045839" style="zoom:33%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153045839.png" alt="image-20220410153045839" style="zoom:33%;" /></p>
 <blockquote>
 <p> 图$2$所示。三维激光雷达在本研究中使用的是一个由马达驱动旋转运动的Hokuyo激光扫描仪，以及一个测量旋转角度的编码器。该激光扫描仪的视场为$180^◦$的分辨率为$0.25^◦$。扫描速度为$40$行/秒。电机被控制从$−90^◦$旋转到$90^◦$与激光扫描仪的水平方向为零。</p>
 </blockquote>
@@ -1525,7 +1526,7 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
 <p>我们选择尖锐边缘上的特征点和平面表面的特征点。设$i$是$P_k$中的一个点，$i\in P_k$，设$S$是激光扫描仪在同一次扫描中返回的$i$的连续点的集合。由于激光扫描器以$CW$或$CCW$顺序生成点返回，$S$包含一半位于$i$和两点之间$0.25^◦$间隔的每一边上的点。定义一个术语来评估局部表面的平滑度，</p>
 <script type="math/tex; mode=display">
 c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (X^L_{(k,i)}-X^L_{(k,j)}) \parallel \tag{1}</script><p>根据$c$值对扫描中的点进行排序，选择$c$值最大的点为边缘点，$c$值最小的点为平面点的特征点。为了在环境中均匀分布特征点，我们将扫描分割成四个相同的子区域。每个子区域最多可提供$2$个边缘点和$4$个平面点。只有当点$i$的$c$值大于或小于一个阈值，且所选点的个数不超过最大值时，才能将点$i$选择为边或平面点。</p>
-<p><img src="/images/loam论文翻译/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153159251.png" alt="image-20220410153159251" style="zoom:50%;" /></p>
 <blockquote>
 <p>图4所示。$(a)$实线段表示局部表面贴片。点$A$位于与激光束有一定角度的表面上(虚线橙色线段)。点$B$在一个大致平行于激光束的表面上。我们将$B$作为一个不可靠的激光返回点，不选择它作为特征点。$(b)$实线段是激光的可观测对象。点$A$位于被遮挡区域(虚线橙线段)的边界上，可以被检测为边缘点。然而，如果从不同的角度看，被遮挡的区域会发生变化，变得可以观察到。我们不把$A$作为显著边缘点，也不选择它作为特征点。</p>
 </blockquote>
@@ -1537,19 +1538,19 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <li>它不能在大致平行于激光束的表面上，也不能在被遮挡区域的边界上。</li>
 </ul>
 <p>从走廊场景中提取特征点的示例如图$5$所示。边缘点和平面点分别用黄色和红色标记。</p>
-<p><img src="/images/loam论文翻译/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153221345.png" alt="image-20220410153221345" style="zoom:50%;" /></p>
 <blockquote>
 <p>图$5$所示。从走廊的激光雷达云中提取边缘点(黄色)和平面点(红色)的例子。同时，激光雷达以$0.5m/s$的速度向图左侧的壁面移动，导致壁面运动失真。</p>
 </blockquote>
 <h2 id="B-寻找特征点对应"><a href="#B-寻找特征点对应" class="headerlink" title="B.寻找特征点对应"></a>B.寻找特征点对应</h2><p>里程计算法估计激光雷达在扫描范围内的运动。设$t_k$为扫描$k$的起始时间。在每次扫描结束时，将扫描过程中感知到的点云$P_k$重新投影到时间戳$t_{k+1}$，如图$6$所示。我们将重新投影的点云表示为$\overline{P}_k$。在下一次扫描$k+1$时，$\overline{P}_k$和新接收到的点云$P_{k+1}$一起使用，来估计激光雷达的运动。</p>
-<p><img src="/images/loam论文翻译/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153230555.png" alt="image-20220410153230555" style="zoom:50%;" /></p>
 <blockquote>
 <p>图$6$所示。将点云重新投影到扫描的末端。蓝色线段表示扫描$k$时感知到的点云 $P_k$，在扫描$k$结束时，将$P_k$重新投影到时间戳$t_{k+1}$，得到绿色线段$\overline{P}_k$。然后，在扫描$k+1$时，$\overline{P}_k$和新感知的点云$P_{k+1}$(橙色线段)一起估计激光雷达运动。</p>
 </blockquote>
 <p>让我们假设$\overline{P}_k$和$P_{k+1}$现在都是可用的，然后从找到两个激光雷达云之间的对应关系开始。对于$P_{k+1}$，我们使用上一节讨论的方法从激光雷达云中找到边缘点和平面点。设$\xi_{k+1}$和$H_{k+1}$分别为边点和平面点的集合。我们将从$\overline{P}_k$中找到与$\xi_{k+1}$中的点对应的边线，从平面图中找到与$H_{k+1}$中的点对应的平面贴片(patch)。</p>
 <p>请注意，在扫描$k+1$开始时，$P_{k+1}$是一个空集，它在扫描过程中随着接收到更多点数而增长。激光雷达里程计递归地估计了扫描期间的$6-DOF$运动，并随着$P_{k+1}$的增加逐渐包含更多的点。在每次迭代中，使用当前估计的变换将$\xi_{k+1}$和$H_{k+1}$重新投影到扫描的开始，记$\tilde{\xi}_{k+1}$和$\tilde{H}_{k+1}$为重投影的点集。对于每个点在$\xi_{k+1}$和$H_{k+1}$，我们将在$\overline{P}_k$中找到最近的邻居点。在这里，$\overline{P}_k$被存储在$3D$  $ KD-tree$[24]中，用于快速索引。</p>
 <p>图$7(a)$给出了寻找边缘点对应的边线的过程。设$i$是属于$\tilde{\xi}_{k+1}$的点，即$ i \in \tilde{\xi}_{k+1}$。边线由两个点表示。设$j$是$i$在$\overline{P}_k$中的最近邻，$j\in \overline{P}_k$，设$l$是$i$在连续两次扫描$j$时的最近邻，$(j, l)$构成$i$的对应关系。然后，为了验证$j$和$l$都是边缘点，我们根据公式$(1)$来检查局部表面的平滑度。这里，我们特别要求$j$和$l$来自不同的扫描，考虑到一次扫描不能包含来自同一边线的多个点。只有一个例外，即边缘线在扫描平面上。然而，如果是这样，边缘线就会退化且<br>在扫描平面上显示为一条直线，并且特征点在边缘线上不应该首先被提取。</p>
-<p><img src="/images/loam论文翻译/image-20220410153242817.png" alt="image-20220410153242817" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153242817.png" alt="image-20220410153242817" style="zoom:50%;" /></p>
 <blockquote>
 <p>图7所示。在$\tilde{\xi}_{k+1}$中找到一条边缘线作为边缘点的对应关系，如图$(a)$，以及作为$\tilde{H}_{k+1}$中平面点的对应关系的平面贴片(patch)，如图$(b)$。在$(a)$和$(b)$中，$j $是距离特征点最近的点，在$\overline{P}_k$中找到。橙色的线表示对j的相同扫描，蓝色的线表示连续的两次扫描。为了找出$(a)$中的边线对应关系，我们在蓝色的直线上找到另一个点$l$，对应关系用$(j, l)$表示。为了找到$(b)$中的平面贴片(patch)对应关系，我们发现另外两个点，$l $和 $m$，分别位于橙色和蓝色线上。对应关系为$(j, l, m)$。</p>
 </blockquote>
@@ -1590,14 +1591,14 @@ f(T^L_{k+1})=d,\tag{11}</script><p>其中每一行$f$对应一个特征点，$d$
 T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>$\lambda$是由<code>Levenberg-Marquardt</code>方法确定的因子。</p>
 <h2 id="D-激光雷达里程计算法"><a href="#D-激光雷达里程计算法" class="headerlink" title="D.激光雷达里程计算法"></a>D.激光雷达里程计算法</h2><p><img src="/images/loam论文翻译/%E5%9B%BE%E7%89%871.png" alt="图片1"></p>
 <p>激光雷达里程计算法如算法1所示。该算法以上次扫描的点云$\overline{P}_k$、当前扫描的增长点云$P_{k+1}$和上次递归的位姿变换$T^L_{k+1}$作为输入。如果启动了新的扫描，$T^L_{k+1}$将被设置为零(第$4-6$行)。然后，算法从$P_{k+1}$中提取特征点构造第$7$行$\xi_{k+1}$和$H_{k+1}$。对于每个特征点，我们可以在$\overline{P}_k$(第$9-19$行)中找到对应。运动估计适应于鲁棒拟合[27]。在第$ 15 $行，该算法为每个特征点分配一个平方权值。 与其对应的距离较大的特征点被分配较小的权重，距离大于阈值的特征点被视为异常值并分配零权重。然后，在第$ 16 $行，为一次迭代更新位姿变换。 当发现收敛或满足最大迭代次数时，非线性优化终止。 如果算法到达扫描结束，则使用扫描期间估计的运动将$P_{k+1}$重新投影到时间戳 $t_{k+2}$。 否则，仅返回变换$T^L_{k+1}$ 用于下一轮递归。</p>
-<h1 id="VI-激光雷达建图"><a href="#VI-激光雷达建图" class="headerlink" title="VI.激光雷达建图"></a>VI.激光雷达建图</h1><p><img src="/images/loam论文翻译/image-20220410153350151.png" alt="image-20220410153350151" style="zoom:50%;"></p>
+<h1 id="VI-激光雷达建图"><a href="#VI-激光雷达建图" class="headerlink" title="VI.激光雷达建图"></a>VI.激光雷达建图</h1><p><img src="/images/loam论文翻译/image-20220410153350151.png" alt="image-20220410153350151" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 8. 建图过程示意图。 蓝色曲线表示地图上的激光雷达位姿$T^W_k$ ，由建图算法在扫描 $k $处生成。 橙色曲线表示扫描 $k + 1$ 期间的激光雷达运动$T^L_{k+1}$，由里程计算法计算得出。 使用$ T^W_k$和$T^L_{k+1}$，将里程计算法发布的未失真点云投影到地图上，表示为（绿色线段）$\overline{Q}_{k+1}$，并与地图上现有的云$ Q_k$（黑色线段）进行匹配。</p>
 </blockquote>
 <p>建图算法运行的频率比里程计算法低，并且每次扫描只调用一次。在扫描 $k + 1$结束时，即介于$ [t_{k+1}, t_{k+2 }]$，激光雷达里程计生成一个未失真的点云$\overline{P}_{k+1}$，同时生成一个激光雷达的位姿变换$T^L_{k+1}$。建图算法在世界坐标$\left\{W\right\}$中匹配并注册$\overline{P}_{k+1}$，如图$8$所示。为了解释这个过程，让我们将$ Q_k$ 定义为累积到扫描 $k$的地图上的点云，设 $T^W_k$是扫描 $k $在$t_{k+1}$结束时，激光雷达在地图上的位姿。利用激光雷达里程计的输出，建图算法将 $T^W_k$扩展到从$t_{k+1}$到 $t_{k+2}$的一次扫描，以获得$T^W_{k+1}$，并将 $\overline{P}_{k+1}$投影到世界坐标$\left\{W\right\}$中，表示为$\overline{Q}_{k+1}$。 接下来，该算法通过优化激光雷达位姿$T^W_{k+1}$，将$\overline{Q}_{k+1}$ 与$ Q_k$ 匹配。</p>
 <p>特征点的提取方法与第$V-A$节相同，但使用了$ 10 $倍的特征点。 为了找到特征点的对应关系，我们将点云存储在地图上$ Q_k$，在 $10$ 立方米区域中。立方体中与$\overline{Q}_{k+1}$相交的点被提取并存储在 $3D$  $KD-tree$ [24] 中。 我们发现$ Q_k$中的点在特征点周围的某一区域内。令$ S^\prime $为一组周围点。 对于边缘点，我们只在 $ S^\prime $中保留边缘线上的点，对于平面点，我们只保留平面上的点。然后，计算 $ S^\prime $的协方差矩阵，记为$M$, $M$的特征值和特征向量，分别记为$V$和$E$。如果$ S^\prime $分布在一条边线上，$V$包含的一个特征值明显大于其他两个特征值，$E$中与最大特征值相关联的特征向量表示边缘线的方向。另一方面，如果$ S^\prime $分布在一个平面贴片(patch)上，$V$包含两个较大的特征值，第三个特征值明显较小，$E$中最小的特征值对应的特征向量表示该平面贴片(patch)的方位。通过$ S^\prime $的几何中心确定边缘线或平面贴片(patch)的位置。</p>
 <p>为了计算特征点与其对应点的距离，我们在边缘线上选择两个点，在平面贴片(patch)上选择三个点。这允许使用$(2)$和$(3)$相同的公式来计算距离。然后，为每个特征点推导出一个方程为$(9)$ 或 $(10)$，但不同之处在于$\overline{Q}_{k+1}$ 中的所有点共享相同的时间戳$t_{k+2}$。 非线性优化通过 <code>Levenberg-Marquardt</code>方法 [26] 通过鲁棒拟合 [27] 再次求解，并在$\overline{Q}_{k+1}$被注册在地图上。为了均匀分布这些点，地图云通过体素网格过滤器 [28] 缩小尺寸，体素大小为 5 厘米立方体。</p>
-<p><img src="/images/loam论文翻译/image-20220410153401364.png" alt="image-20220410153401364" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153401364.png" alt="image-20220410153401364" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 9. 位姿变换的集成。 蓝色区域说明了建图算法 $T^W_k$ 的激光雷达位姿，每次扫描生成一次。 橙色区域是当前扫描 $T^L_{k+1} $内的激光雷达运动，由里程计算法计算得出。 激光雷达的运动估计是两种变换的组合，频率与 $T^L_{k+1} $相同。</p>
 </blockquote>
@@ -1612,16 +1613,16 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>图10所示。$(a)-(b)$狭长的走廊，$(c)-(d)$大厅，$(e)-(f)$植被覆盖的道路和$(g)-(h)$两行树木之间的果园生成的地图。激光雷达在室内测试中放置在手推车上，在室外测试中安装在地面车辆上。所有测试使用$0.5m/s$的速度。</p>
 </blockquote>
 <p>为了评估地图的局部准确性，我们从相同的环境中收集了第二组激光雷达云。在数据选择过程中，激光雷达保持静止，并放置在每个环境中的几个不同的位置。使用点对面$ICP$方法[9]对两个点云进行匹配和比较。 匹配完成后，将一个点云与第二个点云中对应的平面块之间的距离视为匹配误差。 图 $11 $显示了误差分布的密度。室内匹配误差小于室外匹配误差。结果是合理的，因为在自然环境中特征匹配不如在人造环境中精确。</p>
-<p><img src="/images/loam论文翻译/image-20220410153427498.png" alt="image-20220410153427498" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153427498.png" alt="image-20220410153427498" style="zoom:50%;" /></p>
 <blockquote>
 <p>图11所示。廊道(红色)、大堂(绿色)、绿化路(蓝色)、果园(黑色)的匹配误差，对应图$10$中的四个场景。</p>
 </blockquote>
-<p><img src="/images/loam论文翻译/image-20220410153545569.png" alt="image-20220410153545569" style="zoom: 33%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153545569.png" alt="image-20220410153545569" style="zoom: 33%;" /></p>
 <p>此外，我们还对运动估计的累积漂移进行了测试。我们选择包含闭环的走廊进行室内实验。这使得我们可以在同一个地方开始和结束。运动估计在起始位置和结束位置之间产生一个间隙，该间隙表明了漂移量。对于户外实验，我们选择果园环境。 携带激光雷达的地面车辆配备了高精度 $GPS/INS$，用于获取地面实况。 将测得的漂移与行进距离作为相对精度进行比较，并列于表$ I$。具体来说，测试$ 1 $使用与图 $10(a)$ 和图 $10(g) $相同的数据集。 一般来说，室内测试的相对准确度在$ 1\% $左右，室外测试的相对准确度在 $2.5\% $左右。</p>
 <h2 id="B-融合IMU"><a href="#B-融合IMU" class="headerlink" title="B.融合IMU"></a>B.融合IMU</h2><p>我们将<code>Xsens MTi-10 IMU</code> 连接到激光雷达以应对快速的速度变化。 点云在发送到所提出的方法之前以两种方式进行预处理，$1)$ 使用来自 $IMU$ 的方向，在一次扫描中接收到的点云被旋转，使得与该扫描中激光雷达的初始方向对齐，$2)$ 使用加速度测量 ，运动失真被部分消除，就好像激光雷达在扫描过程中以恒定速度移动一样。 然后由激光雷达里程计和建图程序处理点云。</p>
 <p>$IMU $定位是通过在卡尔曼滤波器 [1] 中集成来自陀螺仪的角速率和来自加速度计的读数来获得的。 图 $12(a) $显示了一个示例结果。 一个人拿着激光雷达走在楼梯上。 在计算红色曲线时，我们使用 IMU 提供的方向，我们的方法只估计平移。 在 $5 $分钟的数据收集过程中，方向漂移超过 $25°$。 假设没有可用的$ IMU$，绿色曲线仅依赖于我们方法中的优化。 蓝色曲线使用$ IMU $数据进行预处理，然后采用本文方法。 我们观察到绿色和蓝色曲线之间的微小差异。 图 $12(b) $给出了对应于蓝色曲线的图。 在图$ 12(c)$中，我们比较了图 $12(b)$中黄色矩形中地图的两个闭合视图。 上图和下图分别对应蓝色和绿色曲线。 仔细对比发现，上图的边缘更加清晰。</p>
-<p><img src="/images/loam论文翻译/image-20220410153604781.png" alt="image-20220410153604781" style="zoom:50%;"></p>
-<p><img src="/images/loam论文翻译/image-20220410153615690.png" alt="image-20220410153615690" style="zoom:50%;"></p>
+<p><img src="/images/loam论文翻译/image-20220410153604781.png" alt="image-20220410153604781" style="zoom:50%;" /></p>
+<p><img src="/images/loam论文翻译/image-20220410153615690.png" alt="image-20220410153615690" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 $12$所示。有/无$IMU$ 辅助的结果比较。 一个人拿着激光雷达走在楼梯上。 黑点是起点。 在$(a)$中，红色曲线使用来自$ IMU $的方向和我们的方法估计的平移来计算，绿色曲线仅依赖于我们方法中的优化，蓝色曲线使用$ IMU$数据进行预处理，然后再进行该方法。 $(b)$是对应于蓝色曲线的地图。 在$(c)$中，上图和下图分别对应于蓝色和绿色曲线，使用$(b)$中黄色矩形标记的区域。 上图中的边缘更清晰，表明地图上的准确性更高。</p>
 </blockquote>
@@ -1660,7 +1661,7 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>我们将带有相机位姿和空间点的图优化称为 BA，能够有效地求解大规模的定位与建图问题。但是考虑大场景以及实时性的要求，我们不得不想办法缩减计算量，这就是引入位姿图的意义。</p>
 <p><img src="/images/实践位姿图优化/image-20220407170107621.png" alt="image-20220407170107621"></p>
 <h1 id="g2o-原生位姿图"><a href="#g2o-原生位姿图" class="headerlink" title="g2o 原生位姿图"></a>g2o 原生位姿图</h1><p>Pose Graph 图优化的<strong>节点</strong>表示相机位姿，以 $\xi_1,\xi_2,…,\xi_n$来表达。而<strong>边</strong>，则是两个位姿节点之间相对运动的估计，该估计可能来自于特征点法或直接法。</p>
-<p><img src="/images/实践位姿图优化/image-20220408092815957.png" alt="image-20220408092815957" style="zoom:50%;"></p>
+<p><img src="/images/实践位姿图优化/image-20220408092815957.png" alt="image-20220408092815957" style="zoom:50%;" /></p>
 <p><code>g2o</code>仿真产生的位姿图，由 <code>g2o</code>自带的 create sphere 程序仿真生成的。它的真实轨迹为一个球，由从下往上的多个层组成。每层为一个正圆形，很多个大小不一的圆形层组成了一个完整的球体，共包含 2500 个位姿节点，可以看成一个转圈上升的过程。然后，仿真程序生成了$ t − 1 $到 $t$ 时刻的边，称为<code>odometry</code><strong>边（里程计）</strong>。此外，又生成层与层之间的边，称为 <strong>loop closure（回环）</strong>。</p>
 <p>sphere.g2o 也是一个文本文件，可以用文本编辑器打开，查看它里面的内容。文件前半部分由节点组成，后半部分则是边：</p>
 <p><img src="/images/实践位姿图优化/image-20220408093444275.png" alt="image-20220408093444275"></p>
@@ -1672,7 +1673,7 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( pose_graph )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>( CMAKE_BUILD_TYPE <span class="string">&quot;Release&quot;</span> )</span><br><span class="line"><span class="keyword">set</span>( CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++14 -O3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">list</span>( APPEND CMAKE_MODULE_PATH <span class="variable">$&#123;PROJECT_SOURCE_DIR&#125;</span>/cmake_modules )</span><br><span class="line"></span><br><span class="line"><span class="comment"># Eigen</span></span><br><span class="line"><span class="keyword">include_directories</span>( <span class="string">&quot;/usr/include/eigen3&quot;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># sophus </span></span><br><span class="line"><span class="keyword">find_package</span>( Sophus REQUIRED )</span><br><span class="line"><span class="comment"># Sophus链接错误</span></span><br><span class="line"><span class="keyword">set</span>(Sophus_LIBRARIES libSophus.so)</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;Sophus_INCLUDE_DIRS&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="comment"># g2o </span></span><br><span class="line"><span class="keyword">find_package</span>( G2O REQUIRED )</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;G2O_INCLUDE_DIRS&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>( Cholmod REQUIRED )</span><br><span class="line"><span class="keyword">include_directories</span>( <span class="variable">$&#123;CHOLMOD_INCLUDE_DIR&#125;</span> )</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>( pose_graph_g2o_SE3 pose_graph_g2o_SE3.cpp )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( pose_graph_g2o_SE3</span><br><span class="line">    g2o_core g2o_stuff g2o_types_slam3d <span class="variable">$&#123;CHOLMOD_LIBRARIES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 <p>优化结束执行文件：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 执行文件</span></span><br><span class="line">./build/pose_graph_g2o_SE3 ../sphere.g2o  </span><br><span class="line"><span class="comment"># 查看优化够的位姿图</span></span><br><span class="line">g2o_viewer result.g2o </span><br></pre></td></tr></table></figure>
-<p><img src="/images/实践位姿图优化/image-20220408142818313.png" alt="image-20220408142818313" style="zoom:50%;"></p>
+<p><img src="/images/实践位姿图优化/image-20220408142818313.png" alt="image-20220408142818313" style="zoom:50%;" /></p>
 <h1 id="李代数上的位姿图优化"><a href="#李代数上的位姿图优化" class="headerlink" title="李代数上的位姿图优化"></a>李代数上的位姿图优化</h1><p>把 Sophus 用到 g2o 中，定义自己的顶点和边吧。</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 给定误差求J_R^&#123;-1&#125;的近似</span></span><br><span class="line"><span class="keyword">typedef</span> Eigen::Matrix&lt;<span class="keyword">double</span>, <span class="number">6</span>, <span class="number">6</span>&gt; Matrix6d;</span><br><span class="line"><span class="function">Matrix6d <span class="title">JRInv</span><span class="params">(SE3 e)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    Matrix6d J;</span><br><span class="line">    J.<span class="built_in">block</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">3</span>) = SO3::<span class="built_in">hat</span>(e.<span class="built_in">so3</span>().<span class="built_in">log</span>());</span><br><span class="line">    J.<span class="built_in">block</span>(<span class="number">0</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>) = SO3::<span class="built_in">hat</span>(e.<span class="built_in">translation</span>());</span><br><span class="line">    J.<span class="built_in">block</span>(<span class="number">3</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="number">3</span>) = Eigen::Matrix3d::<span class="built_in">Zero</span>(<span class="number">3</span>, <span class="number">3</span>);</span><br><span class="line">    J.<span class="built_in">block</span>(<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>) = SO3::<span class="built_in">hat</span>(e.<span class="built_in">so3</span>().<span class="built_in">log</span>());</span><br><span class="line">    J = J * <span class="number">0.5</span> + Matrix6d::<span class="built_in">Identity</span>();</span><br><span class="line">    <span class="keyword">return</span> J;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="定义李代数顶点"><a href="#定义李代数顶点" class="headerlink" title="定义李代数顶点"></a>定义李代数顶点</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 李代数顶点</span></span><br><span class="line"><span class="keyword">typedef</span> Eigen::Matrix&lt;<span class="keyword">double</span>, <span class="number">6</span>, <span class="number">1</span>&gt; Vector6d;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">VertexSE3LieAlgebra</span> :</span> <span class="keyword">public</span> g2o::BaseVertex&lt;<span class="number">6</span>, SE3&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function">    <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;is)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">double</span> data[<span class="number">7</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">7</span>; i++)</span><br><span class="line">            is &gt;&gt; data[i];</span><br><span class="line">        <span class="built_in">setEstimate</span>(<span class="built_in">SE3</span>(Eigen::<span class="built_in">Quaterniond</span>(data[<span class="number">6</span>], data[<span class="number">3</span>], data[<span class="number">4</span>], data[<span class="number">5</span>]),</span><br><span class="line">                        Eigen::<span class="built_in">Vector3d</span>(data[<span class="number">0</span>], data[<span class="number">1</span>], data[<span class="number">2</span>])));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;os)</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        os &lt;&lt; <span class="built_in">id</span>() &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        Eigen::Quaterniond q = _estimate.<span class="built_in">unit_quaternion</span>();</span><br><span class="line">        os &lt;&lt; _estimate.<span class="built_in">translation</span>().<span class="built_in">transpose</span>() &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">        os &lt;&lt; q.<span class="built_in">coeffs</span>()[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; q.<span class="built_in">coeffs</span>()[<span class="number">1</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; q.<span class="built_in">coeffs</span>()[<span class="number">2</span>] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; q.<span class="built_in">coeffs</span>()[<span class="number">3</span>] &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate = Sophus::<span class="built_in">SE3</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 左乘更新</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> *update)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="function">Sophus::SE3 <span class="title">up</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">            Sophus::SO3(update[<span class="number">3</span>], update[<span class="number">4</span>], update[<span class="number">5</span>]),</span></span></span><br><span class="line"><span class="params"><span class="function">            Eigen::Vector3d(update[<span class="number">0</span>], update[<span class="number">1</span>], update[<span class="number">2</span>]))</span></span>;</span><br><span class="line">        _estimate = up * _estimate;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -1701,11 +1702,11 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>文件结构已经提过了</p>
 <p><img src="/images/g2o-viewer安装/image-20220405210455088.png" alt="image-20220405210455088"></p>
 <p>我们的g2o_viewer源文件就在app里面：</p>
-<p><img src="/images/g2o-viewer安装/image-20220405210828391.png" alt="image-20220405210828391" style="zoom:50%;"></p>
+<p><img src="/images/g2o-viewer安装/image-20220405210828391.png" alt="image-20220405210828391" style="zoom:50%;" /></p>
 <p>我们编译之后检查一下g2o源代码目录下<code>g2o\bin</code>下有没有生成g2o_viewer的可执行文件</p>
-<p><img src="/images/g2o-viewer安装/image-20220405211004286.png" alt="image-20220405211004286" style="zoom:50%;"></p>
+<p><img src="/images/g2o-viewer安装/image-20220405211004286.png" alt="image-20220405211004286" style="zoom:50%;" /></p>
 <p>因为我们编译了，所以检查一下有没有在本地</p>
-<p><img src="/images/g2o-viewer安装/image-20220405211129848.png" alt="image-20220405211129848" style="zoom:50%;"></p>
+<p><img src="/images/g2o-viewer安装/image-20220405211129848.png" alt="image-20220405211129848" style="zoom:50%;" /></p>
 <p>如果没有说明你没有<code>sudo make install</code>成功。</p>
 <p>如果此时还不可以直接在终端打开g2o:</p>
 <p><img src="/images/g2o-viewer安装/image-20220405211231692.png" alt="image-20220405211231692"></p>
@@ -1715,7 +1716,7 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <p>然后执行：</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
 <p>然后就可以使用了！</p>
-<p><img src="/images/g2o-viewer安装/image-20220405211615903.png" alt="image-20220405211615903" style="zoom:50%;"></p>
+<p><img src="/images/g2o-viewer安装/image-20220405211615903.png" alt="image-20220405211615903" style="zoom:50%;" /></p>
 <p>如果还不可以，那你指定哪一步不对劲！</p>
 ]]></content>
       <categories>
@@ -1751,7 +1752,7 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
 <script type="math/tex; mode=display">
 \underset{φ}{min} \underset{i}{max} \sum^m_{1=1}|e_i|= \sum^m_{1=1}|φ(x_i)-y_i|</script><p>按偏差平方和最小的原则选取拟合曲线，并且采取二项式方程为拟合曲线的方法, 称为最小二乘法。</p>
 <h1 id="线性最小二乘"><a href="#线性最小二乘" class="headerlink" title="线性最小二乘"></a>线性最小二乘</h1><h2 id="一元线性回归求解过程"><a href="#一元线性回归求解过程" class="headerlink" title="一元线性回归求解过程"></a>一元线性回归求解过程</h2><h3 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h3><p>举一个简单的例子，某次实验得到了四个数据点$(x,y):(1,6),(2,5),(3,7),(4,10)$，如图所示</p>
-<p><img src="/images/什么是最小二乘法/image-20220404164725825.png" alt="image-20220404164725825" style="zoom:50%;"></p>
+<p><img src="/images/什么是最小二乘法/image-20220404164725825.png" alt="image-20220404164725825" style="zoom:50%;" /></p>
 <p>我们需要找到一条直线与这四个点的最佳匹配，设这条直线为$y=ax+b$，即找出在某种“最佳情况”下能够大致符合如下超定线性方程组的 $a,b$:</p>
 <script type="math/tex; mode=display">
 1a+b=6\\
@@ -2492,8 +2493,8 @@ K_k=\frac{ {e_{EST} }_{k-1} }{ {e_{EST} }_{k-1}+{e_{MEA} }_{k} }</script><p><str
 </li>
 </ul>
 <p>已知物体的实际长度为$50mm$，测量误差$e_{MEA}=3mm$，估计误差$e_{MEA}=5mm$，$\hat{x}_0=40mm$，一共测量了13次，根据上面的三个步骤，我们可以计算并画出折线图。</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401102705574.png" alt="image-20220401102705574" style="zoom:50%;"></p>
-<p><img src="/images/卡尔曼滤波器/image-20220401102555645.png" alt="image-20220401102555645" style="zoom:50%;"></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401102705574.png" alt="image-20220401102705574" style="zoom:50%;" /></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401102555645.png" alt="image-20220401102555645" style="zoom:50%;" /></p>
 <p>很明显，经过测量次数的增加，最终的估计值是接近真实值的，这就是卡尔曼滤波递归的作用。</p>
 <h2 id="数据融合"><a href="#数据融合" class="headerlink" title="数据融合"></a>数据融合</h2><p>数据融合(Data Fusion)</p>
 <p>【例】现有两个称，已知它们称的结果都符合正态分布，现去称同一个物体，已知称$A$称得物体重量为$z_1=30g$，并且已知它的标准差为$\sigma_1=2g$；称$B$称得物体重量为$z_2=32g$，并且已知它的标准差为$\sigma_2=4g$；估计该物体的真实重量$\hat{z}_k=?$。</p>
@@ -2540,7 +2541,7 @@ K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带�
 \begin{align*}
 \mu_c&=\frac{\sigma^2_b\mu_a+\sigma^2_a\mu_b}{\sigma^2_a+\sigma^2_b}\\
 \sigma_c&=\frac{\sigma^2_a\sigma^2_b}{\sigma^2_b+\sigma^2_b}
-\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;"></p>
+\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;" /></p>
 <hr>
 <h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
 <p>【例】</p>
@@ -2619,7 +2620,7 @@ x_3&y_3&z_3
 \end{bmatrix}</script><p>协方差：</p>
 <script type="math/tex; mode=display">
 P=\frac{1}{3}a^Ta</script><h2 id="状态空间表达式"><a href="#状态空间表达式" class="headerlink" title="状态空间表达式"></a>状态空间表达式</h2><p>【例】：有一个弹簧阻尼系统，对质量为$m$的物块施加一个力$F$，弹簧向右的位移量为$x$，已知弹簧的胡克系数为$k$，阻尼系数为$B$</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;"></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;" /></p>
 <p>定义输入为$u_{(t)}=F_{(t)}$，输出为$x$</p>
 <p>由胡克定律可知，弹簧拉力$f_k$以及阻力$f_B$：</p>
 <script type="math/tex; mode=display">
@@ -2896,7 +2897,7 @@ J=\frac{\partial I_2}{\partial u}
           </blockquote>
 <span id="more"></span>
 <p>考虑某个空间点 $P$ 和两个时刻的相机。$P $的世界坐标为$ [X, Y, Z]$，它在两个相机上成像，记非齐次像素坐标为 $p_1 , p_2$ 。</p>
-<p><img src="/images/直接法的推导/image-20220329150722092.png" alt="image-20220329150722092" style="zoom: 33%;"></p>
+<p><img src="/images/直接法的推导/image-20220329150722092.png" alt="image-20220329150722092" style="zoom: 33%;" /></p>
 <p>我们的目标是求第一个相机到第二个相机的相对位姿变换。我们以第一个相机为参照系，设第二个相机旋转和平移为$ R, t$（对应李代数为 $\xi$）。同时，两相机的内参相同，记为 $K$。为清楚起见，我们列写完整的投影方程：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -3215,7 +3216,7 @@ HΔx=−b</script><p>这就需要一个线性方程的求解器。而这个求�
 <h4 id="参数设置-1"><a href="#参数设置-1" class="headerlink" title="参数设置"></a>参数设置</h4><p>使用时需要设置的参数，可以参考之前使用$PnP$优化所有特征点的空间位置P时，设置的参数内容</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 优化所有特征点的空间位置 P</span></span><br><span class="line"><span class="keyword">int</span> index = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> Point3f p : points_3d)</span><br><span class="line">&#123;</span><br><span class="line">    g2o::VertexPointXYZ *point = <span class="keyword">new</span> g2o::<span class="built_in">VertexPointXYZ</span>();</span><br><span class="line">    point-&gt;<span class="built_in">setId</span>(index++); <span class="comment">// 设置Id号</span></span><br><span class="line">    point-&gt;<span class="built_in">setEstimate</span>(Eigen::<span class="built_in">Vector3d</span>(p.x, p.y, p.z));<span class="comment">// 设置待优化空间点3D位置XYZ</span></span><br><span class="line">    point-&gt;<span class="built_in">setMarginalized</span>(<span class="literal">true</span>); <span class="comment">// 是否边缘化（以便稀疏化求解）g2o中必须设置 marg 参见第十讲内容</span></span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(point); <span class="comment">// 向一个图中添加顶点</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="边Edge"><a href="#边Edge" class="headerlink" title="边Edge"></a>边Edge</h2><p>BaseUnaryEdge，BaseBinaryEdge，BaseMultiEdge 分别表示一元边，两元边，多元边。一元边可以理解为一条边只连接一个顶点，两元边理解为一条边连接两个顶点，也就是我们常见的边啦，多元边理解为一条边可以连接多个（3个以上）顶点</p>
-<p><img src="/images/g2o中关于BA的节点与边/5c7df32d30e9d.png" alt></p>
+<p><img src="/images/g2o中关于BA的节点与边/5c7df32d30e9d.png" alt=""></p>
 <h3 id="EdgeProjectXYZ2UV"><a href="#EdgeProjectXYZ2UV" class="headerlink" title="EdgeProjectXYZ2UV"></a>EdgeProjectXYZ2UV</h3><p>EdgeProjectXYZ2UV(重投影误差)</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">G2O_TYPES_SBA_API</span> <span class="title">EdgeProjectXYZ2UV</span> :</span> <span class="keyword">public</span> BaseBinaryEdge&lt;<span class="number">2</span>, Vector2, VertexPointXYZ, VertexSE3Expmap&gt; </span><br><span class="line">&#123;</span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW;</span><br><span class="line">    <span class="comment">//1. 默认初始化</span></span><br><span class="line">    <span class="built_in">EdgeProjectXYZ2UV</span>();</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">read</span><span class="params">(std::istream&amp; is)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">bool</span> <span class="title">write</span><span class="params">(std::ostream&amp; os)</span> <span class="keyword">const</span></span>;</span><br><span class="line">    <span class="comment">//2. 计算误差</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span>; <span class="comment">// 使用当前顶点的值计算的测量值与真实的测量值之间的误差</span></span><br><span class="line">    <span class="comment">//3. 线性增量函数，也就是雅克比矩阵J的计算方法</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">linearizeOplus</span><span class="params">()</span></span>; <span class="comment">// 在当前顶点的值下，该误差对优化变量的偏导数，也就是我们说的Jacobian</span></span><br><span class="line"></span><br><span class="line"> <span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">//相机参数</span></span><br><span class="line">  CameraParameters* _cam;  <span class="comment">// TODO make protected member?</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>这是个二元边。第1个参数2是说观测值是2维的，也就是图像像素坐标x,y的差值，即$ z − h(ξ, P )$，对应观测值的类型是Vector2D，两个顶点也就是优化变量分别是三维点 VertexPointXYZ，和李群位姿VertexSE3Expmap</p>
@@ -3308,7 +3309,7 @@ e_i = p_i - (Rp_i^{\prime}+t)</script><p>因此,我们把估计的$p_i^{\prime}$
 <h1 id="求解ICP"><a href="#求解ICP" class="headerlink" title="求解ICP"></a>求解ICP</h1><p>ICP的原理主要是通过两组匹配好的点云，进行运动估计，求得$R,t$的过程。我们知道对于两组匹配好的点云理想情况下应该可以达到完全重合，但是实际上则会有偏差，而重合的程度就是一个评价标椎，我们通过求解ICP，可以得到相对优的$R,t$，也就是进行最优的运动估计，这就是ICP的原理以及作用。</p>
 <p><img src="/images/求解ICP并使用BA优化/image-20220428151935615.png" alt="image-20220428151935615"></p>
 <p>重合程度就是一个$loss\ function$，</p>
-<p><img src="/images/求解ICP并使用BA优化/image-20220428161453025.png" alt="image-20220428161453025" style="zoom:67%;"></p>
+<p><img src="/images/求解ICP并使用BA优化/image-20220428161453025.png" alt="image-20220428161453025" style="zoom:67%;" /></p>
 <h2 id="SVD方法"><a href="#SVD方法" class="headerlink" title="SVD方法"></a>SVD方法</h2><h3 id="构建最小二乘"><a href="#构建最小二乘" class="headerlink" title="构建最小二乘"></a>构建最小二乘</h3><p>假设我们有一组配对好的 3D 点（比如我们对两个 RGB-D 图像进行了匹配）：</p>
 <script type="math/tex; mode=display">
 P = \{p_1 , . . . , p_n \} \\ P^′= \{p^′_1 , . . . , p^′_n \}</script><p>现在，想要找一个欧氏变换 $R, t，$使得：</p>
@@ -3421,7 +3422,7 @@ z     &0     &-x &0     &-1 &0 \\
 <span id="more"></span>
 <h1 id="PnP中的BA问题"><a href="#PnP中的BA问题" class="headerlink" title="PnP中的BA问题"></a>PnP中的BA问题</h1><p>我们可以把 $PnP $问题构建成一个定义于李代数上的非线性最小二乘问题。前面说的线性方法，往往是<strong>先求相</strong><br><strong>机位姿，再求空间点位置</strong>，而非线性优化则是把它们都看成优化变量，放在一起优化。这是一种非常通用的求解方式，我们可以用它对$ PnP $或$ ICP $给出的结果进行优化。</p>
 <h2 id="1-重投影误差"><a href="#1-重投影误差" class="headerlink" title="1.重投影误差"></a>1.重投影误差</h2><p>在 $PnP $中，这个$ Bundle Adjustment $问题，是一个最小化重投影误差（Reprojection error）的问题。</p>
-<p><img src="/images/求解PnP并使用BA优化/image-20220329214556296.png" alt="image-20220329214556296" style="zoom: 33%;"></p>
+<p><img src="/images/求解PnP并使用BA优化/image-20220329214556296.png" alt="image-20220329214556296" style="zoom: 33%;" /></p>
 <p>该问题的误差项，是将像素坐标（观测到的投影位置）与 3D 点按照当前估计的位姿进行投影得到的位置相比较得到的误差，所以称之为重投影误差。如图，我们通过特征匹配，知道了 $p_1$和 $p_2$是同一个空间点$P$ 的投影，但是我们不知道相机的位姿。在初始值中，$P $的投影$\hat{p_2}$与实际的$ p_2$之间有一定的距离。于是我们调整相机的位姿，使得这个距离变小。不过，由于这个调整需要考虑很多个点，所以最后每个点的误差通常都不会精确为零。</p>
 <p>考虑 $n$ 个三维空间点 $P $和它们的投影$ p$，我们希望计算相机的位姿 $R, t，$它的李代数表示为 $ξ$。假设某空间点坐标为$ P_i = [X_i , Y_i , Z_i ]^{T} $，其投影的像素坐标为 $u_i = [u_i , v_i ]^{T} $。<br>像素位置与空间点位置的关系如下：</p>
 <script type="math/tex; mode=display">
@@ -3589,7 +3590,7 @@ P^′&=exp(\xi ^{\land})P=RP+t\\
 z_j = h(ξ, P_j ).</script></li>
 </ol>
 <p>由于第一个相机位姿固定为零，我们没有把它写到优化变量里，但在习题中，我希望你能够把第一个相机的位姿与观测也考虑进来。现在我们根据一组 $3D $点和第二个图像中的 $2D $投影，估计第二个相机的位姿。所以我们把第一个相机画成虚线，表明我们不希望考虑它。</p>
-<p><img src="/images/求解PnP并使用BA优化/image-20220326112157782.png" alt="image-20220326112157782" style="zoom:50%;"></p>
+<p><img src="/images/求解PnP并使用BA优化/image-20220326112157782.png" alt="image-20220326112157782" style="zoom:50%;" /></p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用BA优化</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">bundleAdjustment</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;cv::Point3f&gt; &amp;points_3d,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> vector&lt;cv::Point2f&gt; &amp;points_2d,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;K,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;R,</span></span></span><br><span class="line"><span class="params"><span class="function">    <span class="keyword">const</span> Mat &amp;t)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 构建图优化，先设定g2o</span></span><br><span class="line">    <span class="comment">// 每个误差项优化变量维度为6(即为se3李代数的维数，前三维为平移，后三维为旋转)</span></span><br><span class="line">    <span class="comment">// 误差值维度为3(每个3D点在第二个相机中的投影)</span></span><br><span class="line">    <span class="keyword">typedef</span> g2o::BlockSolver&lt;g2o::BlockSolverTraits&lt;<span class="number">6</span>, <span class="number">3</span>&gt;&gt; Block;</span><br><span class="line">    <span class="comment">// 实例化线性方程求解器</span></span><br><span class="line">    Block::LinearSolverType *linearSolver = <span class="keyword">new</span> g2o::LinearSolverCSparse&lt;Block::PoseMatrixType&gt;();</span><br><span class="line">    <span class="comment">// 实例化矩阵块求解器</span></span><br><span class="line">    Block *solver_ptr = <span class="keyword">new</span> <span class="built_in">Block</span>(unique_ptr&lt;Block::LinearSolverType&gt;(linearSolver));</span><br><span class="line">    <span class="comment">// 梯度下降方法，从GN(高斯牛顿), LM（列文伯格）, DogLeg 中选</span></span><br><span class="line">    g2o::OptimizationAlgorithmLevenberg *solver = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmLevenberg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line"></span><br><span class="line">    g2o::SparseOptimizer optimizer; <span class="comment">// 图模型</span></span><br><span class="line">    optimizer.<span class="built_in">setAlgorithm</span>(solver); <span class="comment">//设置求解器（使用LM方法）</span></span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);     <span class="comment">// 打开调试输出</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1.设置节点</span></span><br><span class="line">    <span class="comment">// 优化第二个相机的位姿</span></span><br><span class="line">    g2o::VertexSE3Expmap *pose = <span class="keyword">new</span> g2o::<span class="built_in">VertexSE3Expmap</span>();</span><br><span class="line">    Eigen::Matrix3d R_mat;</span><br><span class="line">    R_mat &lt;&lt; R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">2</span>),</span><br><span class="line">        R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">2</span>),</span><br><span class="line">        R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">0</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">1</span>), R.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">2</span>);</span><br><span class="line">    pose-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);</span><br><span class="line">    pose-&gt;<span class="built_in">setEstimate</span>(g2o::<span class="built_in">SE3Quat</span>(</span><br><span class="line">        R_mat,</span><br><span class="line">        Eigen::<span class="built_in">Vector3d</span>(t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">0</span>), t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">0</span>), t.at&lt;<span class="keyword">double</span>&gt;(<span class="number">2</span>, <span class="number">0</span>))));</span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(pose);</span><br><span class="line">    <span class="comment">// 优化所有特征点的空间位置 P</span></span><br><span class="line">    <span class="keyword">int</span> index = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> Point3f p : points_3d)</span><br><span class="line">    &#123;</span><br><span class="line">        g2o::VertexPointXYZ *point = <span class="keyword">new</span> g2o::<span class="built_in">VertexPointXYZ</span>();</span><br><span class="line">        point-&gt;<span class="built_in">setId</span>(index++);</span><br><span class="line">        point-&gt;<span class="built_in">setEstimate</span>(Eigen::<span class="built_in">Vector3d</span>(p.x, p.y, p.z));</span><br><span class="line">        point-&gt;<span class="built_in">setMarginalized</span>(<span class="literal">true</span>); <span class="comment">// g2o 中必须设置 marg 参见第十讲内容</span></span><br><span class="line">        optimizer.<span class="built_in">addVertex</span>(point);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 准备相机参数</span></span><br><span class="line">    g2o::CameraParameters *camera = <span class="keyword">new</span> g2o::<span class="built_in">CameraParameters</span>(</span><br><span class="line">        K.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">0</span>), Eigen::<span class="built_in">Vector2d</span>(K.at&lt;<span class="keyword">double</span>&gt;(<span class="number">0</span>, <span class="number">2</span>), K.at&lt;<span class="keyword">double</span>&gt;(<span class="number">1</span>, <span class="number">2</span>)), <span class="number">0</span>);</span><br><span class="line">    camera-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);</span><br><span class="line">    optimizer.<span class="built_in">addParameter</span>(camera);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2.设置边(每个 3D 点在第二个相机中的投影)</span></span><br><span class="line">    index = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> Point2f p : points_2d)</span><br><span class="line">    &#123;</span><br><span class="line">        g2o::EdgeProjectXYZ2UV *edge = <span class="keyword">new</span> g2o::<span class="built_in">EdgeProjectXYZ2UV</span>();</span><br><span class="line">        edge-&gt;<span class="built_in">setId</span>(index);</span><br><span class="line">        edge-&gt;<span class="built_in">setVertex</span>(<span class="number">0</span>, <span class="keyword">dynamic_cast</span>&lt;g2o::VertexPointXYZ *&gt;(optimizer.<span class="built_in">vertex</span>(index)));</span><br><span class="line">        edge-&gt;<span class="built_in">setVertex</span>(<span class="number">1</span>, pose);</span><br><span class="line">        edge-&gt;<span class="built_in">setMeasurement</span>(Eigen::<span class="built_in">Vector2d</span>(p.x, p.y));</span><br><span class="line">        edge-&gt;<span class="built_in">setParameterId</span>(<span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">        edge-&gt;<span class="built_in">setInformation</span>(Eigen::Matrix2d::<span class="built_in">Identity</span>());</span><br><span class="line">        optimizer.<span class="built_in">addEdge</span>(edge);</span><br><span class="line">        index++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 3.优化</span></span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);</span><br><span class="line">    optimizer.<span class="built_in">initializeOptimization</span>();</span><br><span class="line">    optimizer.<span class="built_in">optimize</span>(<span class="number">100</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;after optimization: \n&quot;</span></span><br><span class="line">         &lt;&lt; <span class="string">&quot;T= \n&quot;</span></span><br><span class="line">         &lt;&lt; Eigen::<span class="built_in">Isometry3d</span>(pose-&gt;<span class="built_in">estimate</span>()).<span class="built_in">matrix</span>() &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h2 id="主函数"><a href="#主函数" class="headerlink" title="主函数"></a>主函数</h2><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">5</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;请输入两张彩色图以及对应的深度图：img1 img2 depth1 depth2&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//-- 读取图像</span></span><br><span class="line">    Mat img_1 = <span class="built_in">imread</span>(argv[<span class="number">1</span>], CV_LOAD_IMAGE_COLOR);</span><br><span class="line">    Mat img_2 = <span class="built_in">imread</span>(argv[<span class="number">2</span>], CV_LOAD_IMAGE_COLOR);</span><br><span class="line">    <span class="comment">// 1. 特征匹配</span></span><br><span class="line">    vector&lt;KeyPoint&gt; keypoints_1, keypoints_2;</span><br><span class="line">    vector&lt;DMatch&gt; matches;</span><br><span class="line">    <span class="built_in">find_feature_matches</span>(img_1, img_2, keypoints_1, keypoints_2, matches);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;图一找到&quot;</span> &lt;&lt; keypoints_1.<span class="built_in">size</span>() &lt;&lt; <span class="string">&quot;个关键点&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;图二找到&quot;</span> &lt;&lt; keypoints_2.<span class="built_in">size</span>() &lt;&lt; <span class="string">&quot;个关键点&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;筛选后一共&quot;</span> &lt;&lt; matches.<span class="built_in">size</span>() &lt;&lt; <span class="string">&quot;组匹配点&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 建立3D点</span></span><br><span class="line">    Mat d1 = <span class="built_in">imread</span>(argv[<span class="number">3</span>], CV_LOAD_IMAGE_UNCHANGED); <span class="comment">// 深度图为16位无符号数，单通道图像</span></span><br><span class="line">    Mat K = (Mat_&lt;<span class="keyword">double</span>&gt;(<span class="number">3</span>, <span class="number">3</span>) &lt;&lt; <span class="number">520.9</span>, <span class="number">0</span>, <span class="number">325.1</span>, <span class="number">0</span>, <span class="number">521.0</span>, <span class="number">249.7</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line">    vector&lt;Point3f&gt; pts_3d;</span><br><span class="line">    vector&lt;Point2f&gt; pts_2d;</span><br><span class="line">    <span class="comment">//提取特征点的深度值：</span></span><br><span class="line">    <span class="keyword">for</span> (DMatch m : matches)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//取得匹配点的深度，queryIdx(表示匹配点的索引)查询描述子索引，pt关键点的坐标 (y行地址)[x列地址]</span></span><br><span class="line">        ushort d = d1.ptr&lt;<span class="keyword">unsigned</span> <span class="keyword">short</span>&gt;(<span class="built_in"><span class="keyword">int</span></span>(keypoints_1[m.queryIdx].pt.y))[<span class="built_in"><span class="keyword">int</span></span>(keypoints_1[m.queryIdx].pt.x)];</span><br><span class="line">        <span class="keyword">if</span> (d == <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">float</span> dd = d / <span class="number">5000.0</span>;</span><br><span class="line">        Point2d p1 = <span class="built_in">pixel2cam</span>(keypoints_1[m.queryIdx].pt, K); <span class="comment">// p1:(X/Z,Y/Z,1)</span></span><br><span class="line">        <span class="comment">// 将相机归一化坐标转换为相机坐标系下的3D组坐标</span></span><br><span class="line">        pts_3d.<span class="built_in">push_back</span>(<span class="built_in">Point3f</span>(p1.x * dd, p1.y * dd, dd)); <span class="comment">// (X,Y,Z)第一帧图像的3D坐标（相机坐标系下）</span></span><br><span class="line">        pts_2d.<span class="built_in">push_back</span>(keypoints_2[m.trainIdx].pt);        <span class="comment">// 第二帧图像的像素坐标</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;3d-2d pairs: &quot;</span> &lt;&lt; pts_3d.<span class="built_in">size</span>() &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用EPnP方法求解PnP</span></span><br><span class="line">    Mat r, t;</span><br><span class="line">    <span class="built_in">solvePnP</span>(pts_3d, pts_2d, K, <span class="built_in">Mat</span>(), r, t, <span class="literal">false</span>, cv::SOLVEPNP_EPNP);</span><br><span class="line">    Mat R;</span><br><span class="line">    cv::<span class="built_in">Rodrigues</span>(r, R); <span class="comment">// r为旋转向量形式，用Rodrigues公式转换为矩阵</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;R=&quot;</span> &lt;&lt; endl</span><br><span class="line">         &lt;&lt; R &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;t=&quot;</span> &lt;&lt; endl</span><br><span class="line">         &lt;&lt; t &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用BA优化</span></span><br><span class="line">    <span class="built_in">bundleAdjustment</span>(pts_3d, pts_2d, K, R, t);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>CMakeLists.txt</p>
@@ -3850,7 +3851,7 @@ e(x+\Delta x)\approx e(x)+J\Delta x</script><h1 id="集合符号"><a href="#集�
 </div>
 <p>极限</p>
 <script type="math/tex; mode=display">
-\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script><p>浅红色文字：<font color="#dd0000">浅红色文字：</font><br><br>深红色文字：<font color="#660000">深红色文字</font><br><br>浅绿色文字：<font color="#00dd00">浅绿色文字</font><br><br>深绿色文字：<font color="#006600">深绿色文字</font><br><br>浅蓝色文字：<font color="#0000dd">浅蓝色文字</font><br><br>深蓝色文字：<font color="#000066">深蓝色文字</font><br><br>浅黄色文字：<font color="#dddd00">浅黄色文字</font><br><br>深黄色文字：<font color="#666600">深黄色文字</font><br><br>浅青色文字：<font color="#00dddd">浅青色文字</font><br><br>深青色文字：<font color="#006666">深青色文字</font><br><br>浅紫色文字：<font color="#dd00dd">浅紫色文字</font><br><br>深紫色文字：<font color="#660066">深紫色文字</font><br> <span style="color:red;">文字</span></p>
+\lim\limits_{x\rightarrow\infty}\frac{1}{x}</script><p>浅红色文字：<font color="#dd0000">浅红色文字：</font><br /><br>深红色文字：<font color="#660000">深红色文字</font><br /><br>浅绿色文字：<font color="#00dd00">浅绿色文字</font><br /><br>深绿色文字：<font color="#006600">深绿色文字</font><br /><br>浅蓝色文字：<font color="#0000dd">浅蓝色文字</font><br /><br>深蓝色文字：<font color="#000066">深蓝色文字</font><br /><br>浅黄色文字：<font color="#dddd00">浅黄色文字</font><br /><br>深黄色文字：<font color="#666600">深黄色文字</font><br /><br>浅青色文字：<font color="#00dddd">浅青色文字</font><br /><br>深青色文字：<font color="#006666">深青色文字</font><br /><br>浅紫色文字：<font color="#dd00dd">浅紫色文字</font><br /><br>深紫色文字：<font color="#660066">深紫色文字</font><br /> <span style="color:red;">文字</span></p>
 <p><span style="color:red;">正态分布的随机变量通过非线性系统后就不再是正态的了。</span></p>
 <div class="table-container">
 <table>
@@ -3900,7 +3901,7 @@ e(x+\Delta x)\approx e(x)+J\Delta x</script><h1 id="集合符号"><a href="#集�
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="/images/对极约束求解相机运动/image-20220325110120640.png" alt="image-20220325110120640" style="zoom:50%;"></p>
+<p><img src="/images/对极约束求解相机运动/image-20220325110120640.png" alt="image-20220325110120640" style="zoom:50%;" /></p>
 <p>设 $P$ 的空间位置为：</p>
 <script type="math/tex; mode=display">
 P=[X,Y,Z]^{T}</script><p>由于像素坐标与世界坐标的关系为：</p>
@@ -3963,7 +3964,7 @@ x_2^{T}t^{\land}Rx_1=0</script><p>首先，要知道像素坐标转相机归一�
 <p>由于 $E$ 本身具有尺度等价性，它分解得到的$ t, R $也有一个尺度等价性。而$ R ∈ SO(3) $自身具有约束，所以我们认为 $t $具有一个尺度。换言之，在分解过程中，对$ t $乘以任意非零常数，分解都是成立的。因此，我们通常把 $t $进行归一化，让它的长度等于 1。</p>
 </blockquote>
 <p>这也是由于单目相机本身的缺点，在单目 SLAM 中，仅通过单张图像无法获得像素的深度信息，我们需要通过三角测量（Triangulation）（或三角化）的方法来估计地图点的深度。</p>
-<p><img src="/images/对极约束求解相机运动/image-20220325110908224.png" alt="image-20220325110908224" style="zoom:50%;"></p>
+<p><img src="/images/对极约束求解相机运动/image-20220325110908224.png" alt="image-20220325110908224" style="zoom:50%;" /></p>
 <p>按照对极几何中的定义，设 $x_1 , x_2 $为两个特征点的归一化坐标，满足：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -4024,7 +4025,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
           </blockquote>
 <span id="more"></span>
 <p>素材：</p>
-<p><img src="/images/特征提取/FE.PNG" alt="FE" style="zoom:50%;"></p>
+<p><img src="/images/特征提取/FE.PNG" alt="FE" style="zoom:50%;" /></p>
 <p>相关函数参考文档：<a href="http://www.opencv.org.cn/opencvdoc/2.3.2/html/modules/features2d/doc/features2d.html">features2d. 二维图像特征框架</a></p>
 <p>特征匹配的步骤：</p>
 <ul>
@@ -4043,11 +4044,11 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
 <p>CMakeLists.txt</p>
 <figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>( VERSION <span class="number">2.8</span> )</span><br><span class="line"><span class="keyword">project</span>( feature_extraction )</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>( CMAKE_BUILD_TYPE <span class="string">&quot;Release&quot;</span> )</span><br><span class="line"><span class="keyword">set</span>( CMAKE_CXX_FLAGS <span class="string">&quot;-std=c++14 -O3&quot;</span> )</span><br><span class="line"><span class="keyword">find_package</span>( OpenCV <span class="number">3.1</span> REQUIRED )</span><br><span class="line"></span><br><span class="line"><span class="keyword">include_directories</span>( </span><br><span class="line">    <span class="variable">$&#123;OpenCV_INCLUDE_DIRS&#125;</span> </span><br><span class="line">    <span class="string">&quot;/usr/include/eigen3/&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="keyword">add_executable</span>( feature_extraction feature_extraction.cpp  )</span><br><span class="line"><span class="keyword">target_link_libraries</span>( feature_extraction <span class="variable">$&#123;OpenCV_LIBS&#125;</span> )</span><br></pre></td></tr></table></figure>
 <p>特征点检测</p>
-<p><img src="/images/特征提取/outimg1.png" alt="outimg1" style="zoom: 50%;"></p>
+<p><img src="/images/特征提取/outimg1.png" alt="outimg1" style="zoom: 50%;" /></p>
 <p>所有匹配点对</p>
-<p><img src="/images/特征提取/img_match.png" alt="img_match" style="zoom: 50%;"></p>
+<p><img src="/images/特征提取/img_match.png" alt="img_match" style="zoom: 50%;" /></p>
 <p>优化后匹配点对</p>
-<p><img src="/images/特征提取/img_goodmatch.png" alt="img_goodmatch" style="zoom:50%;"></p>
+<p><img src="/images/特征提取/img_goodmatch.png" alt="img_goodmatch" style="zoom:50%;" /></p>
 ]]></content>
       <categories>
         <category>SLAM十四讲</category>
@@ -4068,7 +4069,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
 <span id="more"></span>
 <p>编译与安装</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/RainerKuemmerle/g2o</span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">sudo apt-get install libqt4-dev qt4-qmake libqglviewer-dev libsuitesparse-dev libcxsparse3.1.2 libcholmod-dev</span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line"><span class="built_in">cd</span> g2o</span><br><span class="line">mkdir build</span><br><span class="line"><span class="built_in">cd</span> build </span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-<h2 id="使用G2O的步骤："><a href="#使用G2O的步骤：" class="headerlink" title="使用G2O的步骤："></a>使用G2O的步骤：</h2><p><img src="/posts/6634.htm/1855613-20200414153348238-1860777008.png" alt="img"></p>
+<h2 id="使用G2O的步骤："><a href="#使用G2O的步骤：" class="headerlink" title="使用G2O的步骤："></a>使用G2O的步骤：</h2><p><img src="1855613-20200414153348238-1860777008.png" alt="img"></p>
 <h3 id="1、创建线性求解器"><a href="#1、创建线性求解器" class="headerlink" title="1、创建线性求解器"></a>1、创建线性求解器</h3><p>这里的线性求解器<code>LinearSolver</code>创建的是<code>LinearSolverCSparse</code>：</p>
 <ul>
 <li><strong>LinearSolverCholmod ：</strong>使用sparse cholesky分解法。继承自LinearSolverCCS</li>
@@ -4103,7 +4104,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
 y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高斯噪声。我们故意选择了这样一个非线性模型，以使问题不至于太简单。现在，假设我们有$ N $个关于$ x, y$ 的观测数据点，想根据这些数据点求出曲线的参数。那么，可以求解下面的最小二乘问题以估计曲线参数：</p>
 <script type="math/tex; mode=display">
 \underset{a,b,c}{min}\frac{1}{2}\sum^{N}_{i=1}\parallel y_i-exp(ax^2_i+bx_i+c)\parallel^2</script><p>节点为优化变量，边为误差项：</p>
-<p><img src="/posts/6634.htm/image-20220326161220343.png" alt="image-20220326161220343"></p>
+<p><img src="image-20220326161220343.png" alt="image-20220326161220343"></p>
 <p>在曲线拟合问题中，整个问题只有一个顶点：曲线模型的参数$ a, b, c$；而每个带噪声的数据点，构成了一个个误差项，也就是图优化的边。</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Core&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/base_vertex.h&gt;</span>     <span class="comment">// 顶点</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/base_unary_edge.h&gt;</span> <span class="comment">// 边</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/block_solver.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;opencv2/core/core.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/solvers/dense/linear_solver_dense.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_gauss_newton.h&gt;</span> <span class="comment">// GN</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_levenberg.h&gt;</span>    <span class="comment">// LM</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_dogleg.h&gt;</span>       <span class="comment">// DogLeg</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 曲线模型的顶点，模板参数：优化变量维度和数据类型   (节点为优化变量)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingVertex</span> :</span> <span class="keyword">public</span> g2o::BaseVertex&lt;<span class="number">3</span>, Eigen::Vector3d&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 结构体包含eigen成员必须进行宏定义 EIGEN_MAKE_ALIGNED_OPERATOR_NEW, 保证内存对齐</span></span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function">    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span> <span class="comment">// 顶点重置函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate &lt;&lt; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> *update)</span> <span class="comment">// 顶点更新函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate += Eigen::<span class="built_in">Vector3d</span>(update);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 误差模型 模板参数：观测值维度，类型，连接顶点类型   (边为误差项)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingEdge</span> :</span> <span class="keyword">public</span> g2o::BaseUnaryEdge&lt;<span class="number">1</span>, <span class="keyword">double</span>, CurveFittingVertex&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">CurveFittingEdge</span>(<span class="keyword">double</span> x) : <span class="built_in">BaseUnaryEdge</span>(), _x(x) &#123;&#125; <span class="comment">// 初始化列表</span></span><br><span class="line">    <span class="comment">// 计算曲线模型误差</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> CurveFittingVertex *v = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> CurveFittingVertex *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">const</span> Eigen::Vector3d abc = v-&gt;<span class="built_in">estimate</span>();</span><br><span class="line">        _error(<span class="number">0</span>, <span class="number">0</span>) = _measurement - std::<span class="built_in">exp</span>(<span class="built_in">abc</span>(<span class="number">0</span>, <span class="number">0</span>) * _x * _x + <span class="built_in">abc</span>(<span class="number">1</span>, <span class="number">0</span>) * _x + <span class="built_in">abc</span>(<span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">double</span> _x; <span class="comment">// x 值， y 值为 _measurement</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//主函数</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> a = <span class="number">1.0</span>, b = <span class="number">2.0</span>, c = <span class="number">1.0</span>; <span class="comment">// 真实参数值</span></span><br><span class="line">    <span class="keyword">int</span> N = <span class="number">100</span>;                      <span class="comment">// 数据点</span></span><br><span class="line">    <span class="keyword">double</span> w_sigma = <span class="number">1.0</span>;             <span class="comment">// 噪声Sigma值</span></span><br><span class="line">    cv::RNG rng;                      <span class="comment">// OpenCV随机数产生器</span></span><br><span class="line">    <span class="keyword">double</span> abc[<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;;        <span class="comment">// abc参数的估计值</span></span><br><span class="line"></span><br><span class="line">    vector&lt;<span class="keyword">double</span>&gt; x_data, y_data;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;生成数据：&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> x = i / <span class="number">100.0</span>;</span><br><span class="line">        x_data.<span class="built_in">push_back</span>(x);</span><br><span class="line">        y_data.<span class="built_in">push_back</span>(<span class="built_in">exp</span>(a * x * x + b * x + c) + rng.<span class="built_in">gaussian</span>(w_sigma));</span><br><span class="line">        cout &lt;&lt; x_data[i] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; y_data[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 构建图优化，先设定g2o</span></span><br><span class="line">    <span class="comment">// 每个误差项优化变量维度为3，误差值维度为1</span></span><br><span class="line">    <span class="keyword">typedef</span> g2o::BlockSolver&lt;g2o::BlockSolverTraits&lt;<span class="number">3</span>, <span class="number">1</span>&gt;&gt; Block;</span><br><span class="line">    <span class="comment">// 实例化线性方程求解器</span></span><br><span class="line">    Block::LinearSolverType *linearSolver = <span class="keyword">new</span> g2o::LinearSolverDense&lt;Block::PoseMatrixType&gt;();</span><br><span class="line">    <span class="comment">// 实例化矩阵块求解器</span></span><br><span class="line">    Block *solver_ptr = <span class="keyword">new</span> <span class="built_in">Block</span>(unique_ptr&lt;Block::LinearSolverType&gt;(linearSolver));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 梯度下降方法，从GN(高斯牛顿), LM（列文伯格）, DogLeg 中选</span></span><br><span class="line">    g2o::OptimizationAlgorithmGaussNewton *solver_gn = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmGaussNewton</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">    g2o::OptimizationAlgorithmLevenberg *solver_lm = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmLevenberg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">    g2o::OptimizationAlgorithmDogleg *solver_dog = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmDogleg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line"></span><br><span class="line">    g2o::SparseOptimizer optimizer;    <span class="comment">// 图模型</span></span><br><span class="line">    optimizer.<span class="built_in">setAlgorithm</span>(solver_lm); <span class="comment">//设置求解器（使用LM方法）</span></span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);        <span class="comment">// 打开调试输出</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 往图中增加顶点</span></span><br><span class="line">    CurveFittingVertex *v = <span class="keyword">new</span> <span class="built_in">CurveFittingVertex</span>();</span><br><span class="line">    v-&gt;<span class="built_in">setEstimate</span>(Eigen::<span class="built_in">Vector3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)); <span class="comment">// 设置优化初始值</span></span><br><span class="line">    v-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);                              <span class="comment">// 设置顶点ID</span></span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(v);                   <span class="comment">// 向稀疏优化器添加顶点</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 往图中增加边</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        CurveFittingEdge *edge = <span class="keyword">new</span> <span class="built_in">CurveFittingEdge</span>(x_data[i]);</span><br><span class="line">        edge-&gt;<span class="built_in">setId</span>(i);</span><br><span class="line">        edge-&gt;<span class="built_in">setVertex</span>(<span class="number">0</span>, v);           <span class="comment">// 设置连接的顶点</span></span><br><span class="line">        edge-&gt;<span class="built_in">setMeasurement</span>(y_data[i]); <span class="comment">//观测数值</span></span><br><span class="line">        <span class="comment">// 信息矩阵：协方差矩阵的逆</span></span><br><span class="line">        edge-&gt;<span class="built_in">setInformation</span>(Eigen::Matrix&lt;<span class="keyword">double</span>, <span class="number">1</span>, <span class="number">1</span>&gt;::<span class="built_in">Identity</span>() * <span class="number">1</span> / (w_sigma * w_sigma));</span><br><span class="line">        optimizer.<span class="built_in">addEdge</span>(edge); <span class="comment">// 向稀疏优化器添加边</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 执行优化</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot; 开始优化：&quot;</span> &lt;&lt; endl;</span><br><span class="line">    chrono::steady_clock::time_point t1 = chrono::steady_clock::<span class="built_in">now</span>(); <span class="comment">// 计时工具</span></span><br><span class="line"></span><br><span class="line">    optimizer.<span class="built_in">initializeOptimization</span>(); <span class="comment">// 设置优化初始值</span></span><br><span class="line">    optimizer.<span class="built_in">optimize</span>(<span class="number">100</span>);            <span class="comment">// 设置优化次数</span></span><br><span class="line"></span><br><span class="line">    chrono::steady_clock::time_point t2 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line">    chrono::duration&lt;<span class="keyword">double</span>&gt; time_used = chrono::duration_cast&lt;chrono::duration&lt;<span class="keyword">double</span>&gt;&gt;(t2 - t1);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;求解优化共使用了&quot;</span> &lt;&lt; time_used.<span class="built_in">count</span>() &lt;&lt; <span class="string">&quot;秒&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出优化值</span></span><br><span class="line">    Eigen::Vector3d abc_estimate = v-&gt;<span class="built_in">estimate</span>(); <span class="comment">// 执行优化</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;估计模型为：&quot;</span> &lt;&lt; abc_estimate.<span class="built_in">transpose</span>() &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>CMakeList.txt</p>
@@ -4301,7 +4302,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
 \end{aligned}
 \right.</script><figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Core&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Dense&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;ctime&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> <span class="keyword">const</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;*******求解线性方程组*******&quot;</span> &lt;&lt; endl;</span><br><span class="line">    Eigen::Matrix3f A1;</span><br><span class="line">    Eigen::Vector3f b;</span><br><span class="line">    A1 &lt;&lt; <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">10</span>;</span><br><span class="line">    b &lt;&lt; <span class="number">3</span>, <span class="number">3</span>, <span class="number">4</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">clock_t</span> time_stt = <span class="built_in">clock</span>();</span><br><span class="line">    Eigen::Vector3f x;</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;QR分解&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; A1.<span class="built_in">colPivHouseholderQr</span>().<span class="built_in">solve</span>(b) &lt;&lt; endl; <span class="comment">// QR分解</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;总计用时：&quot;</span> &lt;&lt; <span class="number">1000</span> * (<span class="built_in">clock</span>() - time_stt) / (<span class="keyword">double</span>)CLOCKS_PER_SEC &lt;&lt; <span class="string">&quot;ms&quot;</span> &lt;&lt; endl; </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>上述代码调用了<code>.colPivHouseholderQr()</code>函数对方程进行求解。Eigen中所有不同方法调用都有固定的格式：<code>x = A.methodName().solve(b)</code>，如下是Eigen中一些常用方法的比较，根据需要选择不同方法。</p>
-<p><img src="/posts/6957.htm/2019-08-22-01.PNG" alt="img"></p>
+<p><img src="./img/2019-08-22-01.PNG" alt="img"></p>
 <p>Eigen还可以解一些长的比较“奇怪”的方程组(如x、b并不是向量而是矩阵)，如下方程组：</p>
 <script type="math/tex; mode=display">
 \left( \begin{matrix} 
@@ -4375,7 +4376,7 @@ x_3 & x_4
 <p> 2.⾼斯消元法的原理是什么？</p>
 </blockquote>
 <p>高斯消元法主要是通过用<strong>初等行变换</strong>将增广矩阵化为行阶梯阵，然后通过回带求解线性方程组的解。</p>
-<p><img src="/posts/42667.htm/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/v2-43c79654d421239b9a6e262b9d91acbe_b.jpg" alt="img"></p>
+<p><img src="/home/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/v2-43c79654d421239b9a6e262b9d91acbe_b.jpg" alt="img"></p>
 <blockquote>
 <p> 3.QR 分解的原理是什么？</p>
 </blockquote>
@@ -4431,7 +4432,7 @@ x_3 & x_4
     <url>/posts/53697.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>已添加eigen库的路径到IncludePath，include<Eigen dense>也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </Eigen></p>
+            <p>已添加eigen库的路径到IncludePath，include<Eigen/Dense>也没有小灯泡，可是编译出错：fatal error: Eigen/Dense: No such file or directory </p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -4444,7 +4445,7 @@ x_3 & x_4
 </blockquote>
 </li>
 </ol>
-<p><img src="/images/eigen报错/image-20220426123147968.png" alt="image-20220426123147968" style="zoom:33%;"></p>
+<p><img src="/images/eigen报错/image-20220426123147968.png" alt="image-20220426123147968" style="zoom:33%;" /></p>
 <p>vscode中c_cpp_properties.json的”includePath”告诉vscode插件在哪里找到头文件，便于进行源码查看和debug，并没有告诉gcc编译器这个路径。</p>
 <ol>
 <li>添加eigen库的路径到编译参数”args”.（tasks.json）</li>
@@ -4454,19 +4455,19 @@ x_3 & x_4
 <p>“-I”,</p>
 <p>“/usr/include/eigen3”</p>
 </blockquote>
-<p><img src="/images/eigen报错/image-20220426123215807.png" alt="image-20220426123215807" style="zoom:50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123215807.png" alt="image-20220426123215807" style="zoom:50%;" /></p>
 <h1 id="方案二-使用命令"><a href="#方案二-使用命令" class="headerlink" title="方案二:使用命令"></a>方案二:使用命令</h1><p>命令<code>g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</code>的意思就是编译代码,指定头文件位置,并输出可执行文件</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ g++ eigenMatrix.cpp  -I /usr/include/eigen3 -o main</span><br><span class="line">alvin@ros:~/slam_ws/ch3/useEigen$ ./main </span><br><span class="line">1 2 3</span><br><span class="line">4 5 6</span><br></pre></td></tr></table></figure>
 <h1 id="方案三-使用CMake"><a href="#方案三-使用CMake" class="headerlink" title="方案三:使用CMake"></a>方案三:使用CMake</h1><p>用vscode编写这类的调用第三方，其实最好的方式是用cmake，</p>
 <p>首先，配置c_cpp_properties.json中的includepath，这里配置的目的只是为了在vscode里没有红色波浪线，看起来美观。</p>
 <p>这里和方案一的第一步是一样的!</p>
 <p>项目结构如下：</p>
-<p><img src="/images/eigen报错/image-20220426123236573.png" alt="image-20220426123236573" style="zoom: 50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123236573.png" alt="image-20220426123236573" style="zoom: 50%;" /></p>
 <p>CMakeLists.txt内容如下：</p>
 <figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span> (VERSION <span class="number">2.8</span>.<span class="number">11</span>)</span><br><span class="line"><span class="keyword">project</span> (demo)</span><br><span class="line"><span class="keyword">find_package</span>(Eigen3 REQUIRED)</span><br><span class="line"><span class="keyword">include_directories</span>(/usr/<span class="keyword">include</span>/eigen3)</span><br><span class="line"><span class="keyword">add_executable</span> (eigenMatrix eigenMatrix.cpp)</span><br></pre></td></tr></table></figure>
 <p>运行代码:</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir build &amp;&amp; <span class="built_in">cd</span> build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">./eigenMatrix</span><br></pre></td></tr></table></figure>
-<p><img src="/images/eigen报错/image-20220426123337819.png" alt="image-20220426123337819" style="zoom:50%;"></p>
+<p><img src="/images/eigen报错/image-20220426123337819.png" alt="image-20220426123337819" style="zoom:50%;" /></p>
 ]]></content>
       <categories>
         <category>c++</category>
@@ -4514,7 +4515,7 @@ x_3 & x_4
 </blockquote>
 <p><code>.cpp</code>文件则是核心代码部分,<strong>定义(definition)</strong>某些变量或者方法以及逻辑实现.而这些方法和变量都是<code>.h</code>文件所<strong>声明</strong>的.</p>
 <p>在<code>.cpp</code>文件使用的时候,我们一般使用<code>#include</code>来引入<code>.h</code>文件中<strong>声明</strong>的方法或者变量,<code>#include</code>的含义如下图所示;</p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_17-06.png" width="60%"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_17-06.png" width="60%"/></p>
 <h1 id="在Unix查看C-的编译过程"><a href="#在Unix查看C-的编译过程" class="headerlink" title="在Unix查看C++的编译过程"></a>在Unix查看C++的编译过程</h1><p>我们新建两个文件,<code>a.h</code>和<code>a.cpp</code>,如下</p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//a.h</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">int</span> global;</span><br></pre></td></tr></table></figure>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//a.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
@@ -4526,7 +4527,7 @@ x_3 & x_4
 <p>我们新建一个文件<code>b.cpp</code></p>
 <figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//b.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
 <p>现在需要将<code>a.cpp</code>和<code>b.cpp</code>组合在一起,执行命令<code>g++ a.cpp b.cpp --save-temps</code></p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_20-17.png" width="50%"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_20-17.png" width="50%"/></p>
 <p><code>multiple definition of global</code>?显然<code>a.o</code> <code>b.o</code>重复定义了global,查看临时文件,可以看出编译已经完成(这是因为编译器是分开编译<code>a.cpp</code>和<code>b.cpp</code>),已经生产<code>.o</code>文件,但是没有生成<code>.out</code>.出错的原因在于<code>ld</code>(链接器),没有完成<code>a.cpp</code>和<code>b.cpp</code>的链接,什么原因?</p>
 <blockquote>
 <p>原因就在于我们在<code>a.h</code>的文件中的<code>global</code>是定义而非声明,因为<code>a.cpp</code>和<code>b.cpp</code>都包含了<code>a.h</code>文件,而<code>global</code>又是定义而非声明,因此说明它被定义了两次,故报错.</p>
@@ -4567,7 +4568,7 @@ x_3 & x_4
 <p>最后修改一下<code>a.cpp</code>, 它由于需求必须引入两个头文件.</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;a.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;b.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>执行命令<code>g++ a.cpp --save-temps</code></p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_22-18.png"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-11_22-18.png"/></p>
 <p>报错显示<code>error: redefinition of ‘class A’</code>,重新定义了<code>classA</code>这个类</p>
 <p>什么原因呢?查看编译过程文件<code>a.ii</code></p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;built-in&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;/usr/include/stdc-predef.h&quot;</span> <span class="number">1</span> <span class="number">3</span> <span class="number">4</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;&lt;command-line&gt;&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.cpp&quot;</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;b.h&quot;</span> <span class="number">1</span></span><br><span class="line"># <span class="number">1</span> <span class="string">&quot;a.h&quot;</span> <span class="number">1</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">int</span> global;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>&#123;</span>&#125;;</span><br><span class="line"># <span class="number">2</span> <span class="string">&quot;b.h&quot;</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> A a;</span><br><span class="line"># <span class="number">3</span> <span class="string">&quot;a.cpp&quot;</span> <span class="number">2</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"> <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -4595,12 +4596,12 @@ x_3 & x_4
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png"/></p>
 <p>解决方法： 通过直接下载所有模型到用户的根目录下的.gazebo/models/下 </p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/</span><br><span class="line">$ mkdir -p models</span><br><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/models/</span><br><span class="line">$ wget http://file.ncnynl.com/ros/gazebo_models.txt</span><br><span class="line">$ wget -i gazebo_models.txt</span><br><span class="line">$ ls model.tar.g* | xargs -n1 tar xzvf</span><br></pre></td></tr></table></figure>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-49.png"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-49.png"/></p>
 <p>完美解决</p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"></p>
+<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/></p>
 ]]></content>
       <categories>
         <category>ROS</category>

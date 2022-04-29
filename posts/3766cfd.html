@@ -23,12 +23,12 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="LOAM是Ji Zhang于2014年提出的使用激光雷达完成定位与三维建图的算法，即Lidar Odometry and Mapping。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了翻译。">
+  <meta name="description" content="LeGO-LOAM是Tixiao Shan 和 Brendan Englot于2018年提出的使用激光雷达完成定位与三维建图的算法，全称为：Lightweight and Groud-Optimized Lidar Odometry and Mapping on Variable Terrain，从标题可以看出 LeGO-LOAM 为应对可变地面">
 <meta property="og:type" content="article">
 <meta property="og:title" content="LeGO-LOAM论文翻译">
 <meta property="og:url" content="https://lukeyalvin.top/posts/3766cfd.html">
 <meta property="og:site_name" content="Lukey Alvin">
-<meta property="og:description" content="LOAM是Ji Zhang于2014年提出的使用激光雷达完成定位与三维建图的算法，即Lidar Odometry and Mapping。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了翻译。">
+<meta property="og:description" content="LeGO-LOAM是Tixiao Shan 和 Brendan Englot于2018年提出的使用激光雷达完成定位与三维建图的算法，全称为：Lightweight and Groud-Optimized Lidar Odometry and Mapping on Variable Terrain，从标题可以看出 LeGO-LOAM 为应对可变地面">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lukeyalvin.top/images/LeGO-LOAM论文翻译/image-20220426195127090.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/LeGO-LOAM论文翻译/image-20220426194420416.png">
@@ -46,7 +46,7 @@
 <meta property="og:image" content="https://lukeyalvin.top/images/LeGO-LOAM论文翻译/image-20220427111646072.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/LeGO-LOAM论文翻译/image-20220427111714790.png">
 <meta property="article:published_time" content="2022-04-27T08:16:25.410Z">
-<meta property="article:modified_time" content="2022-04-28T13:03:49.893Z">
+<meta property="article:modified_time" content="2022-04-29T02:34:14.416Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="激光SLAM">
 <meta property="article:tag" content="文献阅读">
@@ -244,7 +244,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-28 21:03:49" itemprop="dateModified" datetime="2022-04-28T21:03:49+08:00">2022-04-28</time>
+                <time title="修改时间：2022-04-29 10:34:14" itemprop="dateModified" datetime="2022-04-29T10:34:14+08:00">2022-04-29</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -304,7 +304,7 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>LOAM是Ji Zhang于2014年提出的使用激光雷达完成定位与三维建图的算法，即Lidar Odometry and Mapping。之后许多激光SLAM算法借鉴了LOAM中的一些思想，可以说学习LOAM对学习3D激光SLAM很有帮助。本文对LOAM原论文进行了翻译。</p>
+            <p>LeGO-LOAM是Tixiao Shan 和 Brendan Englot于2018年提出的使用激光雷达完成定位与三维建图的算法，全称为：Lightweight and Groud-Optimized Lidar Odometry and Mapping on Variable Terrain，从标题可以看出 LeGO-LOAM 为应对<strong>可变地面</strong>进行了地面优化，同时保证了轻量级。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -344,7 +344,7 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>我们在这里介绍一种两步 L-M 优化方法。最佳变换 $T $分两步找到：</p>
 <p>$(1)$ 通过匹配$F^t_p$中的平面特征及其在 $\mathbb{F}^{t-1}_p$ 中的对应关系来估计$ [t_z, θ_{roll}, θ_{pitch}]$</p>
 <p>$(2) $然后使用 $F^t_e$中的边缘特征及其在 $\mathbb{F}^{t-1}_e$ 中的对应关系，并同时使用 $[t_z, θ_{roll}, θ_{pitch}]$ 作为约束一起来估计剩余的 $[t_x, t_y, θ_{yaw}]$。需要注意的是，虽然$[t_x, t_y, θ_{yaw}]$也可以从第一个优化步骤中获得，但它们的准确度较低，得到的结果也不能继续放在第二步中使用。最后，通过融合 $[t_z, θ_{roll}, θ_{pitch}]$ 和$[t_x, t_y, θ_{yaw}]$找到两个连续扫描之间的$ 6D$ 变换。通过使用所提出的两步优化方法，我们观察到在计算时间减少约 $35\% $的同时可以实现类似的精度（表 III）。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427165436363.png" alt="image-20220427165436363" style="zoom: 33%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427165436363.png" alt="image-20220427165436363" style="zoom: 33%;" /></p>
 <blockquote>
 <p>图 3：激光雷达里程计模块的两步优化。首先通过匹配从地面点提取的平面特征来获得$[t_z, θ_{roll}, θ_{pitch}]$。 $[t_x, t_y, θ_{yaw}]$然后使用从分割点提取的边缘特征进行估计，同时应用$[t_z, θ_{roll}, θ_{pitch}]$作为约束。</p>
 </blockquote>
@@ -356,7 +356,7 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>$^1$LeGO-LOAM 的代码可在 <a target="_blank" rel="noopener" href="https://github.com/RobustFieldAutonomyLab/LeGO-LOAM">https://github.com/RobustFieldAutonomyLab/LeGO-LOAM</a> 获得</p>
 </blockquote>
 <h2 id="A-小型-UGV-测试"><a href="#A-小型-UGV-测试" class="headerlink" title="A. 小型 UGV 测试"></a>A. 小型 UGV 测试</h2><p>我们在植被覆盖的室外环境中手动驱动机器人。我们首先展示了在这种环境下特征提取的定性比较。使用这两种方法从同一扫描中提取的边缘和平面特征如图 4 所示。这些特征对应于第 III 节中发送到激光雷达建图模块的$\{\mathbb{F}^{t}_e, \mathbb{F}^{t}_p\}$。如图$4(d)$ 所示，LeGO-LOAM 的特征数量在点云分割后大大减少。从树叶返回的大部分点被丢弃，因为它们在多次扫描中不是稳定的特征。另一方面，由于从草地返回的点也非常嘈杂，因此在评估后会得出较大的粗曲率值。因此，使用原始 的LOAM， 不可避免地会从这些点中提取边缘特征。如图$4(c)$ 所示，从地面提取的边缘特征通常不可靠。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090416034.png" alt="image-20220427090416034" style="zoom: 80%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090416034.png" alt="image-20220427090416034" style="zoom: 80%;" /></p>
 <blockquote>
 <p>图 4：在植被覆盖的室外环境中，从两种不同的激光雷达里程计和制图框架获得的边缘和平面特征。边缘和平面特征分别为绿色和粉红色。从 LOAM 获得的特征显示在$ (b) $和$ (c) $中。从 LeGO-LOAM 获得的特征如 $(d) $和$ (e)$ 所示。标签 (i) 表示树，(ii) 表示石墙， (iii) 表示机器人。</p>
 </blockquote>
@@ -365,12 +365,12 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <blockquote>
 <p>$^2$<a target="_blank" rel="noopener" href="https://youtu.be/O3tz_ftHV48">https://youtu.be/O3tz_ftHV48</a></p>
 </blockquote>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090607185.png" alt="image-20220427090607185" style="zoom:80%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427090607185.png" alt="image-20220427090607185" style="zoom:80%;" /></p>
 <blockquote>
 <p>图 5：LOAM 和 LeGO-LOAM 在图 $4(a) $所示地形上的地图。 $(a) $中用白色箭头标记的树代表同一棵树。</p>
 </blockquote>
 <h2 id="B-大规模-UGV-测试"><a href="#B-大规模-UGV-测试" class="headerlink" title="B. 大规模 UGV 测试"></a>B. 大规模 UGV 测试</h2><p>接下来，我们在三个大规模数据集上对 LOAM 和 LeGO-LOAM 进行定量比较，这将被称为实验$ 1、2 $和$ 3$。前两个是在史蒂文斯理工学院校园收集的，那里有许多建筑物、树木、道路和人行道。这些实验及其环境如图 6(a) 所示。实验 3 跨越了一条森林覆盖的远足小径，其中有树木、柏油路和被草和土壤覆盖的小径。执行实验 3 的环境如图 8 所示。每个实验的详细信息列在表 I 中。为了进行公平比较，每个实验显示的所有性能和准确度结果均在每个数据集的 10 次实时回放试验中平均得出。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427102855741.png" alt="image-20220427102855741" style="zoom: 50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427102855741.png" alt="image-20220427102855741" style="zoom: 50%;" /></p>
 <p>1)实验1：第一个实验旨在证明LOAM和LeGO-LOAM都可以在具有平滑运动的城市环境中实现低漂移姿态估计。我们避免了激进的偏航动作，并且我们避免驾驶机器人穿过只能获得一些稳定特征的稀疏区域。在整个数据记录过程中，机器人在平坦的道路上运行。机器人的初始位置，如图6(b)所示，位于斜坡上。机器人以平均 1.35m/s 的平均速度行驶 807 秒后返回同一位置。</p>
 <p>为了评估这两种方法的姿态估计精度，我们比较了最终姿态和初始姿态之间的平移和旋转差异。这里，通过所有实验，初始位姿定义为$ [0, 0, 0, 0, 0, 0]$。如表 V 所示，LOAM 和 LeGO-LOAM 在两种不同的硬件安排上都实现了相似的低漂移姿态估计。当在 Jetson 上运行时，来自 LeGO-LOAM 的最终地图如图 6(b) 所示。</p>
 <p><img src="/images/LeGO-LOAM论文翻译/image-20220427101541012.png" alt="image-20220427101541012"></p>
@@ -383,26 +383,26 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
 <p>图 $7$：实验$ 2 $中 LOAM 在穿过史蒂文斯校园的人行道上发生故障的场景（上图 $(a)$ 中最左侧的人行道）。人行道的一端由附近建筑物的特征支撑。人行道的另一端主要被嘈杂的物体包围，即草和树。如果没有点云分割，将从这些对象中提取不可靠的边缘和平面特征。图像 $(b)$ 和 $(d)$ 显示 LOAM 在经过人行道后失效。</p>
 </blockquote>
 <p>3)实验 3：实验 3 的数据集是从森林远足小径记录的，其中 UGV 以 1.3m/s 的平均速度行驶。机器人行驶 35 分钟后返回初始位置。这种环境下的海拔变化约为 19 米。UGV 在三个路面上行驶：泥土覆盖的小径、沥青和被草覆盖的地面。这些表面的代表性图像分别显示在图 8 的底部。树木或灌木丛始终存在于道路的至少一侧。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427101634370.png" alt="image-20220427101634370" style="zoom:67%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427101634370.png" alt="image-20220427101634370" style="zoom:67%;" /></p>
 <blockquote>
 <p>图 8：实验$3$ LeGO-LOAM 建图结果。</p>
 </blockquote>
 <p>我们首先在这种环境下测试 LOAM 的准确性。生成的地图在所使用的两台计算机上的不同位置存在分歧。相对于 UGV 初始位置的最终平移和旋转误差在 Jetson 上为 69.40m 和 27.38°，在笔记本电脑上为 62.11m 和 8.50°。图 9(a) 和 (b) 显示了对两种硬件安排进行 10 次试验的结果轨迹。</p>
 <p>当 LeGO-LOAM 应用于该数据集时，Jetson 上的最终相对平移和旋转误差为 13.93m 和 7.73°，笔记本电脑上为 14.87m 和 7.96°。 Jetson 上 LeGO-LOAM 的最终点云图如图 8 所示，叠加在卫星图像上。在图 8 的中心放大的局部地图显示，来自 LeGO-LOAM 的点云图与开放中可见的三棵树匹配得很好。在两台计算机上从 LeGO-LOAM 获得的所有路径之间显示出高度一致性。图 9(c) 和 (d) 显示了在每台计算机上运行的十次试验。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427103924914.png" alt="image-20220427103924914" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427103924914.png" alt="image-20220427103924914" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 9：LOAM 和 LeGO-LOAM 在 10 次试验和 2 台计算机上生成的路径，以及实验 3 数据集。</p>
 </blockquote>
 <h2 id="C-基准测试结果"><a href="#C-基准测试结果" class="headerlink" title="C. 基准测试结果"></a>C. 基准测试结果</h2><p><strong>1)特征数量比较</strong>：我们在表II中展示了两种方法的特征提取比较。每次扫描的特征内容平均超过每个数据集的 10 次试验。点云分割后，对于集合$ F_e、F_p、\mathbb{F}_e $和$\mathbb{F}_p$，需要 LeGO-LOAM 处理的特征数量分别减少了至少$ 29\%、40\%、68\%$ 和 $72\%$。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105750858.png" alt="image-20220427105750858" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105750858.png" alt="image-20220427105750858" style="zoom:50%;" /></p>
 <p><strong>2)迭代次数比较：</strong>应用提出的两步L-M优化方法的结果如表III所示。我们首先使用 LeGO-LOAM 应用原始 L-M 优化，这意味着我们最小化从边缘和平面特征一起获得的距离函数。然后我们对 LeGO-LOAM 应用两步 L-M 优化：①$F_p$中的平面特征用于获得$[t_z, θ_{roll}, θ_{pitch}]$，②利用$F_e$中的边缘特征得到$[t_x, t_y, θ_{yaw}]$。记录 L-M 方法在处理一次扫描后终止时的平均迭代次数以进行比较。当使用两步优化时，第一步优化在实验 1 和 2 的两次迭代中完成。虽然第二步优化的迭代次数与原始L-M方法的数量相似，但处理的特征较少。因此，在使用两步 L-M 优化后，激光雷达里程计的运行时间减少了 $34\%$ 至 $48\%$。两步优化的运行时间如表 IV 所示。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105906074.png" alt="image-20220427105906074" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427105906074.png" alt="image-20220427105906074" style="zoom:50%;" /></p>
 <p><strong>3)运行时间比较：</strong>LOAM 和$\rm{LeGO-LOAM}$ 的每个模块在两台计算机上的运行时间如表 IV 所示。使用所提出的框架，<strong>特征提取</strong>和<strong>激光雷达里程计</strong>模块的运行时间在 LeGO-LOAM 中减少了一个数量级。请注意，在 Jetson 上,这两个模块在 LOAM 中的运行时间超过 100 毫秒。导致许多扫描被跳过，因为 LOAM 在嵌入式系统上无法实现实时性能。使用 LeGO-LOAM 时，激光雷达建图的运行时间也减少了至少 $60\%$。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427110536203.png" alt="image-20220427110536203" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427110536203.png" alt="image-20220427110536203" style="zoom:50%;" /></p>
 <p><strong>4)位姿误差比较：</strong>通过在所有实验中将初始位姿设置为$[0, 0, 0, 0, 0, 0]$，我们通过将最终位姿与初始位姿进行比较来计算相对位姿估计误差。表 V 列出了两台计算机上两种方法的旋转误差（以度为单位）和平移误差（以米为单位）。通过使用所提出的框架，LeGO-LOAM 可以以更少的计算时间实现相当或更好的位置估计精度。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111646072.png" alt="image-20220427111646072" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111646072.png" alt="image-20220427111646072" style="zoom:50%;" /></p>
 <h2 id="D-使用-KITTI-数据集的闭环测试"><a href="#D-使用-KITTI-数据集的闭环测试" class="headerlink" title="D. 使用 KITTI 数据集的闭环测试"></a>D. 使用 KITTI 数据集的闭环测试</h2><p>我们的最终实验将 LeGO-LOAM 应用于 KITTI 数据集 [21]。由于在 [20] 中对 KITTI 数据集的 LOAM 测试以 10% 的实时速度运行，我们只探索 LeGO-LOAM 及其在嵌入式系统实时应用中的潜力，其中行程长度足够大需要完整的 SLAM 解决方案。LeGO-LOAM 在 Jetson 上使用序列 00 的结果如图 10 所示。为了在 Jetson 上实现实时性能，我们将 HDL-64E 的扫描下采样到与第 III 节中使用的相同范围图像VLP-16。换言之，每次扫描的 75% 的点在处理前都被省略掉了。 ICP在这里用于在位姿图中的节点之间添加约束。然后使用 iSAM2 [24] 优化该图。最后，我们使用优化后的图来校正传感器位姿和地图。更多闭环测试可以在视频附件中找到。</p>
-<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111714790.png" alt="image-20220427111714790" style="zoom:50%;"></p>
+<p><img src="/images/LeGO-LOAM论文翻译/image-20220427111714790.png" alt="image-20220427111714790" style="zoom:50%;" /></p>
 <blockquote>
 <p>图 10：LeGO-LOAM，KITTI 数据集闭环测试，使用 Jetson。颜色变化表示海拔变化。</p>
 </blockquote>
@@ -487,8 +487,8 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
       <i class="fa fa-chevron-left"></i> 三、基于优化的IMU预积分与视觉信息融合
     </a></div>
       <div class="post-nav-item">
-    <a href="/posts/eb43aafd.html" rel="next" title="前端里程计方案-基于直接匹配">
-      前端里程计方案-基于直接匹配 <i class="fa fa-chevron-right"></i>
+    <a href="/posts/eb43aafd.html" rel="next" title="前端里程计方案-基于直接匹配的ICP&NDT">
+      前端里程计方案-基于直接匹配的ICP&NDT <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>

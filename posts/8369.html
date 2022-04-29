@@ -348,8 +348,8 @@ K_k=\frac{ {e_{EST} }_{k-1} }{ {e_{EST} }_{k-1}+{e_{MEA} }_{k} }</script><p><str
 </li>
 </ul>
 <p>已知物体的实际长度为$50mm$，测量误差$e_{MEA}=3mm$，估计误差$e_{MEA}=5mm$，$\hat{x}_0=40mm$，一共测量了13次，根据上面的三个步骤，我们可以计算并画出折线图。</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401102705574.png" alt="image-20220401102705574" style="zoom:50%;"></p>
-<p><img src="/images/卡尔曼滤波器/image-20220401102555645.png" alt="image-20220401102555645" style="zoom:50%;"></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401102705574.png" alt="image-20220401102705574" style="zoom:50%;" /></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401102555645.png" alt="image-20220401102555645" style="zoom:50%;" /></p>
 <p>很明显，经过测量次数的增加，最终的估计值是接近真实值的，这就是卡尔曼滤波递归的作用。</p>
 <h2 id="数据融合"><a href="#数据融合" class="headerlink" title="数据融合"></a>数据融合</h2><p>数据融合(Data Fusion)</p>
 <p>【例】现有两个称，已知它们称的结果都符合正态分布，现去称同一个物体，已知称$A$称得物体重量为$z_1=30g$，并且已知它的标准差为$\sigma_1=2g$；称$B$称得物体重量为$z_2=32g$，并且已知它的标准差为$\sigma_2=4g$；估计该物体的真实重量$\hat{z}_k=?$。</p>
@@ -396,7 +396,7 @@ K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带�
 \begin{align*}
 \mu_c&=\frac{\sigma^2_b\mu_a+\sigma^2_a\mu_b}{\sigma^2_a+\sigma^2_b}\\
 \sigma_c&=\frac{\sigma^2_a\sigma^2_b}{\sigma^2_b+\sigma^2_b}
-\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;"></p>
+\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;" /></p>
 <hr>
 <h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
 <p>【例】</p>
@@ -475,7 +475,7 @@ x_3&y_3&z_3
 \end{bmatrix}</script><p>协方差：</p>
 <script type="math/tex; mode=display">
 P=\frac{1}{3}a^Ta</script><h2 id="状态空间表达式"><a href="#状态空间表达式" class="headerlink" title="状态空间表达式"></a>状态空间表达式</h2><p>【例】：有一个弹簧阻尼系统，对质量为$m$的物块施加一个力$F$，弹簧向右的位移量为$x$，已知弹簧的胡克系数为$k$，阻尼系数为$B$</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;"></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;" /></p>
 <p>定义输入为$u_{(t)}=F_{(t)}$，输出为$x$</p>
 <p>由胡克定律可知，弹簧拉力$f_k$以及阻力$f_B$：</p>
 <script type="math/tex; mode=display">

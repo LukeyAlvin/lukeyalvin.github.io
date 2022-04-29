@@ -313,12 +313,12 @@
 <ul>
 <li>典型 6 轴 IMU 本身由一个陀螺仪和一个加速度计组成，分别测量自身的角速度和加速度，并以较高频率（≥ 100Hz）返回。</li>
 </ul>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;" /></p>
 <ul>
 <li>但是IMU，受自身温度、零偏、振动等因素干扰，积分得到的平移和旋转容易漂移</li>
 </ul>
 <p>手机等电子产品多使用价格低廉的 MEMS IMU（如 MPU 6050），自动驾驶类则多使用几万元的 IMU（如 Apollo 中使用的 Novatel SPAN-IGM-A1）</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;" /></p>
 <p>视觉 Visual Odometry</p>
 <ul>
 <li>以图像形式记录数据，频率较低（15 − 60Hz 居多）</li>
@@ -337,13 +337,13 @@
 <tbody>
 <tr>
 <td style="text-align:center">优势</td>
-<td style="text-align:center">快速响应<br>不受成像质量影响<br>角速度普遍比较准确<br>可估计绝对尺度</td>
-<td style="text-align:center">（静止）不产生漂移<br>直接测量旋转与平移</td>
+<td style="text-align:center">快速响应<br/>不受成像质量影响<br/>角速度普遍比较准确<br/>可估计绝对尺度</td>
+<td style="text-align:center">（静止）不产生漂移<br/>直接测量旋转与平移</td>
 </tr>
 <tr>
 <td style="text-align:center">劣势</td>
-<td style="text-align:center">存在零偏<br>低精度 IMU 积分位姿发散<br>高精度价格昂贵</td>
-<td style="text-align:center">受图像遮挡、运动物体干扰<br>单目视觉无法测量尺度<br>单目纯旋转运动无法估计<br>快速运动时易丢失</td>
+<td style="text-align:center">存在零偏<br/>低精度 IMU 积分位姿发散<br/>高精度价格昂贵</td>
+<td style="text-align:center">受图像遮挡、运动物体干扰<br/>单目视觉无法测量尺度<br/>单目纯旋转运动无法估计<br/>快速运动时易丢失</td>
 </tr>
 </tbody>
 </table>
@@ -361,12 +361,12 @@
 <li><strong>松耦合</strong></li>
 </ul>
 <p>松耦合将 IMU 定位与视觉/GNSS 的位姿直接进行融合，融合过程对二者本身不产生影响，作为后处理方式输出。典型方案为卡尔曼滤波器。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;" /></p>
 <ul>
 <li><strong>紧耦合</strong></li>
 </ul>
 <p>紧耦合则是使用两个传感器的原始数据共同估计一组变量，传感器噪声也是相互影响的，紧耦合算法上比较复杂，但充分利用了传感器数据，可以实现更好的效果，是目前研究的重点。典型方案为 MSCKF 和非线性优化。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;"></p>
+<p><img src="/images/1手写VIO-课程概要/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;" /></p>
 <p><strong>为什么要使用紧耦合？</strong></p>
 <ul>
 <li>单纯凭（单目）视觉或 IMU 都不具备估计 Pose 的能力：视觉存在尺度不确定性、IMU 存在零偏导致漂移；</li>
