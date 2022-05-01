@@ -30,16 +30,16 @@
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="近期发在gazebo在加载一些world环境时,总是出现下面黑屏的情况,这是因为model库加载不正确导致的">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png">
-<meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-49.png">
-<meta property="og:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/gazebo加载world出现黑屏问题/image-20220430102858532.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/gazebo加载world出现黑屏问题/image-20220430102920945.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/gazebo加载world出现黑屏问题/image-20220430102953161.png">
 <meta property="article:published_time" content="2021-11-02T14:46:34.029Z">
-<meta property="article:modified_time" content="2022-04-26T01:20:20.935Z">
+<meta property="article:modified_time" content="2022-04-30T02:29:56.058Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="BUG">
 <meta property="article:tag" content="gazebo">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/gazebo加载world出现黑屏问题/image-20220430102858532.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/34779.html">
 
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-26 09:20:20" itemprop="dateModified" datetime="2022-04-26T09:20:20+08:00">2022-04-26</time>
+                <time title="修改时间：2022-04-30 10:29:56" itemprop="dateModified" datetime="2022-04-30T10:29:56+08:00">2022-04-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -239,7 +239,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/ROS/" itemprop="url" rel="index"><span itemprop="name">ROS</span></a>
+                  <a href="/categories/error/" itemprop="url" rel="index"><span itemprop="name">error</span></a>
                 </span>
             </span>
 
@@ -270,7 +270,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>255</span>
+              <span>253</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -296,12 +296,12 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-44.png"/></p>
+<p><img src="/images/gazebo加载world出现黑屏问题/image-20220430102858532.png" alt="image-20220430102858532"></p>
 <p>解决方法： 通过直接下载所有模型到用户的根目录下的.gazebo/models/下 </p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/</span><br><span class="line">$ mkdir -p models</span><br><span class="line">$ <span class="built_in">cd</span> ~/.gazebo/models/</span><br><span class="line">$ wget http://file.ncnynl.com/ros/gazebo_models.txt</span><br><span class="line">$ wget -i gazebo_models.txt</span><br><span class="line">$ ls model.tar.g* | xargs -n1 tar xzvf</span><br></pre></td></tr></table></figure>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_22-49.png"/></p>
-<p>完美解决</p>
-<p><img src="https://gitee.com/LukeyAlvin/img_mk/raw/master/img/2021-11-02_23-16.png"/></p>
+<p><img src="/images/gazebo加载world出现黑屏问题/image-20220430102920945.png" alt="image-20220430102920945" style="zoom:50%;" /></p>
+<p>解决</p>
+<p><img src="/images/gazebo加载world出现黑屏问题/image-20220430102953161.png" alt="image-20220430102953161"></p>
 
     </div>
 
@@ -381,8 +381,8 @@
       <i class="fa fa-chevron-left"></i> turtlebot3仿真实践
     </a></div>
       <div class="post-nav-item">
-    <a href="/posts/9654.html" rel="next" title="c++头文件">
-      c++头文件 <i class="fa fa-chevron-right"></i>
+    <a href="/posts/53697.html" rel="next" title="fatal error Eigen/Core No such file or directory">
+      fatal error Eigen/Core No such file or directory <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -457,14 +457,14 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-count">53</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -783,12 +783,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">381k</span>
+    <span title="站点总字数">388k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:46</span>
+    <span title="站点阅读时长">5:53</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

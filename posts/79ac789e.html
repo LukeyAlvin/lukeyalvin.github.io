@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Scan Context 由韩国KAIST大学的 Giseop Kim, Ayoung Kim 于2018年发表在IROS(International Conference on Intelligent Robots and Systems).Scan Context 应用于基于3D点云的重定位和场景识别，主要思想是将场景3维信息压缩，将笛卡尔坐">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ScanContext论文翻译">
+<meta property="og:url" content="https://lukeyalvin.top/posts/79ac789e.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="Scan Context 由韩国KAIST大学的 Giseop Kim, Ayoung Kim 于2018年发表在IROS(International Conference on Intelligent Robots and Systems).Scan Context 应用于基于3D点云的重定位和场景识别，主要思想是将场景3维信息压缩，将笛卡尔坐">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/1-16512834289741.gif">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/image-20220429164041335-16512834289762.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/image-20220429164059389-16512834289774.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/image-20220429192701251-16512834289773.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/image-20220429201446582-16512834290096.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/image-20220429203142763-16512834290095.png">
+<meta property="article:published_time" content="2022-04-29T08:07:21.546Z">
+<meta property="article:modified_time" content="2022-05-01T01:06:30.396Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="ScanContext">
+<meta property="article:tag" content="激光SLAM">
+<meta property="article:tag" content="文献阅读">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/Scan-Context论文阅读/1-16512834289741.gif">
+
+<link rel="canonical" href="https://lukeyalvin.top/posts/79ac789e.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>ScanContext论文翻译 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/79ac789e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ScanContext论文翻译
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-04-29 16:07:21" itemprop="dateCreated datePublished" datetime="2022-04-29T16:07:21+08:00">2022-04-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-01 09:06:30" itemprop="dateModified" datetime="2022-05-01T09:06:30+08:00">2022-05-01</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%BF%80%E5%85%89SLAM/" itemprop="url" rel="index"><span itemprop="name">激光SLAM</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">文献阅读</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/79ac789e.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/79ac789e.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p><strong>Scan Context</strong> 由韩国KAIST大学的 Giseop Kim, Ayoung Kim 于2018年发表在<strong>IROS</strong>(International Conference on Intelligent Robots and Systems).Scan Context 应用于基于3D点云的重定位和场景识别，主要思想是将场景3维信息压缩，将笛卡尔坐标系的信息转换到极坐标系下计算。优势是高效利用场景点云分布特征，引入”旋转不变性”描述子，快速搜索。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="mathrm-Scan-Context-用于-3D-点云地图中地点识别的以自我为中心的空间描述子"><a href="#mathrm-Scan-Context-用于-3D-点云地图中地点识别的以自我为中心的空间描述子" class="headerlink" title="$\mathrm{Scan Context}$:用于 3D 点云地图中地点识别的以自我为中心的空间描述子"></a>$\mathrm{Scan Context}$:用于 3D 点云地图中地点识别的以自我为中心的空间描述子</h1><p><img src="/images/Scan-Context论文阅读/1-16512834289741.gif" alt="1"></p>
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>与用于视觉场景的各种特征检测器和描述子相比，使用结构信息描述地点的研究相对较少。同时定位和建图 (SLAM) 的最新进展提供了环境的密集 3D 地图，并且定位是由不同的传感器提出的。针对基于结构信息的全局定位，我们提出了 $\mathrm{Scan Context}$，这是一种来自 3D 光检测和测距（激光雷达） (Light Detection and Ranging ，LiDAR) 扫描的基于非直方图的全局描述子。与先前研究的方法不同，所提出的方法直接从传感器记录可见空间的 3D 结构，而不依赖于直方图或先前的训练。此外，该方法提出了使用相似度分数来计算两个$\mathrm{Scan Context}$之间的距离，以及一种两阶段搜索算法来有效地检测回环。$\mathrm{Scan Context}$及其搜索算法使回环检测不受激光雷达视点变化的影响，从而可以在重新访问同一个地点和拐角等地方检测到闭环。$\mathrm{Scan Context}$性能已经通过 3D激光雷达扫描的各种基准数据集进行了评估，并且所提出的方法显示出充分改进的性能。</p>
+<h1 id="Ⅰ-引言"><a href="#Ⅰ-引言" class="headerlink" title="Ⅰ.引言"></a>Ⅰ.引言</h1><p>在许多机器人应用中，位置识别是重要的问题。特别是对于 SLAM，这种识别为闭环提供了候选项，这对于纠正漂移误差和构建全局一致的地图至关重要 [1]。虽然闭环对机器人导航至关重要，但错误的匹配可能是灾难性的，需要仔细匹配。视觉识别随着相机传感器的广泛使用而流行，然而，由于光照变化和短期（例如，移动的物体）或长期（例如，季节）的变化，它本质上是困难的。因此，最近的文献集中在通过检查表示 [2] 和弹性后端 [3] 的鲁棒位置识别。</p>
+<p>与这些视觉传感器不同，激光雷达最近因其对感知方差的强不变性而受到关注。早期，传统的局部关键点描述子 [4, 5, 6, 7] 最初是为计算机视觉中的 3D 模型设计的，尽管它们容易受到噪声的影响，但已被用于位置识别。基于激光雷达的位置识别方法已在机器人文献中广泛提出 [8, 9, 10]。这些工作侧重于从结构信息（例如点云）中以局部 [8] 和全局方式 [10] 开发描述子。</p>
+<p>现有的基于 LiDAR 的位置识别方法一直试图克服两个问题。首先，无论视点变化如何，都需要描述子来实现旋转不变性。其次，噪声处理是这些空间描述子的另一个主题，因为点云的分辨率随距离而变化，并且法线是有噪声的。现有方法主要使用直方图[9,11,12]来解决上述两个问题。然而，由于直方图方法只提供场景的随机索引，描述场景的详细结构并不简单。这种限制使得描述子对于地点识别问题的可识别性降低，从而导致潜在的误匹配。</p>
+<p><img src="/images/Scan-Context论文阅读/image-20220429164041335-16512834289762.png" alt="image-20220429164041335" style="zoom:50%;" /></p>
+<p><img src="/images/Scan-Context论文阅读/image-20220429164059389-16512834289774.png" alt="image-20220429164059389" style="zoom:50%;" /></p>
+<blockquote>
+<p>图 1. 两步$\mathrm{Scan Context}$创建。使用来自 3D 扫描的点云的俯视图 (a)，我们将地面区域划分为 bin，根据方位角（在 LiDAR 框架内从 0 到 2π）和径向（从中心到最大感应范围）进行划分方向。我们将黄色区域称为一个环，将青色区域称为一个扇区，将黑色填充区域称为一个 bin。$\mathrm{Scan Context}$是（b）中的矩阵，它明确地保留了点云的绝对几何结构。 (a) 中描述的环和扇区在 (b) 中分别由相同颜色的列和行表示。从位于每个 bin 中的点中提取的代表值用作 (b) 的对应像素值。在本文中，我们使用 bin 中点的最大高度。</p>
+</blockquote>
+<p>在本文中，我们提出了 $\mathrm{Scan Context}$，这是一种具有匹配算法的新型空间描述子，专门针对使用单个 3D 扫描的户外地点识别。我们的表示将 3D 扫描中的整个点云编码为矩阵（图 1）。所提出的表示描述了以自我为中心的 2.5D 信息。该方法的贡献点是：</p>
+<ul>
+<li><strong>高效的 bin 编码功能。</strong>与现有的点云描述子 [7, 10] 不同，所提出的方法不需要计算 bin 中的点数，而是提出了一种更有效的用于位置识别的 bin 编码函数。这种编码对点云的密度和法线具有不变性。</li>
+<li><strong>保留点云的内部结构。</strong>如图 1 所示，矩阵的每个元素值仅由属于 bin 的点云确定。因此，与将点的相对几何描述为直方图并丢失点的绝对位置信息的[9]不同，我们的方法通过有意避免使用直方图来保留点云的绝对内部结构。这提高了判别能力，还可以在计算距离时将查询扫描与候选扫描（在我们的实验中，6°方位角分辨率）进行视点对齐。因此，也可以通过使用$\mathrm{Scan Context}$来检测反向闭环。</li>
+<li><strong>有效的两相匹配算法。</strong>为了实现可行的搜索时间，我们为第一个最近邻搜索提供了一个旋转不变的子描述子，并将其与成对相似度评分分层结合，从而避免搜索所有数据库进行闭环检测。</li>
+<li><strong>针对其他最先进的空间描述子进行彻底验证。</strong>与其他现有的全局点云描述子相比，例如 M2DP [8]、形状函数集合 (ESF) [11] 和 Z 投影 [12]，所提出的方法具有实质性的改进。</li>
+</ul>
+<h1 id="Ⅱ-相关工作"><a href="#Ⅱ-相关工作" class="headerlink" title="Ⅱ.相关工作"></a>Ⅱ.相关工作</h1><p>移动机器人的位置识别方法可以分为基于视觉和基于激光雷达的方法。视觉方法已普遍用于 SLAM 文献中的地点识别 [13, 14, 15]。 FAB-MAP [13] 通过学习视觉词袋的生成模型，使用概率方法提高了鲁棒性。然而，视觉表示具有局限性，例如易受光照条件变化的影响[16]。已经提出了几种方法来克服这些问题。 SeqSLAM [17] 提出了基于道路的方法，并显示出比 FAB-MAP 大大提高的性能。 SRAL [2] 融合了几种不同的表示，例如颜色、GIST [18] 和 HOG [19]，用于长期视觉位置识别。</p>
+<p>LiDAR 对上述这些感知变化具有很强的鲁棒性。基于 LiDAR 的方法被进一步分类为局部和全局描述子。局部描述子，例如 PFH [4]、SHOT [5]、shape context[7]或 spin image [6]，首先找到一个关键点，将附近的点分成 bin，并将周围 bin 的模式编码为直方图。Steder 等人提出了以词袋的方式利用点特征和完形描述子（gestalt descriptor） [20] 的位置识别方法[8]。</p>
+<p>然而，这些关键点描述子显示出局限性，因为它们最初是为 3D 模型部分匹配而不是为位置识别而设计的。例如，与 3D 模型不同，3D 扫描（例如，来自 VLP-16）中的点云密度会随着与传感器的距离而变化。此外，由于现实世界中的非结构化对象（例如树），点的法线比模型噪声更大。因此，局部方法通常需要关键点的法线，因此不太适合户外的地点识别。</p>
+<p>全局描述子不包括关键点检测阶段。 GLARE [9] 及其变体 [21, 22] 将点之间的几何关系编码为直方图，以代替搜索关键点和提取描述子。 ESF [11] 使用了由形状函数制成的直方图的串联。 Muhammad 和 Lacroix 提出了 Z 投影 [12]，它是法向量的直方图，以及具有两个距离函数的双阈值方案。Heet 等人提出了 M2DP [10]，它将扫描的整个 3D 点云投影到多个 2D 平面并提取 192 维紧凑的全局表示。M2DP 表现出比现有点云描述子更高的性能以及对噪声和分辨率变化的鲁棒性。如本段所述，全局描述子通常使用直方图。最近，SegMatch [23] 引入了一种基于分段的匹配算法。这是一种高级感知，但需要一个训练步骤，并且需要在全局参考框架中表示点。</p>
+<p>在本文中，我们提出了一种新的位置描述子，称为$\mathrm{Scan Context}$，它将 3D 扫描的点云编码为矩阵。$\mathrm{Scan Context}$可以被认为是Shape Context [7] 的扩展，用于定位 3D LiDAR 扫描数据的位置识别。具体来说，$\mathrm{Scan Context}$包含三个组成部分：在每个 bin 中保留点云的绝对位置信息的表示、高效的 bin 编码函数和两步搜索算法。</p>
+<h1 id="Ⅲ-mathrm-Scan-Context-进行地点识别"><a href="#Ⅲ-mathrm-Scan-Context-进行地点识别" class="headerlink" title="Ⅲ.$\mathrm{Scan Context}$进行地点识别"></a>Ⅲ.$\mathrm{Scan Context}$进行地点识别</h1><p>在本节中，我们描述了给定来自 3D 扫描的点云的$\mathrm{Scan Context}$创建，并提出了一种计算两个$\mathrm{Scan Context}$之间距离的度量。接下来，介绍两步搜索过程。使用$\mathrm{Scan Context}$进行位置识别的整体流程如图 2 所示。$\mathrm{Scan Context}$的创建和验证也可以在 scancontext.mp4 中找到。</p>
+<h2 id="A-mathrm-Scan-Context"><a href="#A-mathrm-Scan-Context" class="headerlink" title="A.$\mathrm{Scan Context}$"></a>A.$\mathrm{Scan Context}$</h2><p>我们为户外地点识别定义了一个名为 $\mathrm{Scan Context}$ 的地点描述子。</p>
+<p><img src="/images/Scan-Context论文阅读/image-20220429192701251-16512834289773.png" alt="image-20220429192701251" style="zoom: 50%;" /></p>
+<blockquote>
+<p>图 2. 算法概述。首先，将单个 3D 扫描中的点云编码到$\mathrm{Scan Context}$中。然后，从$\mathrm{Scan Context}$中对 $N_t$（环数）维向量进行编码，并用于检索最近的候选项以及 KD 树的构造。最后，将检索到的候选与查询$\mathrm{Scan Context}$进行比较。满足接受阈值并最接近查询的候选被认为是闭环。</p>
+</blockquote>
+<p>$\mathrm{Scan Context}$的关键思想受到 Belongie 等人提出的 Shape Context [7] 的启发，它将局部关键点周围的点云的几何形状编码为图像。然而他们的方法只是简单地计算点的数量来总结点的分布，我们的方法与他们的不同之处在于我们使用每个 bin 中点云的高度。使用高度的原因是为了有效地总结周围结构的垂直形状，而不需要大量的计算来分析点云的特征。此外，最大高度表示从传感器可以看到周围结构的哪一部分。这种以自我为中心的可视化在城市设计文献中一直是一个众所周知的概念，用于分析一个地方的身份[24, 25]。</p>
+<p>与Shape Context [7] 类似，我们首先将 3D 扫描划分为传感器坐标中的方位角和径向 bin，但采用等间距的方式，如图 1(a) 所示。扫描的中心充当全局关键点，因此我们将$\mathrm{Scan Context}$称为以自我为中心的位置描述子。$N_s$ 和 $N_r$ 分别是扇区和环的数量。也就是说，如果我们将 LiDAR 传感器的最大感应范围设置为 $L_{max}$，则环之间的径向间隙为 $\frac{L_{max} }{N_r}$，扇形的中心角等于$\frac{2\pi}{N_s}$。在本文中，我们使用 $N_s= 60$ 和 $N_r = 20$。</p>
+<p>因此，制作$\mathrm{Scan Context}$的第一个过程是将 3D 扫描的整个点划分为相互排斥的点云，如图 1(a) 所示。$\mathcal{P}_{ij}$是属于第$ i $个环和第 $j$ 个扇区重叠的 bin 的点集。符号 $[N_s]$ 等于$ \{1, 2, …, N_{s-1}, N_s\}$。因此，分区在数学上是</p>
+<script type="math/tex; mode=display">
+\mathcal{P}=\underset{i\in[N_r],j\in[N_s]}{\cup}\mathcal{P}_{ij}\tag{1}</script><p>因为点云是按固定间隔划分的，所以远离传感器的 bin 的物理面积比近的 bin 更宽。但是，两者都被同等地编码到$\mathrm{Scan Context}$的单个像素中。因此，$\mathrm{Scan Context}$补偿了由于远点稀疏导致的信息量不足，并将附近的动态对象视为稀疏噪声。</p>
+<p>在点云分区之后，使用该 bin 中的点云为每个 bin 分配一个实数值：</p>
+<script type="math/tex; mode=display">
+\phi:\mathcal{P}_{ij}\rightarrow\mathbb{R}\tag{2}</script><p>我们使用最大高度，其灵感来自城市能见度分析 [24, 25]。因此，bin 编码函数为:</p>
+<script type="math/tex; mode=display">
+\phi(\mathcal{P}_{ij})=\underset{p\in\mathcal{P}_{ij}}{\max}z(p)\tag{3}</script><p>其中 $z(\cdot ) $是返回点 $p$ 的$ z $坐标值的函数。我们为空的bin分配零。例如，如图 1(b) 所示，$\mathrm{Scan Context}$中的蓝色像素意味着与其 bin 对应的空间是空闲的，或者由于遮挡而未观察到。</p>
+<p>通过上述过程，最终将$\mathrm{Scan Context}$ $I$ 表示为$ N_r\times N_s$ 矩阵:</p>
+<script type="math/tex; mode=display">
+I=(a_{ij})\in\mathbb{R}^{N_r\times N_s},a_{ij}=\phi(\mathcal{P}_{ij})\tag{4}</script><p>为了对变换进行鲁棒的识别，我们通过$\mathit{ root\ shifting}$ 来增强 $\mathrm{Scan Context}$。通过这样做，在轻微运动扰动下从原始扫描中获取各种$\mathrm{Scan Context}$变得可行。</p>
+<p>在重新访问到过的地方时，单个$\mathrm{Scan Context}$可能对平移运动下的扫描中心位置敏感。例如，当重新访问不同通道中的相同位置时，可能不会保留$\mathrm{Scan Context}$的行顺序。为了克服这种情况，我们根据水平间隔将原始点云转换为 $N_{trans}$ 个邻居（本文中使用$N_{trans}=8$  ），并将从这些$\mathit{ root\ shifting}$ 点云获得的$\mathrm{Scan Context}$存储在一起。我们假设即使在实际移动的位置也能获得类似的点云，这是有效的，除了少数情况下，比如一个新空间突然出现的交叉点。</p>
+<h2 id="B-mathrm-Scan-Context-之间的相似度得分"><a href="#B-mathrm-Scan-Context-之间的相似度得分" class="headerlink" title="B. $\mathrm{Scan Context}$之间的相似度得分"></a>B. $\mathrm{Scan Context}$之间的相似度得分</h2><p>给定一个$\mathrm{Scan Context}$对，我们需要一个距离度量来衡量两个地方的相似性。$I^q$ 和$ I^c $分别是从查询点云和候选点云获取的$\mathrm{Scan Context}$。它们以列方式进行比较。也就是说，距离是同一索引处的列之间的距离之和。余弦距离用于计算相同索引处的两个列向量 $c^q_j $和 $c^c_j $之间的距离。此外，我们将总和除以总列数$N_s$用于归一化。因此，距离函数为:</p>
+<script type="math/tex; mode=display">
+d(I^q,I^c)=\frac{1}{N_s}\sum^{N_s}_{j=1}(1-\frac{c^q_j\cdot c^c_j}{\parallel c^q_j \parallel \parallel c^c_j \parallel}).\tag{5}</script><p>考虑到贯穿扇区的一致性，基于列的比较对动态物体特别有效。然而，候选$\mathrm{Scan Context}$的列甚至可以在相同的地方移动，因为激光雷达的视角对于不同的地方是不同的(例如，在相反的方向或角落重新访问一个地方)。图3说明了这种情况。由于$\mathrm{Scan Context}$是依赖于传感器位置的表示，因此行顺序始终是一致的。但是，如果 LiDAR 传感器相对于全局坐标的坐标发生变化，则列顺序可能会有所不同。</p>
+<p><img src="/images/Scan-Context论文阅读/image-20220429201446582-16512834290096.png" alt="image-20220429201446582" style="zoom:50%;" /></p>
+<blockquote>
+<p>图 3. 具有时间间隔的同一地点的$\mathrm{Scan Context}$示例。重新访问时传感器视点的变化导致$\mathrm{Scan Context}$的列移位，如 (a) 所示。但是，这两个矩阵包含相似的形状并显示相同的行顺序。</p>
+</blockquote>
+<p>为了解决这个问题，我们使用所有可能的列移位后的$\mathrm{Scan Context}$来计算距离，并找到最小距离。$I^c_n$ 是一个$\mathrm{Scan Context}$，它的第$n$列是从原始的$\mathrm{Scan Context}$偏移过来的。这与以$\frac{2\pi}{N_s}$分辨率粗略对齐两个点云以获取旋转分量中的偏航角的任务相同。然后，我们确定最佳对齐的列移位数量$(7)$和对应的距离$(6)$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+D(I^q,I^c)&=\underset{n\in[N_s]}{\min}d(I^q,I^c_n),\tag{6}\\
+n^*&=\underset{n\in[N_s]}{\arg\min}\ d(I^q,I^c_n),\tag{7}
+\end{align*}</script><p>请注意，此附加移位信息可以作为进一步定位细化的良好初始值，例如迭代最近点 (ICP)，如第 IV-C 节所示。</p>
+<h2 id="C-两阶段搜索算法"><a href="#C-两阶段搜索算法" class="headerlink" title="C. 两阶段搜索算法"></a>C. 两阶段搜索算法</h2><p>当在位置识别的ScanContext搜索时，有三个主要的典型工作流：成对相似性评分、最近邻搜索和稀疏优化[26]。我们的搜索算法将成对评分和最近邻搜索分层融合，以获得可接受的搜索时间。</p>
+<p>由于我们在(6)中的距离计算比其他全局描述子如[12，10]更加耗时，我们通过引入ring key提供了一个两阶段分层搜索算法。Ring key是一个具有旋转不变性的描述子，它是从$\mathrm{Scan Context}$中提取的。$\mathrm{Scan Context}$的每一行，$r$，都通过环形编码函数$\psi$编码成一个实数值。矢量<strong>$k$</strong>的第一个元素来自距离传感器最近的环，随后的元素来自下一个环，如图4所示。因此，ring key成为一个 $N_r$ 维向量，如 (8)：</p>
+<script type="math/tex; mode=display">
+k=(\psi(r_1),...,\psi(r_{N_r})),\mathrm{where}\ \psi:r_i\rightarrow\mathbb{R}\tag{8}</script><p>我们使用的环编码函数$\psi$是使用 $L_0$范数的环的占用率：</p>
+<script type="math/tex; mode=display">
+\psi(r_i)=\frac{\parallel r_i \parallel_0}{N_s}\tag{9}</script><p>由于占用率与视点无关，因此ring key实现了旋转不变性。</p>
+<p><img src="/images/Scan-Context论文阅读/image-20220429203142763-16512834290095.png" alt="image-20220429203142763" style="zoom:50%;" /></p>
+<blockquote>
+<p>图 4. 快速搜索的ring key生成。</p>
+</blockquote>
+<p>虽然不如$\mathrm{Scan Context}$信息丰富，但ring key支持快速搜索，以找到可能的候选闭环。向量$k$用作构建KD树的key。同时，要查询扫描的ring key用于查找相似的key及其对应的扫描索引。将被检索的相似key的数量由用户决定。使用距离(6)将这些恒定数量的候选$\mathrm{Scan Context}$与要查询的$\mathrm{Scan Context}$进行比较。最接近的满足给定阈值的候选项被选为重新访问的位置:</p>
+<script type="math/tex; mode=display">
+c^*=\underset{c_k\in\mathcal{C} }{\arg\min}\ D(I^q,I^c),s.t. \ D<\tau\tag{10}</script><p>其中 $\mathcal{C}$ 是从 KD 树中提取的一组候选索引，$\tau$ 是给定的接受阈值。 $c^∗ $是确定为闭环的位置的索引。</p>
+<h1 id="Ⅳ-实验评估"><a href="#Ⅳ-实验评估" class="headerlink" title="Ⅳ.实验评估"></a>Ⅳ.实验评估</h1><p>略…….</p>
+<h1 id="Ⅴ-结论"><a href="#Ⅴ-结论" class="headerlink" title="Ⅴ.结论"></a>Ⅴ.结论</h1><p>在这篇文章中，我们提出了一个空间描述子——$\mathrm{Scan Context}$，将一个地方概括为一个矩阵，这个矩阵明确描述了以自我为中心的环境的2.5D结构信息。与使用点云的现有全局描述子相比，$\mathrm{Scan Context}$在各种数据集上显示出更高的闭环检测性能。</p>
+<p>在未来的工作中，我们计划通过引入额外的层来扩展$\mathrm{Scan Context}$。也就是说，其他bin编码函数(例如，bin的语义信息)可被用于提高性能，即使对于具有高度重复结构的数据集，如复杂城市激光雷达数据集。</p>
+<p>Lidar定位：Scan Context<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/359523177">https://zhuanlan.zhihu.com/p/359523177</a></p>
+<p>Scan Context 介绍及理解<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/393353116">https://zhuanlan.zhihu.com/p/393353116</a></p>
+<p>从零开始做自动驾驶定位(二): 数据集<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/104875159">https://zhuanlan.zhihu.com/p/104875159</a></p>
+<p>$I^c_n$</p>
+<h6 id=""><a href="#" class="headerlink" title=" "></a> </h6>
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/79ac789e.html" title="ScanContext论文翻译">https://lukeyalvin.top/posts/79ac789e.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ScanContext/" rel="tag"> <i class="fa fa-tag"></i> ScanContext</a>
+              <a href="/tags/%E6%BF%80%E5%85%89SLAM/" rel="tag"> <i class="fa fa-tag"></i> 激光SLAM</a>
+              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/eb43aafd.html" rel="prev" title="前端里程计方案-基于直接匹配的ICP&NDT">
+      <i class="fa fa-chevron-left"></i> 前端里程计方案-基于直接匹配的ICP&NDT
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/posts/3df51dc4.html" rel="next" title="ScanContext解析与实践">
+      ScanContext解析与实践 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#mathrm-Scan-Context-%E7%94%A8%E4%BA%8E-3D-%E7%82%B9%E4%BA%91%E5%9C%B0%E5%9B%BE%E4%B8%AD%E5%9C%B0%E7%82%B9%E8%AF%86%E5%88%AB%E7%9A%84%E4%BB%A5%E8%87%AA%E6%88%91%E4%B8%BA%E4%B8%AD%E5%BF%83%E7%9A%84%E7%A9%BA%E9%97%B4%E6%8F%8F%E8%BF%B0%E5%AD%90"><span class="nav-text">$\mathrm{Scan Context}$:用于 3D 点云地图中地点识别的以自我为中心的空间描述子</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%91%98%E8%A6%81"><span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E5%BC%95%E8%A8%80"><span class="nav-text">Ⅰ.引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%9B%B8%E5%85%B3%E5%B7%A5%E4%BD%9C"><span class="nav-text">Ⅱ.相关工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A2-mathrm-Scan-Context-%E8%BF%9B%E8%A1%8C%E5%9C%B0%E7%82%B9%E8%AF%86%E5%88%AB"><span class="nav-text">Ⅲ.$\mathrm{Scan Context}$进行地点识别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-mathrm-Scan-Context"><span class="nav-text">A.$\mathrm{Scan Context}$</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-mathrm-Scan-Context-%E4%B9%8B%E9%97%B4%E7%9A%84%E7%9B%B8%E4%BC%BC%E5%BA%A6%E5%BE%97%E5%88%86"><span class="nav-text">B. $\mathrm{Scan Context}$之间的相似度得分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E4%B8%A4%E9%98%B6%E6%AE%B5%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95"><span class="nav-text">C. 两阶段搜索算法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A3-%E5%AE%9E%E9%AA%8C%E8%AF%84%E4%BC%B0"><span class="nav-text">Ⅳ.实验评估</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A4-%E7%BB%93%E8%AE%BA"><span class="nav-text">Ⅴ.结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">388k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:53</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>
