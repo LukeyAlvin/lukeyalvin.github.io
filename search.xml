@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>后端位姿图优化</title>
+    <url>/posts/aed03174.html</url>
+    <content><![CDATA[]]></content>
+      <categories>
+        <category>SLAM十四讲</category>
+      </categories>
+      <tags>
+        <tag>后端优化</tag>
+        <tag>位姿图优化</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>ScanContext解析与实践</title>
     <url>/posts/3df51dc4.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -11,7 +23,8 @@
           </blockquote>
 <span id="more"></span>
 <p><img src="/images/ScanContext解析与实践/1-16512834289741.gif" alt="1"></p>
-<p>对于SLAM来说，回环检测是重要的一步，对于某一帧点云来说，它经过一个历史状态之后，我们如何去索引当前帧是否在历史帧中出现过，即检测有没有发生回环。当然，最容易想到的也是最朴素的做法就是，将这一帧的3D点云与历史所有帧做匹配，找到最接近的那一个。但是对于3D点云来这么做计算量无疑是巨大的，而且三维匹配还存在一个初值的问题。</p>
+<p>对于SLAM来说，回环检测是重要的一步，我们知道，当机器人做一个回环时，可能会出现已经达到达起始点，但是由于漂移，位姿估计值却显示当前位置和初始位置还有相差一段距离，这时候，我们就依赖回环检测，把当前位置拉回初始位置，这样就消除了漂移，这个过程就是回环检测的目的。</p>
+<p>所以回环检测的关键是，对于某一帧点云来说，它经过一个历史状态之后，我们如何去索引当前帧是否在历史帧中出现过，即检测有没有发生回环。当然，最容易想到的也是最朴素的做法就是，将这一帧的3D点云与历史所有帧做匹配，找到最接近的那一个。但是对于3D点云来这么做计算量无疑是巨大的，而且三维匹配还存在一个初值的问题。</p>
 <p>因此，作者提出了ScanContext，上面的动画可以看出ScanContext的工作过程就是把3D点云通过俯视图的方式转换为2D，然后用过2D匹配找到回环，达到回环检测的目的，这样将三维降为两维进行匹配大大减小了计算量，并且它对初值相对不敏感。</p>
 <p>ScanContext的主要流程如下：</p>
 <p><img src="/images/ScanContext解析与实践/image-20220430131549451.png" alt="image-20220430131549451" style="zoom: 50%;" /></p>
@@ -169,8 +182,7 @@ c^*=\underset{c_k\in\mathcal{C} }{\arg\min}\ D(I^q,I^c),s.t. \ D<\tau\tag{10}</s
 <p>Lidar定位：Scan Context<a href="https://zhuanlan.zhihu.com/p/359523177">https://zhuanlan.zhihu.com/p/359523177</a></p>
 <p>Scan Context 介绍及理解<a href="https://zhuanlan.zhihu.com/p/393353116">https://zhuanlan.zhihu.com/p/393353116</a></p>
 <p>从零开始做自动驾驶定位(二): 数据集<a href="https://zhuanlan.zhihu.com/p/104875159">https://zhuanlan.zhihu.com/p/104875159</a></p>
-<p>$I^c_n$</p>
-<h6 id=""><a href="#" class="headerlink" title=" "></a> </h6>]]></content>
+]]></content>
       <categories>
         <category>激光SLAM</category>
         <category>文献阅读</category>
@@ -316,6 +328,8 @@ h&=y_{i1}(s_xc_z+c_xs_ys_z)+y_{i2}(c_xs_yc_z-s_xs_z)
       </categories>
       <tags>
         <tag>激光SLAM</tag>
+        <tag>ICP</tag>
+        <tag>NDT</tag>
       </tags>
   </entry>
   <entry>
@@ -511,9 +525,9 @@ F(x+\alpha d)\approx F(x)+\alpha Jd</script><p>其中下降方向满足：$Jd&lt
 &=w^{\land} r
 \end{align*}\tag{1}</script><p>其中$w$是角速度，它是一个矢量，即$w=\begin{bmatrix}0\\0\\ \dot\theta\end{bmatrix}=\dot\theta z$,其中$|\dot\theta|$是角速度的大小。对公式$(1)$取模：</p>
 <script type="math/tex; mode=display">
-|\dot r|=|w||r|sin\phi=a|\dot\theta|</script><p><img src="image-20220422093936869.png" alt="image-20220422093936869"></p>
+|\dot r|=|w||r|sin\phi=a|\dot\theta|</script><p><img src="/images/2手写VIO-IMU传感器/image-20220422093936869.png" alt="image-20220422093936869" style="zoom:50%;" /></p>
 <h2 id="B-旋转坐标系下的运动学"><a href="#B-旋转坐标系下的运动学" class="headerlink" title="B.旋转坐标系下的运动学"></a>B.旋转坐标系下的运动学</h2><p>如图，考虑两个坐标系，一个是世界坐标系(惯性坐标系)$W$，它本身是静止不动的；一个是机器人本体坐标系$B$，它本身在做角速度为$w_B$的纯旋转，设质量块在坐标系$B$下做速度为$v_B$，加速度为$a_B$的匀加速直线运动，它在$B$坐标系下坐标为$r_B=(x_1,x_2,x_3)^T$，设从坐标系世界坐标系$W$到是机器人本体坐标系$B$只考虑旋转的时候，旋转矩阵$R_{WB}$。</p>
-<p><img src="image-20220422155242434.png" alt="image-20220422155242434"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422155242434.png" alt="image-20220422155242434"></p>
 <p>这里定义一些变量：</p>
 <blockquote>
 <p>①设物体在坐标系$B$下做速度为$v_B$，加速度为$a_B$，对应在坐标系$W$下的速度为$v_W$，加速度为$a_W$</p>
@@ -586,22 +600,22 @@ w_W^{\land}\dot r_W&=w_W^{\land}(v+w_W^{\land}r_W)\\
 <p>整个过程的作用是什么？</p>
 <p>我们在已知$B$坐标系下的物体的加速度、速度以及旋转轴的角速度，我们就可以求得对应世界坐标系下的相应的物理量，那么相应的求可以求得世界坐标系下的位姿（速度积分得到位姿）、四元数（根据角速度）。</p>
 <h1 id="Ⅱ-IMU-测量模型及运动模型"><a href="#Ⅱ-IMU-测量模型及运动模型" class="headerlink" title="Ⅱ.IMU 测量模型及运动模型"></a>Ⅱ.IMU 测量模型及运动模型</h1><h2 id="A-加速度计工作原理"><a href="#A-加速度计工作原理" class="headerlink" title="A.加速度计工作原理"></a>A.加速度计工作原理</h2><p>测量原理可以用一个简单的质量块 + 弹簧 + 指示计来表示:</p>
-<p><img src="image-20220422191601477.png" alt="image-20220422191601477.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422191601477.png" alt="image-20220422191601477.png" style="zoom:33%;" /></p>
 <p>注意这里的加速度计测量值$a_m$为弹簧拉力对应的加速度，所以有：</p>
 <script type="math/tex; mode=display">
 a_m=\frac{f}{m}=a-g\tag{5}</script><p>其中$f $为弹簧拉力，$a$ 为物体在惯性系下的加速度，$g$为重力加速度。</p>
 <p>另外，实际的加速度计大都是$MEMS $加速度计，它利用电容或者电阻桥来等原理来测量$ a_m$</p>
 <p>其原理可以参考：<a href="https://m.elecfans.com/article/596137.html"><strong>MEMS 加速度传感器的原理与构造介绍</strong></a></p>
 <p>通常情况下我们假设地球表面为惯性参考系，但是对于高端的测量单元来说，这种精度远远不够（需要考虑地球自转的影响），所以就将惯性参考系的原点记为地球的质心，而位于地球表面的坐标系称为地面参考系或东北天坐标系（ENU坐标系）, 如下图所示。在此坐标系下$g=(0,0,-9.81)^T$</p>
-<p><img src="image-20220422192532908.png" alt="image-20220422192532908.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422192532908.png" alt="image-20220422192532908.png" style="zoom:33%;" /></p>
 <p>假设 IMU 坐标系就是 ENU 坐标系，$R_{WB }= I$，静止时有$a=0,a_m=-g$，自由落体时有$a=g,a_m=0$</p>
 <h2 id="B-陀螺仪测量原理"><a href="#B-陀螺仪测量原理" class="headerlink" title="B.陀螺仪测量原理"></a>B.陀螺仪测量原理</h2><p>陀螺仪侦测的是角速度。其工作原理基于科里奥利力的原理：当一个物体在坐标系中直线移动时，假设坐标系做一个旋转，那么在旋转的过程中，物体会感受到一个垂直的力和垂直方向的加速度。</p>
 <p>按测量原理分有<strong>振动陀螺</strong>，<strong>光纤陀螺</strong>等。</p>
-<p><img src="陀螺仪.gif" alt="陀螺仪.gif"></p>
+<p><img src="/images/2手写VIO-IMU传感器/陀螺仪.gif" alt="陀螺仪.gif"></p>
 <p>低端 MEMS 陀螺上一般采用振动陀螺原理，通过测量 科氏力（Coriolis force ）来间接得到角速度。MEMS 陀螺仪：一个主动运动轴 + 一个敏感轴，比如，如图示，高速运动的物体速度为$v$，在旋转坐标系下，物体会受到科氏力的影响，我们通过求科氏力就可以求得角速度$w$的大小。</p>
-<p><img src="image-20220422195814350.png" alt="image-20220422195814350.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422195814350.png" alt="image-20220422195814350.png" style="zoom:33%;" /></p>
 <p>但是实际制作的过程中我们不只是使用一个质量块，而是使用两个质量块，就是<strong>音叉陀螺仪</strong>，如图所示，叉子的中间为旋转轴，叉子左右两个质量块，做方反的正弦运动，质量块受到的科氏力方向相反。</p>
-<p><img src="image-20210905220130.png" alt="20210905220130.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20210905220130.png" alt="20210905220130.png"></p>
 <p>当两个完全相同的质量块的运动方向相反，但是旋转相同的时候，它们就会受到相反的科氏力以及相同的外部加速度影响力。将两个质量块所受到该方向上的力做差，就会得到两倍的科氏力。</p>
 <p><strong>但是为啥要用这么做呢? 一个质量块不行么？</strong></p>
 <p>①利用二倍的科氏力对应的电压指数更大，测量也变得更准确；②因为有可能在科氏力方向上物体本身具有一定的加速度，所以利用音叉陀螺仪构成差分模型，可以将两个外部力相互抵消（科氏力方向物体本身的加速度），消除自身的影响，是的获得的科氏力更准。</p>
@@ -617,12 +631,12 @@ v_{err}=b_at,\ \ \ p_{err}=\frac{1}{2}b_at^2</script><p>这里的$p_{err}$指的
 <li><strong>Scale</strong></li>
 </ul>
 <p>scale 可以看成是实际数值和传感器输出值之间的比值。</p>
-<p><img src="image-20220422204953295.png" alt="image-20220422204953295.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422204953295.png" alt="image-20220422204953295.png" style="zoom:33%;" /></p>
 <ul>
 <li><strong>Nonorthogonality/Misalignment Errors</strong></li>
 </ul>
 <p>特别的在多轴的IMU传感器中，由于制作工艺的问题，有可能对导致$xyz$轴并不是严格意义的正交，如下图所示，$z$轴并不是严格意义上与$xOy$平面垂直，则会影响对应的$x,y$上的分量。</p>
-<p><img src="image-20220422204127003.png" alt="image-20220422204127003.png"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220422204127003.png" alt="image-20220422204127003.png" style="zoom:33%;" /></p>
 <p>加上之前的scale的影响：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -735,11 +749,11 @@ w[k]\sim N(0,1)\\
 <p>具体的流程如下：</p>
 <p>①保持传感器绝对静止获取数据。</p>
 <p>②对数据进行分段，设定时间段的时长，如下图所示。</p>
-<p><img src="image-20220423162306358.png" alt="image-20220423162306358"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220423162306358.png" alt="image-20220423162306358" style="zoom:50%;" /></p>
 <p>③将传感器数据按照时间段进行平均。</p>
 <p>④计算方差，绘制艾伦曲线。</p>
 <p>得到的艾伦曲线如下图所示：</p>
-<p><img src="image-20220423162352964.png" alt="image-20220423162352964"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220423162352964.png" alt="image-20220423162352964" style="zoom: 33%;" /></p>
 <p>从艾伦方差曲线中可以辨识出 IMU 的五种噪声，分别为：量化噪声、角度随机游走、零偏不稳定性噪声，角速率随机游走，速率斜坡，一般在 IMU 噪声辨识中用的比较多的是中间 3 种。</p>
 <h2 id="C-误差模型"><a href="#C-误差模型" class="headerlink" title="C .误差模型"></a>C .误差模型</h2><h3 id="1-加速度计的误差模型"><a href="#1-加速度计的误差模型" class="headerlink" title="1.加速度计的误差模型"></a>1.加速度计的误差模型</h3><p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
 <p>理论测量值：</p>
@@ -747,13 +761,13 @@ w[k]\sim N(0,1)\\
 a_m^B=R_{BG}(a^G-g^G)
 \tag{16}</script><p>如果考虑高斯白噪声，bias，以及尺度因子(通常假设尺度因子为单位矩阵。)，则为：</p>
 <script type="math/tex; mode=display">
-a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{17}</script><p><img src="image-20220423171217806.png" alt="image-20220423171217806.png"></p>
+a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{17}</script><p><img src="/images/2手写VIO-IMU传感器/image-20220423171217806.png" alt="image-20220423171217806.png" style="zoom: 50%;" /></p>
 <h3 id="2-陀螺仪的误差模型"><a href="#2-陀螺仪的误差模型" class="headerlink" title="2.陀螺仪的误差模型"></a>2.陀螺仪的误差模型</h3><p>考虑尺度因子，高斯白噪声，以及 bias, 陀螺仪的误差模型如下：</p>
 <script type="math/tex; mode=display">
 w^B_m=S_gw^B+n_g+nb_g\tag{18}</script><p>低端传感器，考虑加速度对陀螺仪的影响，即 g-灵敏度：</p>
 <script type="math/tex; mode=display">
 w^B_m=S_gw^B+S_{ga}a^B+n_g+nb_g\tag{19}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
-<p><img src="image-20220423190440715.png" alt="image-20220423190440715"></p>
+<p><img src="/images/2手写VIO-IMU传感器/image-20220423190440715.png" alt="image-20220423190440715" style="zoom: 33%;" /></p>
 <h1 id="Ⅳ-运动模型离散时间处理"><a href="#Ⅳ-运动模型离散时间处理" class="headerlink" title="Ⅳ.运动模型离散时间处理"></a>Ⅳ.运动模型离散时间处理</h1><p>忽略 scale 的影响，只考虑白噪声和 bias 随机游走：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -876,6 +890,7 @@ w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
       </categories>
       <tags>
         <tag>VIO</tag>
+        <tag>IMU误差模型</tag>
       </tags>
   </entry>
   <entry>
@@ -1835,7 +1850,7 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
       </tags>
   </entry>
   <entry>
-    <title>位姿图优化</title>
+    <title>ch11_实践位姿图优化</title>
     <url>/posts/40808.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -1870,7 +1885,9 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
+        <tag>后端优化</tag>
         <tag>SLAM实践</tag>
+        <tag>位姿图优化</tag>
       </tags>
   </entry>
   <entry>
@@ -1909,8 +1926,9 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
         <category>安装</category>
       </categories>
       <tags>
-        <tag>SLAM实践</tag>
         <tag>安装</tag>
+        <tag>SLAM实践</tag>
+        <tag>g2o</tag>
       </tags>
   </entry>
   <entry>
@@ -2072,6 +2090,7 @@ x=\begin{bmatrix}
         <category>SLAM十四讲</category>
       </categories>
       <tags>
+        <tag>最小二乘法</tag>
         <tag>SLAM实践</tag>
       </tags>
   </entry>
@@ -2230,7 +2249,7 @@ x=[\xi_1,...,\xi_m,p_1,...,p_n]^T</script><p>相应的，增量方程中的$ ∆
 <p><strong>观测相机方程关于相机位姿的导数矩阵：</strong></p>
 <script type="math/tex; mode=display">
 \begin{align*}
-J&=-
+F&=-
 \begin{bmatrix}
 \frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}
 &-\frac{f_xX^′Y^′}{Z^{′2}}&f_x+\frac{f_xX^2}{Z^{′2}}&-\frac{f_xY^′}{Z^{′}}
@@ -2240,10 +2259,11 @@ J&=-
 \end{bmatrix}\\
 \end{align*}</script><p><strong>观测相机方程关于特征点的导数矩阵</strong></p>
 <script type="math/tex; mode=display">
-J=\begin{bmatrix}
+E=\begin{bmatrix}
 \frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
 0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
-\end{bmatrix}R</script><p>现在，把相机位姿变量放在一起：</p>
+\end{bmatrix}R</script><p>关于$E,F$雅可比矩阵的具体求导过程，可以查阅：<a href="https://lukeyalvin.top/posts/20908.html">ch7_求解PnP并使用BA优化</a></p>
+<p>现在，把相机位姿变量放在一起：</p>
 <script type="math/tex; mode=display">
 x_c=[\xi_1,\xi_2,...,\xi_1]\in\mathbb{R}^{6m}</script><p>并把空间点的变量也放在一起：</p>
 <script type="math/tex; mode=display">
@@ -2270,7 +2290,9 @@ E^TF & E^TE
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>SLAM实践</tag>
+        <tag>后端优化</tag>
+        <tag>最小二乘法</tag>
+        <tag>BA与图优化</tag>
       </tags>
   </entry>
   <entry>
@@ -2616,6 +2638,7 @@ z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>卡尔曼滤波器</tag>
       </tags>
   </entry>
   <entry>
@@ -2727,7 +2750,7 @@ K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带�
 \begin{align*}
 \mu_c&=\frac{\sigma^2_b\mu_a+\sigma^2_a\mu_b}{\sigma^2_a+\sigma^2_b}\\
 \sigma_c&=\frac{\sigma^2_a\sigma^2_b}{\sigma^2_b+\sigma^2_b}
-\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;" /></p>
+\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 15%;" /></p>
 <hr>
 <h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
 <p>【例】</p>
@@ -2806,7 +2829,7 @@ x_3&y_3&z_3
 \end{bmatrix}</script><p>协方差：</p>
 <script type="math/tex; mode=display">
 P=\frac{1}{3}a^Ta</script><h2 id="状态空间表达式"><a href="#状态空间表达式" class="headerlink" title="状态空间表达式"></a>状态空间表达式</h2><p>【例】：有一个弹簧阻尼系统，对质量为$m$的物块施加一个力$F$，弹簧向右的位移量为$x$，已知弹簧的胡克系数为$k$，阻尼系数为$B$</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;" /></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 25%;" /></p>
 <p>定义输入为$u_{(t)}=F_{(t)}$，输出为$x$</p>
 <p>由胡克定律可知，弹簧拉力$f_k$以及阻力$f_B$：</p>
 <script type="math/tex; mode=display">
@@ -2899,6 +2922,7 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>]]></content>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>卡尔曼滤波器</tag>
       </tags>
   </entry>
   <entry>
@@ -2968,6 +2992,7 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>]]></content>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>VO</tag>
       </tags>
   </entry>
   <entry>
@@ -3201,6 +3226,7 @@ J=-\frac{\partial I_2}{\partial u}
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>直接法</tag>
       </tags>
   </entry>
   <entry>
@@ -3321,6 +3347,7 @@ u\\u
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>LK光流法</tag>
       </tags>
   </entry>
   <entry>
@@ -3479,6 +3506,7 @@ e_i = p_i - (Rp_i^{\prime}+t)</script><p>因此,我们把估计的$p_i^{\prime}$
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>g2o</tag>
       </tags>
   </entry>
   <entry>
@@ -3593,7 +3621,9 @@ z     &0     &-x &0     &-1 &0 \\
         <category>SLAM十四讲</category>
       </categories>
       <tags>
+        <tag>BA与图优化</tag>
         <tag>SLAM实践</tag>
+        <tag>ICP</tag>
       </tags>
   </entry>
   <entry>
@@ -3618,18 +3648,18 @@ s_i
 u_i\\v_i\\1
 \end{matrix}
 \right]=
-Kexp(ξ^{\land})
+K\exp(ξ^{\land})
 \left[
 \begin{matrix}
 X_i\\Y_i\\Z_i\\1
 \end{matrix}
 \right]</script><p>写成矩阵形式：</p>
 <script type="math/tex; mode=display">
-s_iu_i=Kexp(ξ^{\land})P_i</script><p>由于相机位姿未知以及观测点的噪声，该等式存在一个误差，把误差求和，构建最小二乘问题，然后寻找最好的相机位姿，使它最小化:</p>
+s_iu_i=K\exp(ξ^{\land})P_i</script><p>由于相机位姿未知以及观测点的噪声，该等式存在一个误差，把误差求和，构建最小二乘问题，然后寻找最好的相机位姿，使它最小化:</p>
 <script type="math/tex; mode=display">
-ξ^{*}=arg \underset{ξ}{min}\frac{1}{2}\sum^n_{i=1}\parallel u_i-\frac{1} {s_i}Kexp(ξ^{\land})P_i\parallel^2_2</script><p>求每个误差项关于优化变量的导数，也就是线性化：</p>
+ξ^{*}=\arg \underset{ξ}{\min}\frac{1}{2}\sum^n_{i=1}\parallel u_i-\frac{1} {s_i}K\exp(ξ^{\land})P_i\parallel^2_2</script><p>求每个误差项关于优化变量的导数，也就是线性化：</p>
 <script type="math/tex; mode=display">
-e(x+\Delta x)\approx e(x)+J\Delta x</script><p>$e $为像素坐标误差（2 维），$x$ 为相机位姿（6 维）时，$J$ 将是一个 2 × 6 的矩阵。</p>
+e(x+\Delta x)\approx e(x)+J\Delta x</script><p>$e $为像素坐标误差（2 维），$x$ 为相机位姿（6 维）时，$J$ 将是一个$ 2\times 6$ 的矩阵。</p>
 <h2 id="2-优化位姿"><a href="#2-优化位姿" class="headerlink" title="2.优化位姿"></a>2.优化位姿</h2><p>记变换到相机坐标系下的空间点坐标为 $P^′$:</p>
 <script type="math/tex; mode=display">
 s
@@ -3650,7 +3680,8 @@ X^{′}\\Y^{′}\\Z^{′}
 \right]</script><p>利用第 3 行消去 $s$（实际上就是$ P^{′ }$的距离），得：</p>
 <script type="math/tex; mode=display">
 u=f_x\frac{X^′}{Z^′}+c_x\\
-v=f_y\frac{Y^′}{Z^′}+c_y</script><p>对 $ξ^{\land} $左乘扰动量$ δξ$，然后考虑 $e$ 的变化关于扰动量的导数。利用链式法则:</p>
+v=f_y\frac{Y^′}{Z^′}+c_y</script><p>这里与之前求得的相机模型是一致的，可以把$u,v$与实际的测量值比较，求差。</p>
+<p>对 $ξ^{\land} $左乘扰动量$ δξ$，然后考虑 $e$ 的变化关于扰动量的导数。利用链式法则:</p>
 <script type="math/tex; mode=display">
 \frac{\partial e}{\partial \delta \xi}=
 \underset{\delta \xi \rightarrow0}{lim}
@@ -3671,6 +3702,7 @@ v=f_y\frac{Y^′}{Z^′}+c_y</script><p>对 $ξ^{\land} $左乘扰动量$ δξ$�
 \frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
 0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
 \end{bmatrix}</script><p>$\frac{\partial P^′}{\partial \delta \xi}$为变换后的点关于李代数的导数：</p>
+<p>空间点$P$经过坐标变换的到$P^{\prime}=TP$，现在求变换后的空间点对于扰动$\delta\xi$的导数，就是相当于给$T$左乘一个扰动$\Delta T=\exp(\delta\xi)$，这里设扰动项的李代数为$\delta\xi=[\delta\rho,\delta\phi]^T$</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \frac{\partial P^′}{\partial \delta \xi}&=
@@ -3790,7 +3822,9 @@ z_j = h(ξ, P_j ).</script></li>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
+        <tag>BA与图优化</tag>
         <tag>SLAM实践</tag>
+        <tag>PNP</tag>
       </tags>
   </entry>
   <entry>
@@ -4198,6 +4232,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>对极约束</tag>
       </tags>
   </entry>
   <entry>
@@ -4241,6 +4276,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>特征提取</tag>
       </tags>
   </entry>
   <entry>
@@ -4255,7 +4291,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
 <span id="more"></span>
 <p>编译与安装</p>
 <figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/RainerKuemmerle/g2o</span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">sudo apt-get install libqt4-dev qt4-qmake libqglviewer-dev libsuitesparse-dev libcxsparse3.1.2 libcholmod-dev</span><br><span class="line"><span class="comment"># 编译安装</span></span><br><span class="line"><span class="built_in">cd</span> g2o</span><br><span class="line">mkdir build</span><br><span class="line"><span class="built_in">cd</span> build </span><br><span class="line">cmake ..</span><br><span class="line">make -j4</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
-<h2 id="使用G2O的步骤："><a href="#使用G2O的步骤：" class="headerlink" title="使用G2O的步骤："></a>使用G2O的步骤：</h2><p><img src="1855613-20200414153348238-1860777008.png" alt="img"></p>
+<h2 id="使用G2O的步骤："><a href="#使用G2O的步骤：" class="headerlink" title="使用G2O的步骤："></a>使用G2O的步骤：</h2><p><img src="/images/使用g2o拟合曲线/1855613-20200414153348238-1860777008.png" alt="img"></p>
 <h3 id="1、创建线性求解器"><a href="#1、创建线性求解器" class="headerlink" title="1、创建线性求解器"></a>1、创建线性求解器</h3><p>这里的线性求解器<code>LinearSolver</code>创建的是<code>LinearSolverCSparse</code>：</p>
 <ul>
 <li><strong>LinearSolverCholmod ：</strong>使用sparse cholesky分解法。继承自LinearSolverCCS</li>
@@ -4290,7 +4326,7 @@ s_1x^{\land}_2Rx_1+x^{\land}_2t=0 \tag{i}</script><p>这是一个关于$s_1$的�
 y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高斯噪声。我们故意选择了这样一个非线性模型，以使问题不至于太简单。现在，假设我们有$ N $个关于$ x, y$ 的观测数据点，想根据这些数据点求出曲线的参数。那么，可以求解下面的最小二乘问题以估计曲线参数：</p>
 <script type="math/tex; mode=display">
 \underset{a,b,c}{min}\frac{1}{2}\sum^{N}_{i=1}\parallel y_i-exp(ax^2_i+bx_i+c)\parallel^2</script><p>节点为优化变量，边为误差项：</p>
-<p><img src="image-20220326161220343.png" alt="image-20220326161220343"></p>
+<p><img src="/images/使用g2o拟合曲线/image-20220326161220343.png" alt="image-20220326161220343" style="zoom: 50%;" /></p>
 <p>在曲线拟合问题中，整个问题只有一个顶点：曲线模型的参数$ a, b, c$；而每个带噪声的数据点，构成了一个个误差项，也就是图优化的边。</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Core&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/base_vertex.h&gt;</span>     <span class="comment">// 顶点</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/base_unary_edge.h&gt;</span> <span class="comment">// 边</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/block_solver.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;opencv2/core/core.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/solvers/dense/linear_solver_dense.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_gauss_newton.h&gt;</span> <span class="comment">// GN</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_levenberg.h&gt;</span>    <span class="comment">// LM</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;g2o/core/optimization_algorithm_dogleg.h&gt;</span>       <span class="comment">// DogLeg</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 曲线模型的顶点，模板参数：优化变量维度和数据类型   (节点为优化变量)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingVertex</span> :</span> <span class="keyword">public</span> g2o::BaseVertex&lt;<span class="number">3</span>, Eigen::Vector3d&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 结构体包含eigen成员必须进行宏定义 EIGEN_MAKE_ALIGNED_OPERATOR_NEW, 保证内存对齐</span></span><br><span class="line">    <span class="function">EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span></span><br><span class="line"><span class="function">    <span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">setToOriginImpl</span><span class="params">()</span> <span class="comment">// 顶点重置函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate &lt;&lt; <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">oplusImpl</span><span class="params">(<span class="keyword">const</span> <span class="keyword">double</span> *update)</span> <span class="comment">// 顶点更新函数</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        _estimate += Eigen::<span class="built_in">Vector3d</span>(update);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 误差模型 模板参数：观测值维度，类型，连接顶点类型   (边为误差项)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CurveFittingEdge</span> :</span> <span class="keyword">public</span> g2o::BaseUnaryEdge&lt;<span class="number">1</span>, <span class="keyword">double</span>, CurveFittingVertex&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    EIGEN_MAKE_ALIGNED_OPERATOR_NEW</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">CurveFittingEdge</span>(<span class="keyword">double</span> x) : <span class="built_in">BaseUnaryEdge</span>(), _x(x) &#123;&#125; <span class="comment">// 初始化列表</span></span><br><span class="line">    <span class="comment">// 计算曲线模型误差</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">computeError</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> CurveFittingVertex *v = <span class="keyword">static_cast</span>&lt;<span class="keyword">const</span> CurveFittingVertex *&gt;(_vertices[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">const</span> Eigen::Vector3d abc = v-&gt;<span class="built_in">estimate</span>();</span><br><span class="line">        _error(<span class="number">0</span>, <span class="number">0</span>) = _measurement - std::<span class="built_in">exp</span>(<span class="built_in">abc</span>(<span class="number">0</span>, <span class="number">0</span>) * _x * _x + <span class="built_in">abc</span>(<span class="number">1</span>, <span class="number">0</span>) * _x + <span class="built_in">abc</span>(<span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 存盘和读盘：留空</span></span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">read</span><span class="params">(istream &amp;in)</span> </span>&#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="keyword">bool</span> <span class="title">write</span><span class="params">(ostream &amp;out)</span> <span class="keyword">const</span> </span>&#123;&#125; <span class="comment">// const不声明该类就是一个抽象类，不能进行实例化</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">double</span> _x; <span class="comment">// x 值， y 值为 _measurement</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//主函数</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">double</span> a = <span class="number">1.0</span>, b = <span class="number">2.0</span>, c = <span class="number">1.0</span>; <span class="comment">// 真实参数值</span></span><br><span class="line">    <span class="keyword">int</span> N = <span class="number">100</span>;                      <span class="comment">// 数据点</span></span><br><span class="line">    <span class="keyword">double</span> w_sigma = <span class="number">1.0</span>;             <span class="comment">// 噪声Sigma值</span></span><br><span class="line">    cv::RNG rng;                      <span class="comment">// OpenCV随机数产生器</span></span><br><span class="line">    <span class="keyword">double</span> abc[<span class="number">3</span>] = &#123;<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>&#125;;        <span class="comment">// abc参数的估计值</span></span><br><span class="line"></span><br><span class="line">    vector&lt;<span class="keyword">double</span>&gt; x_data, y_data;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;生成数据：&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">double</span> x = i / <span class="number">100.0</span>;</span><br><span class="line">        x_data.<span class="built_in">push_back</span>(x);</span><br><span class="line">        y_data.<span class="built_in">push_back</span>(<span class="built_in">exp</span>(a * x * x + b * x + c) + rng.<span class="built_in">gaussian</span>(w_sigma));</span><br><span class="line">        cout &lt;&lt; x_data[i] &lt;&lt; <span class="string">&quot; &quot;</span> &lt;&lt; y_data[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 构建图优化，先设定g2o</span></span><br><span class="line">    <span class="comment">// 每个误差项优化变量维度为3，误差值维度为1</span></span><br><span class="line">    <span class="keyword">typedef</span> g2o::BlockSolver&lt;g2o::BlockSolverTraits&lt;<span class="number">3</span>, <span class="number">1</span>&gt;&gt; Block;</span><br><span class="line">    <span class="comment">// 实例化线性方程求解器</span></span><br><span class="line">    Block::LinearSolverType *linearSolver = <span class="keyword">new</span> g2o::LinearSolverDense&lt;Block::PoseMatrixType&gt;();</span><br><span class="line">    <span class="comment">// 实例化矩阵块求解器</span></span><br><span class="line">    Block *solver_ptr = <span class="keyword">new</span> <span class="built_in">Block</span>(unique_ptr&lt;Block::LinearSolverType&gt;(linearSolver));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 梯度下降方法，从GN(高斯牛顿), LM（列文伯格）, DogLeg 中选</span></span><br><span class="line">    g2o::OptimizationAlgorithmGaussNewton *solver_gn = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmGaussNewton</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">    g2o::OptimizationAlgorithmLevenberg *solver_lm = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmLevenberg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line">    g2o::OptimizationAlgorithmDogleg *solver_dog = <span class="keyword">new</span> g2o::<span class="built_in">OptimizationAlgorithmDogleg</span>(unique_ptr&lt;Block&gt;(solver_ptr));</span><br><span class="line"></span><br><span class="line">    g2o::SparseOptimizer optimizer;    <span class="comment">// 图模型</span></span><br><span class="line">    optimizer.<span class="built_in">setAlgorithm</span>(solver_lm); <span class="comment">//设置求解器（使用LM方法）</span></span><br><span class="line">    optimizer.<span class="built_in">setVerbose</span>(<span class="literal">true</span>);        <span class="comment">// 打开调试输出</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 往图中增加顶点</span></span><br><span class="line">    CurveFittingVertex *v = <span class="keyword">new</span> <span class="built_in">CurveFittingVertex</span>();</span><br><span class="line">    v-&gt;<span class="built_in">setEstimate</span>(Eigen::<span class="built_in">Vector3d</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)); <span class="comment">// 设置优化初始值</span></span><br><span class="line">    v-&gt;<span class="built_in">setId</span>(<span class="number">0</span>);                              <span class="comment">// 设置顶点ID</span></span><br><span class="line">    optimizer.<span class="built_in">addVertex</span>(v);                   <span class="comment">// 向稀疏优化器添加顶点</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 往图中增加边</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; N; i++)</span><br><span class="line">    &#123;</span><br><span class="line">        CurveFittingEdge *edge = <span class="keyword">new</span> <span class="built_in">CurveFittingEdge</span>(x_data[i]);</span><br><span class="line">        edge-&gt;<span class="built_in">setId</span>(i);</span><br><span class="line">        edge-&gt;<span class="built_in">setVertex</span>(<span class="number">0</span>, v);           <span class="comment">// 设置连接的顶点</span></span><br><span class="line">        edge-&gt;<span class="built_in">setMeasurement</span>(y_data[i]); <span class="comment">//观测数值</span></span><br><span class="line">        <span class="comment">// 信息矩阵：协方差矩阵的逆</span></span><br><span class="line">        edge-&gt;<span class="built_in">setInformation</span>(Eigen::Matrix&lt;<span class="keyword">double</span>, <span class="number">1</span>, <span class="number">1</span>&gt;::<span class="built_in">Identity</span>() * <span class="number">1</span> / (w_sigma * w_sigma));</span><br><span class="line">        optimizer.<span class="built_in">addEdge</span>(edge); <span class="comment">// 向稀疏优化器添加边</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 执行优化</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot; 开始优化：&quot;</span> &lt;&lt; endl;</span><br><span class="line">    chrono::steady_clock::time_point t1 = chrono::steady_clock::<span class="built_in">now</span>(); <span class="comment">// 计时工具</span></span><br><span class="line"></span><br><span class="line">    optimizer.<span class="built_in">initializeOptimization</span>(); <span class="comment">// 设置优化初始值</span></span><br><span class="line">    optimizer.<span class="built_in">optimize</span>(<span class="number">100</span>);            <span class="comment">// 设置优化次数</span></span><br><span class="line"></span><br><span class="line">    chrono::steady_clock::time_point t2 = chrono::steady_clock::<span class="built_in">now</span>();</span><br><span class="line">    chrono::duration&lt;<span class="keyword">double</span>&gt; time_used = chrono::duration_cast&lt;chrono::duration&lt;<span class="keyword">double</span>&gt;&gt;(t2 - t1);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;求解优化共使用了&quot;</span> &lt;&lt; time_used.<span class="built_in">count</span>() &lt;&lt; <span class="string">&quot;秒&quot;</span> &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 输出优化值</span></span><br><span class="line">    Eigen::Vector3d abc_estimate = v-&gt;<span class="built_in">estimate</span>(); <span class="comment">// 执行优化</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;估计模型为：&quot;</span> &lt;&lt; abc_estimate.<span class="built_in">transpose</span>() &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>CMakeList.txt</p>
@@ -4303,6 +4339,7 @@ y=exp(ax^2+bx+c)+w</script><p>其中$ a, b, c $为曲线的参数，$w $为高�
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>g2o</tag>
       </tags>
   </entry>
   <entry>
@@ -4359,6 +4396,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>Ceres</tag>
       </tags>
   </entry>
   <entry>
@@ -4385,6 +4423,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>PCL</tag>
       </tags>
   </entry>
   <entry>
@@ -4413,6 +4452,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>OpenCV</tag>
       </tags>
   </entry>
   <entry>
@@ -4433,6 +4473,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>Sophus</tag>
       </tags>
   </entry>
   <entry>
@@ -4454,6 +4495,7 @@ a=0.891943, b=2.17039, c=0.944142</script><p>与真实值比较接近。</p>
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>Eigen</tag>
       </tags>
   </entry>
   <entry>
@@ -4510,6 +4552,7 @@ x_3 & x_4
       </categories>
       <tags>
         <tag>SLAM实践</tag>
+        <tag>Eigen</tag>
       </tags>
   </entry>
   <entry>
@@ -4539,56 +4582,7 @@ x_3 & x_4
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>SLAM实践</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>SLAM_14习题_ch2</title>
-    <url>/posts/42667.html</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>本次习题，你需要使⽤ Eigen 库，编写程序，求解⼀个线性⽅程组。为此，你需要先<br>了解⼀些有关线性⽅程组数值解法的原理。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-<p>Eigen（<a href="http://eigen.tuxfamily.org）是常⽤的">http://eigen.tuxfamily.org）是常⽤的</a> C++ 矩阵运算库，具有很⾼的运算效率。⼤部分<br>需要在 C++ 中使⽤矩阵运算的库，都会选⽤ Eigen 作为基本代数库，例如 Google Tensorflow，Google<br>Ceres，GTSAM 等。本次习题，你需要使⽤ Eigen 库，编写程序，求解⼀个线性⽅程组。为此，你需要先<br>了解⼀些有关线性⽅程组数值解法的原理。<br>设线性⽅程 Ax = b，在 A 为⽅阵的前提下，请回答以下问题：</p>
-<p>提⽰：你可能需要参考相关的数学书籍或⽂章。请善⽤搜索引擎。Eigen 固定⼤⼩矩阵最⼤⽀持到 50，<br>所以你会⽤到动态⼤⼩的矩阵。</p>
-<blockquote>
-<p> 1.在什么条件下，x 有解且唯⼀？</p>
-</blockquote>
-<p>定理  n 元线性方程组$ Ax = b$<br>（i） <strong>无解</strong>的充分必要条件是$ R（A）＜R（A，b）$；<br>（ii） <strong>有惟一解</strong>的充分必要条件是$ R（A）= R（A，b）= n$；<br>（iii） <strong>有无限多解</strong>的充分必要条件是 $R（A）= R（A，b）＜n.$</p>
-<blockquote>
-<p> 2.⾼斯消元法的原理是什么？</p>
-</blockquote>
-<p>高斯消元法主要是通过用<strong>初等行变换</strong>将增广矩阵化为行阶梯阵，然后通过回带求解线性方程组的解。</p>
-<p><img src="/home/alvin/Documents/lukeyalvin.github.io/Blog/source/_posts/img/v2-43c79654d421239b9a6e262b9d91acbe_b.jpg" alt="img"></p>
-<blockquote>
-<p> 3.QR 分解的原理是什么？</p>
-</blockquote>
-<p>正交阵的定义:</p>
-<ul>
-<li>如果 n 阶矩阵 A 满足$A ^T A = E （即 A^{-1} = A^T ）$，那么称 A 为正交矩阵，简称<strong>正交阵</strong>.</li>
-</ul>
-<p>QR分解:</p>
-<ul>
-<li>将矩阵转化成正交矩阵和上三角矩阵的乘积，对应的分解公式是$A=Q*R$。(其中 Q 是正交阵， R 是 upper triangle 矩阵.)</li>
-</ul>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Core&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Eigen/Dense&gt;</span></span></span><br><span class="line"><span class="comment">// #define MATRIX_SIZE 100</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> Eigen;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// Eigen::Matrix&lt;double,Eigen::Dynamic,Eigen::Dynamic&gt; matrix_100;</span></span><br><span class="line">    <span class="comment">// matrix_100 = Eigen::MatrixXd::Random(MATRIX_SIZE, MATRIX_SIZE);</span></span><br><span class="line">    <span class="comment">// cout &lt;&lt; &quot;matrix_100:&quot; &lt;&lt; endl &lt;&lt; matrix_100 &lt;&lt; endl;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//将矩阵分解为QR</span></span><br><span class="line">    Matrix4d A;</span><br><span class="line">    A &lt;&lt; <span class="number">2</span>, <span class="number">-1</span>, <span class="number">-1</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">1</span>, <span class="number">1</span>, <span class="number">-2</span>, <span class="number">1</span>,</span><br><span class="line">        <span class="number">4</span>, <span class="number">-6</span>, <span class="number">2</span>, <span class="number">-2</span>,</span><br><span class="line">        <span class="number">3</span>, <span class="number">6</span>, <span class="number">-9</span>, <span class="number">7</span>;</span><br><span class="line">    <span class="comment">//使用QR分解</span></span><br><span class="line">    HouseholderQR&lt;MatrixXd&gt; marix_dynamic;</span><br><span class="line">    marix_dynamic.<span class="built_in">compute</span>(A);</span><br><span class="line"></span><br><span class="line">    MatrixXd R = marix_dynamic.<span class="built_in">matrixQR</span>().triangularView&lt;Eigen::Upper&gt;();</span><br><span class="line"></span><br><span class="line">    MatrixXd Q = marix_dynamic.<span class="built_in">householderQ</span>();</span><br><span class="line"></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;A = &quot;</span> &lt;&lt; endl &lt;&lt; A &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;R = &quot;</span> &lt;&lt; endl &lt;&lt; R &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Q = &quot;</span> &lt;&lt; endl &lt;&lt; Q &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">//求解方程AX = B的方法</span></span><br><span class="line">    <span class="function">Vector4d <span class="title">b</span><span class="params">(<span class="number">2</span>,<span class="number">4</span>,<span class="number">4</span>,<span class="number">9</span>)</span></span>;</span><br><span class="line">    Vector4d x_qr = A.<span class="built_in">colPivHouseholderQr</span>().<span class="built_in">solve</span>(b);  <span class="comment">// No pivoting.  </span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;x_qr = &quot;</span> &lt;&lt; endl &lt;&lt; x_qr &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<blockquote>
-<p> 4.Cholesky 分解的原理是什么？</p>
-</blockquote>
-<p>将一个正定的埃尔米特矩阵分解成一个下三角矩阵与其共轭转置之乘积。这种分解方式在提高代数运算效率、蒙特卡罗方法等场合中十分有用。实数矩阵的科列斯基分解由安德烈·路易·科列斯基最先发明。实际应用中，科列斯基分解在求解线性方程组中的效率约两倍于LU分解。</p>
-<p>关于矩阵分解在Eigen中的使用:<a href="https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html">https://eigen.tuxfamily.org/dox/group__TutorialLinearAlgebra.html</a></p>
-<blockquote>
-<p> 5编程实现 A 为 100 × 100 随机矩阵时，⽤ QR 和 Cholesky 分解求 x 的程序。你可以参考本次课<br>⽤到的 useEigen 例程。</p>
-</blockquote>
-]]></content>
-      <categories>
-        <category>SLAM十四讲</category>
-      </categories>
-      <tags>
-        <tag>SLAM十四讲</tag>
+        <tag>cmake</tag>
       </tags>
   </entry>
   <entry>

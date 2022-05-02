@@ -36,9 +36,10 @@
 <meta property="og:image" content="https://lukeyalvin.top/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg">
 <meta property="og:image" content="https://lukeyalvin.top/images/卡尔曼滤波器/image-20220401152419675.png?40">
 <meta property="article:published_time" content="2022-04-01T01:23:32.450Z">
-<meta property="article:modified_time" content="2022-04-26T03:22:27.761Z">
+<meta property="article:modified_time" content="2022-05-02T13:33:30.679Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="SLAM实践">
+<meta property="article:tag" content="卡尔曼滤波器">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://lukeyalvin.top/images/卡尔曼滤波器/image-20220401093317316.png">
 
@@ -232,7 +233,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-04-26 11:22:27" itemprop="dateModified" datetime="2022-04-26T11:22:27+08:00">2022-04-26</time>
+                <time title="修改时间：2022-05-02 21:33:30" itemprop="dateModified" datetime="2022-05-02T21:33:30+08:00">2022-05-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -396,7 +397,7 @@ K_k=\frac{\sigma_1^2}{\sigma_1^2+\sigma_2^2}=\frac{4}{4+16}=0.2</script><p>带�
 \begin{align*}
 \mu_c&=\frac{\sigma^2_b\mu_a+\sigma^2_a\mu_b}{\sigma^2_a+\sigma^2_b}\\
 \sigma_c&=\frac{\sigma^2_a\sigma^2_b}{\sigma^2_b+\sigma^2_b}
-\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 25%;" /></p>
+\end{align*}</script><p><img src="/images/卡尔曼滤波器/WeChat%20Image_20220401141112.jpg" alt="WeChat Image_20220401141112" style="zoom: 15%;" /></p>
 <hr>
 <h2 id="协方差矩阵"><a href="#协方差矩阵" class="headerlink" title="协方差矩阵"></a>协方差矩阵</h2><p>协方差矩阵(Covariance Matrix)，它可以把方差和协方差在一个矩阵中表现出来，体现了变量之间的；联动关系。</p>
 <p>【例】</p>
@@ -475,7 +476,7 @@ x_3&y_3&z_3
 \end{bmatrix}</script><p>协方差：</p>
 <script type="math/tex; mode=display">
 P=\frac{1}{3}a^Ta</script><h2 id="状态空间表达式"><a href="#状态空间表达式" class="headerlink" title="状态空间表达式"></a>状态空间表达式</h2><p>【例】：有一个弹簧阻尼系统，对质量为$m$的物块施加一个力$F$，弹簧向右的位移量为$x$，已知弹簧的胡克系数为$k$，阻尼系数为$B$</p>
-<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 33%;" /></p>
+<p><img src="/images/卡尔曼滤波器/image-20220401152419675.png?40" alt="image-20220401152419675" style="zoom: 25%;" /></p>
 <p>定义输入为$u_{(t)}=F_{(t)}$，输出为$x$</p>
 <p>由胡克定律可知，弹簧拉力$f_k$以及阻力$f_B$：</p>
 <script type="math/tex; mode=display">
@@ -628,6 +629,7 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/SLAM%E5%AE%9E%E8%B7%B5/" rel="tag"> <i class="fa fa-tag"></i> SLAM实践</a>
+              <a href="/tags/%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E5%99%A8/" rel="tag"> <i class="fa fa-tag"></i> 卡尔曼滤波器</a>
           </div>
 
         
@@ -730,7 +732,7 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-count">46</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1043,12 +1045,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">388k</span>
+    <span title="站点总字数">386k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:53</span>
+    <span title="站点阅读时长">5:51</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
