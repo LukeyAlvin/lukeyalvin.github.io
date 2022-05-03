@@ -23,17 +23,26 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="东北大学控制工程研究生">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Lukey Alvin">
-<meta property="og:url" content="https://lukeyalvin.top/tags/SLAM%E5%AE%9E%E8%B7%B5/page/3/index.html">
+  <meta name="description" content="点云地图的建立">
+<meta property="og:type" content="article">
+<meta property="og:title" content="点云地图的建立">
+<meta property="og:url" content="https://lukeyalvin.top/posts/f737dac5.html">
 <meta property="og:site_name" content="Lukey Alvin">
-<meta property="og:description" content="东北大学控制工程研究生">
+<meta property="og:description" content="点云地图的建立">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/点云地图的建立/image-20220503190523343.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/点云地图的建立/image-20220503191428273.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/点云地图的建立/image-20220503193403250.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/loam论文深度解析/image-20220411193701848.png">
+<meta property="article:published_time" content="2022-05-03T10:44:59.183Z">
+<meta property="article:modified_time" content="2022-05-03T11:52:56.394Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="激光SLAM">
+<meta property="article:tag" content="建图">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/点云地图的建立/image-20220503190523343.png">
 
-<link rel="canonical" href="https://lukeyalvin.top/tags/SLAM%E5%AE%9E%E8%B7%B5/page/3/">
+<link rel="canonical" href="https://lukeyalvin.top/posts/f737dac5.html">
 
 
 <script id="page-configurations">
@@ -41,12 +50,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>标签: SLAM实践 | Lukey Alvin</title>
+  <title>点云地图的建立 | Lukey Alvin</title>
   
 
 
@@ -186,60 +195,229 @@
         <div class="content-wrap">
           
 
-          <div class="content tag">
+          <div class="content post posts-expand">
             
 
+    
   
   
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/f737dac5.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          点云地图的建立
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-03 18:44:59 / 修改时间：19:52:56" itemprop="dateCreated datePublished" datetime="2022-05-03T18:44:59+08:00">2022-05-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%BF%80%E5%85%89SLAM/" itemprop="url" rel="index"><span itemprop="name">激光SLAM</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
   
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <h2 class="collection-header">SLAM实践
-          <small>标签</small>
-        </h2>
-      </div>
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/f737dac5.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/f737dac5.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>891</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <span class="collection-header">2022</span>
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>点云地图的建立</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h1><p>建图流程设计的核心原则是准确、高效地把<strong>里程计相对位姿</strong>、<strong>回环相对位姿</strong>、<strong>惯导先验位姿</strong>进行融合。</p>
+<p><img src="/images/点云地图的建立/image-20220503190523343.png" alt="image-20220503190523343" style="zoom: 33%;" /></p>
+<ul>
+<li>轨迹对齐</li>
+</ul>
+<p>里程计的初始位姿是从激光雷达收到第一帧点云开始的，它的初始位姿就是单位阵，平移和旋转均为0；而对于惯导而言，它的旋转是以东北天坐标系为准的，因此它的初始位姿并不一定为0；因此里程计第一帧之间的位姿和惯导第一帧的位姿出现了相对旋转，这会导致里程计和先验之间出现很大的误差，所以我们求第一帧时里程计和惯导位姿之间的相对变换即可，这样就可以把里程计的轨迹拉到与惯导轨迹（一般和小车行进方向一致）一致的方向。这个过程就是<strong>轨迹对齐</strong>。</p>
+<ul>
+<li>回环检测</li>
+</ul>
+<p>这里涉及一个简单的回环检测的策略，比如如下的回环，我们检测回环不可能每一帧都进行检测，而是在一定的范围内，并且两帧之间的时间差必须大于一定的阈值，另外当某一帧被检测为闭环了，那么它相邻的一些帧则不做重复的检测，把相邻帧做“吸收化”之后，在后续段进行闭环检测。</p>
+<p><img src="/images/点云地图的建立/image-20220503191428273.png" alt="image-20220503191428273" style="zoom: 50%;" /></p>
+<ul>
+<li>优化周期</li>
+</ul>
+<p>固定优化周期，可以在一定周期内进行优化，可以在误差累积相对较小的情况下进行优化，因为累积误差小，优化时间短，这样前端里程计构建过程中可以同步实现后端的优化，可以提高效率。</p>
+<h1 id="畸变补偿"><a href="#畸变补偿" class="headerlink" title="畸变补偿"></a>畸变补偿</h1><ul>
+<li><strong>产生原因：</strong></li>
+</ul>
+<p>由于一帧点云中的激光点是不同时刻采集的，激光点的坐标原点是采集时刻的雷达位姿，雷达在不同时刻的位姿有变化的时候，各个激光点原点不一致，拼接成一帧时，点云的形状便和实际物体形状不一致。</p>
+<p><img src="/images/点云地图的建立/image-20220503193403250.png" alt="image-20220503193403250" style="zoom:50%;" /></p>
+<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;" /></p>
+<ul>
+<li><strong>补偿方法：</strong></li>
+</ul>
+<p>对于每一个激光点坐标做补偿，补偿量为激光点云与原点（即当时激光雷达坐标）相对于该帧起始时刻的变换。</p>
+<ul>
+<li><strong>补偿公式</strong></li>
+</ul>
+<p>假设第一帧点云的起始位姿为：</p>
+<script type="math/tex; mode=display">
+T_0=\begin{bmatrix}R_0&t_0\\0&1\end{bmatrix}\tag{1}</script><p>第$i$个激光点采集时，雷达的位姿为：</p>
+<script type="math/tex; mode=display">
+T_i=\begin{bmatrix}R_i&t_i\\0&1\end{bmatrix}\tag{2}</script><p>第$i$个激光点的坐标为：</p>
+<script type="math/tex; mode=display">
+P_i=[p_{ix} \ p_{iy} \ p_{iz}]^T\tag{3}</script><p>则第$i$个激光点补偿畸变后的坐标应该为：</p>
+<script type="math/tex; mode=display">
+\overline{P}_i=T_0^{-1}T_iP_i\tag{4}</script>
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2022-03-21T21:41:07+08:00"
-              content="2022-03-21">
-          03-21
-        </time>
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
       </div>
 
-      <div class="post-title">
-          <a class="post-title-link" href="/posts/6957.html" itemprop="url">
-            <span itemprop="name">使用Eigen基础模块</span>
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/f737dac5.html" title="点云地图的建立">https://lukeyalvin.top/posts/f737dac5.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
           </a>
-      </div>
-
-    </header>
-  </article>
-
+        </div>
     </div>
   </div>
-  
-  
-  
 
-  
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/tags/SLAM%E5%AE%9E%E8%B7%B5/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/tags/SLAM%E5%AE%9E%E8%B7%B5/">1</a><a class="page-number" href="/tags/SLAM%E5%AE%9E%E8%B7%B5/page/2/">2</a><span class="page-number current">3</span>
-  </nav>
 
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%BF%80%E5%85%89SLAM/" rel="tag"> <i class="fa fa-tag"></i> 激光SLAM</a>
+              <a href="/tags/%E5%BB%BA%E5%9B%BE/" rel="tag"> <i class="fa fa-tag"></i> 建图</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/aed03174.html" rel="prev" title="后端位姿图优化">
+      <i class="fa fa-chevron-left"></i> 后端位姿图优化
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -286,6 +464,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-text">整体流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%95%B8%E5%8F%98%E8%A1%A5%E5%81%BF"><span class="nav-text">畸变补偿</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -301,7 +480,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -314,7 +493,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -627,12 +806,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">386k</span>
+    <span title="站点总字数">392k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:51</span>
+    <span title="站点阅读时长">5:56</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
@@ -806,6 +985,61 @@ window.addEventListener('pjax:success', () => {
   
 
   
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
 
   
 

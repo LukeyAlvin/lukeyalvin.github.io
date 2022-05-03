@@ -1,9 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>点云地图的建立</title>
+    <url>/posts/f737dac5.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>点云地图的建立</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h1><p>建图流程设计的核心原则是准确、高效地把<strong>里程计相对位姿</strong>、<strong>回环相对位姿</strong>、<strong>惯导先验位姿</strong>进行融合。</p>
+<p><img src="/images/点云地图的建立/image-20220503190523343.png" alt="image-20220503190523343" style="zoom: 33%;" /></p>
+<ul>
+<li>轨迹对齐</li>
+</ul>
+<p>里程计的初始位姿是从激光雷达收到第一帧点云开始的，它的初始位姿就是单位阵，平移和旋转均为0；而对于惯导而言，它的旋转是以东北天坐标系为准的，因此它的初始位姿并不一定为0；因此里程计第一帧之间的位姿和惯导第一帧的位姿出现了相对旋转，这会导致里程计和先验之间出现很大的误差，所以我们求第一帧时里程计和惯导位姿之间的相对变换即可，这样就可以把里程计的轨迹拉到与惯导轨迹（一般和小车行进方向一致）一致的方向。这个过程就是<strong>轨迹对齐</strong>。</p>
+<ul>
+<li>回环检测</li>
+</ul>
+<p>这里涉及一个简单的回环检测的策略，比如如下的回环，我们检测回环不可能每一帧都进行检测，而是在一定的范围内，并且两帧之间的时间差必须大于一定的阈值，另外当某一帧被检测为闭环了，那么它相邻的一些帧则不做重复的检测，把相邻帧做“吸收化”之后，在后续段进行闭环检测。</p>
+<p><img src="/images/点云地图的建立/image-20220503191428273.png" alt="image-20220503191428273" style="zoom: 50%;" /></p>
+<ul>
+<li>优化周期</li>
+</ul>
+<p>固定优化周期，可以在一定周期内进行优化，可以在误差累积相对较小的情况下进行优化，因为累积误差小，优化时间短，这样前端里程计构建过程中可以同步实现后端的优化，可以提高效率。</p>
+<h1 id="畸变补偿"><a href="#畸变补偿" class="headerlink" title="畸变补偿"></a>畸变补偿</h1><ul>
+<li><strong>产生原因：</strong></li>
+</ul>
+<p>由于一帧点云中的激光点是不同时刻采集的，激光点的坐标原点是采集时刻的雷达位姿，雷达在不同时刻的位姿有变化的时候，各个激光点原点不一致，拼接成一帧时，点云的形状便和实际物体形状不一致。</p>
+<p><img src="/images/点云地图的建立/image-20220503193403250.png" alt="image-20220503193403250" style="zoom:50%;" /></p>
+<p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;" /></p>
+<ul>
+<li><strong>补偿方法：</strong></li>
+</ul>
+<p>对于每一个激光点坐标做补偿，补偿量为激光点云与原点（即当时激光雷达坐标）相对于该帧起始时刻的变换。</p>
+<ul>
+<li><strong>补偿公式</strong></li>
+</ul>
+<p>假设第一帧点云的起始位姿为：</p>
+<script type="math/tex; mode=display">
+T_0=\begin{bmatrix}R_0&t_0\\0&1\end{bmatrix}\tag{1}</script><p>第$i$个激光点采集时，雷达的位姿为：</p>
+<script type="math/tex; mode=display">
+T_i=\begin{bmatrix}R_i&t_i\\0&1\end{bmatrix}\tag{2}</script><p>第$i$个激光点的坐标为：</p>
+<script type="math/tex; mode=display">
+P_i=[p_{ix} \ p_{iy} \ p_{iz}]^T\tag{3}</script><p>则第$i$个激光点补偿畸变后的坐标应该为：</p>
+<script type="math/tex; mode=display">
+\overline{P}_i=T_0^{-1}T_iP_i\tag{4}</script>]]></content>
+      <categories>
+        <category>激光SLAM</category>
+      </categories>
+      <tags>
+        <tag>激光SLAM</tag>
+        <tag>建图</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>后端位姿图优化</title>
     <url>/posts/aed03174.html</url>
-    <content><![CDATA[]]></content>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>BA 能精确地优化每个相机位姿与特征点位置。不过在更大的场景中，大量特征点的存在会严重降低计算效率，导致计算量越来越大以至于无法实时化。本讲介绍两种在更大场景下使用的后端优化方法：位姿图。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="后端优化的基本原理"><a href="#后端优化的基本原理" class="headerlink" title="后端优化的基本原理"></a>后端优化的基本原理</h1><ul>
+<li><strong>后端优化的目的：</strong></li>
+</ul>
+<p>利用回环检测结果和惯导先验位姿修正里程计误差，而回环在此提供的是两帧之间的相对位姿。</p>
+<ul>
+<li><strong>后端优化的方法：</strong></li>
+</ul>
+<p>假设马尔可夫性，简单的一阶马氏性认为，$k $时刻状态只与$ k − 1 $时刻状态有关，而与再之前的无关。如果做出这样的假设，我们就会得到以扩展卡尔曼滤波（EKF）为代表的滤波器方法。在滤波方法中，我们会从某时刻的状态估计，推导到下一个时刻。</p>
+<p>另外一种方法是依然考虑 $k$ 时刻状态与之前所有状态的关系，此时将得到非线性优化为主体的优化框架。在视觉SLAM中非线性优化如BA与图优化、位姿图优化等。</p>
+<ul>
+<li><strong>总结而言，后端优化的观测主要从这三个方面：</strong></li>
+</ul>
+<p>①连续两帧之间的相对位姿观测（里程计）</p>
+<p>②闭环匹配得到的相对位姿观测（闭环检测）</p>
+<p>③组合导航提供的先验位姿估计（IMU）</p>
+<p>①②的观测构成了<strong>基于回环的位姿修正</strong>，①③的观测构成了<strong>基于先验观测的位姿修正，</strong>当然三者也可以结合使用。三者的关系是，②③在①的基础上对位姿进行修正，这里对里程计的平滑性有一定的要求。</p>
+<h1 id="基于回环的位姿修正"><a href="#基于回环的位姿修正" class="headerlink" title="基于回环的位姿修正"></a>基于回环的位姿修正</h1><h2 id="回环检测"><a href="#回环检测" class="headerlink" title="回环检测"></a>回环检测</h2><p><img src="/images/后端位姿图优化/fc51f93b-322d-475b-bfa5-cae57a6750f9.jpeg" alt="回环检测是什么"></p>
+<p>首先我们需要了解什么是回环检测，如是上图所示，对于里程计而言，它用来估计帧与帧之间的位姿估计，而这个位姿估计会因为噪声而产生漂移，（即使每一帧之间我们都进行了BA优化，但微小的漂移仍是无法避免的），由于里程计帧之间的位姿估计有很多，因此积少成多，漂移最终累积特别大，就会导致机器人在达到初始位置是，观测显示已经回到初始位置，而位姿估计却显示与初始位置相差一段距离，如上图所示。</p>
+<p>我们通过构建位姿估计的位置和初始位置的残差项，对整个回环进行优化和修正，进而得到如下的地图。（理论而言，没有漂移的情况下，位姿估计的位置和初始位置是重合的。）</p>
+<p><img src="/images/后端位姿图优化/32fa19ca-c057-4ccb-8075-802d0a456991.jpeg" alt="什么是回环检测"></p>
+<p>因此，回环检测的目的就是消除累积误差。</p>
+<h2 id="位姿图优化"><a href="#位姿图优化" class="headerlink" title="位姿图优化"></a>位姿图优化</h2><p>与之前的BA优化不同，比如我们之前学习的重投影模型，它考虑的是相邻帧之间的位姿估计，需要优化每个相机的位姿和特征点的位置，即使我们使用关键帧，对于大场景而言，特征点的观测是非常巨大的，这种计算量也是巨大的。</p>
+<p>而位姿图优化，构建一个只有轨迹的图优化，而位姿节点之间的边，可以由两个关键帧之间通过特征匹配之后得到的运动估计来给定初始值。不同的是，一旦初始估计完成，我们就不再优化那些路标点的位置，而只关心所有的相机位姿之间的联系了。</p>
+<p><img src="/images/后端位姿图优化/image-20220503095925699.png" alt="image-20220503095925699" style="zoom:50%;" /></p>
+<h2 id="基于回环的位姿修正-1"><a href="#基于回环的位姿修正-1" class="headerlink" title="基于回环的位姿修正"></a>基于回环的位姿修正</h2><h3 id="构建残差"><a href="#构建残差" class="headerlink" title="构建残差"></a>构建残差</h3><p>在上文，我们找到如何构建残差项，下一步就是对残差项进行修正，那么我们就需要求得残差项对相应状态量的雅可比矩阵，从而才能知道从哪个方向修正状态量能够达到优化的目的。</p>
+<p>位姿图优化关心的是两帧之间的观测，这两帧并不一定是相邻的两帧，比如回环检测中的两帧。设第$i$和第$j$帧之间的观测，在李群SE3上可以表示为：</p>
+<script type="math/tex; mode=display">
+\Delta T_{ij}=T_i^{-1}T_j.\tag{1}</script><p>很容易理解，如果说第$i$和第$j$帧构成回环，那么$T_i^{-1}T_j=I$，也就不存在误差。</p>
+<p>也可以用李代数表示：</p>
+<script type="math/tex; mode=display">
+\Delta \xi_{ij}=\xi^{-1}_i◦\xi_j=\ln(T_i^{-1}T_j)^{\lor}.\tag{2}</script><p>构建残差：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+e_{ij}&=\ln(\Delta T_{ij}^{-1}T_i^{-1}T_j)^{\lor}\\
+&=\ln(\exp((-\xi_{ij})^{\land})\exp((-\xi_i)^{\land})\exp(\xi^{\land}_j))^{\lor}
+\end{align*}.\tag{3}</script><p>位姿图优化的思想是通过调整状态量（即位姿），使残差项的值最小化，这就是需要用残差项求雅可比矩阵，才能使用梯度下降方法进行迭代优化。</p>
+<h3 id="求雅可比矩阵"><a href="#求雅可比矩阵" class="headerlink" title="求雅可比矩阵"></a>求雅可比矩阵</h3><p>我们对位姿$T_i$和$T_j$分别左乘一个扰动$\Delta T=\exp(\delta\xi^{\land})$</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\hat{e}_{ij}&=
+\ln \left(
+T_{ij}^{-1}T_i^{-1}
+\exp((-\delta\xi_i)^{\land})
+\exp(\delta\xi_j^{\land})T_j
+\right)^{\lor}\\
+&=\ln \left( T_{ij}^{-1}T_i^{-1}T_j
+\exp\left(  (-Ad(T_j^{-1})\delta\xi_i)^{\land}  \right)
+\exp\left(    (Ad(T_j^{-1})\delta\xi_j)^{\land} \right)
+\right)^{\lor}\\
+&\approx\ln \left( 
+\exp(e_{ij})
+\exp\left(
+(-Ad(T_j^{-1})\delta\xi_i)^{\land}+(Ad(T_j^{-1})\delta\xi_j)^{\land}
+\right)
+\right)^{\lor}\\
+&\approx e_{ij}-\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\delta\xi_i+\mathcal{J}_r^{-1}Ad(T_j^{-1})\delta\xi_j
+\end{align*}
+\tag{4}</script><hr>
+<p>这里推导过程的第一步到第二步利用了李群的伴随性质：</p>
+<ul>
+<li><strong>SO(3)上的伴随性质</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+R\exp(p^{\land})R^T=\exp((Rp)^{\land})\\</script><ul>
+<li><strong>SE(3)上的伴随性质</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+T\exp(\xi^{\land})T^{-1}=\exp((Ad(T)\xi)^{\land})\\</script><p>其中伴随矩阵的定义如下：</p>
+<script type="math/tex; mode=display">
+Ad(T)=\begin{bmatrix}R&t^{\land}R\\ 0&R\end{bmatrix}</script><p>第二步第三步使用的是BCH公式：</p>
+<ul>
+<li><strong>SO(3)上的BCH公式</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+\ln(\exp(\phi_1^{\land})\exp(\phi_2^{\land}))\approx
+\left\{
+\begin{aligned}
+J_l(\phi_2)^{-1}\phi_1+\phi_2\ ,\ 当\phi_1为小量 \\
+J_r(\phi_1)^{-1}\phi_2+\phi_1\ ,\ 当\phi_2为小量
+\end{aligned}
+\right.</script><p>其中左乘雅可比为：</p>
+<script type="math/tex; mode=display">
+J_l=\frac{\sin\theta}{\theta}I+(1-\frac{\sin\theta}{\theta})aa^T+\frac{1-\cos\theta}{\theta}a^{\land}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+J_l^{-1}=\frac{\theta}{2}\cot\frac{\theta}{2}I+(1-\frac{\theta}{2}\cot\frac{\theta}{2})aa^T-\frac{\theta}{2}a^{\land}</script><p>右乘雅可比仅需要在左乘雅可比的基础上对自变量取负号，即：</p>
+<script type="math/tex; mode=display">
+J_r(\phi)=J_l(-\phi)</script><ul>
+<li><strong>SE(3)上的BCH公式</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+\ln(\exp(\xi_1^{\land})\exp(\xi_2^{\land}))^{\lor}\approx
+\left\{
+\begin{aligned}
+J_l(\xi_2)^{-1}\xi_1+\xi_2\ ,\ 当\xi_1为小量 \\
+J_r(\xi_1)^{-1}\xi_2+\xi_1\ ,\ 当\xi_2为小量
+\end{aligned}
+\right.</script><p>其中右乘雅可比为：</p>
+<script type="math/tex; mode=display">
+\mathcal{J}_r^{-1}(\xi)\approx I+\frac{1}{2}\begin{bmatrix}\phi^{\land}&\rho^{\land}\\0&\phi^{\land}\end{bmatrix}</script><p>一般情况下，若$\xi$非常小，该雅克比矩阵可以直接使用单位阵，此时：</p>
+<script type="math/tex; mode=display">
+\ln(\exp(\xi_1^{\land})\exp(\xi_2^{\land}))^{\lor}\approx\ln(\exp(\xi_1^{\land}+\xi_2^{\land}))^{\lor}</script><p>这里第二步到第三步的推导用的就是这个式子。</p>
+<hr>
+<p>所以，残差关于$T_i$的雅可比为：</p>
+<script type="math/tex; mode=display">
+A_{ij}=\frac{\partial e_{ij} }{\partial \delta \xi_i}=-\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\tag{5}</script><p>残差关于$T_j$的雅可比为：</p>
+<script type="math/tex; mode=display">
+B_{ij}=\frac{\partial e_{ij} }{\partial \delta \xi_j}=\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\tag{6}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\mathcal{J}_r^{-1}(\xi)\approx I+\frac{1}{2}\begin{bmatrix}\phi_e^{\land}&\rho_e^{\land}\\0&\phi_e^{\land}\end{bmatrix}\tag{7}</script><p>为了找到梯度方向，需要对残差进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&e_{ij}(x_i+\Delta x_i,x_j+\Delta x_j)\\
+=&e_{ij}(x+\Delta x)\\
+\approx&e_{ij}+J_{ij}\Delta x
+\end{align*}\tag{8}</script><p>其中$J_{ij}$即为前面推导的残差关于位姿的雅可比组成的矩阵：</p>
+<script type="math/tex; mode=display">
+J_{ij}=(0···0\ A_{ij}\ 0···0 \ B_{ij} \ 0···0)</script><p>至此，我们就把非线性优化变成了一个线性化问题。</p>
+<h3 id="进行优化"><a href="#进行优化" class="headerlink" title="进行优化"></a>进行优化</h3><p>位姿图优化就是把所有的观测和状态放在一起优化，在实际使用中，各个残差会被分配一个权重，也就是信息矩阵，它相当于对残差进行加权，考虑信息矩阵后，总的残差可以表示为:</p>
+<script type="math/tex; mode=display">
+F(x)=\sum_{i,j\in \mathcal{C} }F_{ij}=\sum_{i,j\in \mathcal{C}} e_{ij}^T\Omega_{ij}e_{ij}\tag{9}</script><blockquote>
+<p>权重矩阵又称为信息矩阵，它是协方差矩阵的逆，即为：$\Omega_{ij}=\Sigma_{ij}^{-1}$，因为每个残差都看作高斯分布，而每个高斯分布都可以归一化为标准的高斯分布$N(0,1)$，这种归一化操作是减去均值求平方然后除以方差。残差预期均值为0，所以不用减只需要除以方差，扩展到多维的话就变成了信息矩阵加权形式。</p>
+</blockquote>
+<p>所以此时的优化问题就是：</p>
+<script type="math/tex; mode=display">
+x^*=\arg\underset{x}{\min}\ F(x)\tag{10}</script><p>对于每一个残差块，都有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&F_{ij}(x+\Delta x)\\
+&=e_{ij}(x+\Delta x)^T\Omega_{ij}e_{ij}(x+\Delta x)\\
+&\approx e_{ij}^T\Omega_{ij}e_{ij}+2e_{ij}^T\Omega_{ij}J_{ij}\Delta x+\Delta x^TJ_{ij}^T\Omega_{ij}J_{ij}\Delta x\\
+&=c_{ij}+2b^T_{ij}\Delta x+\Delta x^TH_{ij}\Delta x
+\end{align*}\tag{11}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+c_{ij}=e_{ij}^T\Omega_{ij}e_{ij}</script><script type="math/tex; mode=display">
+H^T_{ij}=J_{ij}^T\Omega_{ij}J_{ij}=
+\begin{bmatrix}
+··· & ··· & ··· & ··· \\
+··· &A^T_{ij}\Omega_{ij}A_{ij}&···&A^T_{ij}\Omega_{ij}B_{ij}\\
+··· & ··· & ··· & ··· \\
+··· &B^T_{ij}\Omega_{ij}A_{ij}&···&B^T_{ij}\Omega_{ij}B_{ij}\\
+··· & ··· & ··· & ··· \\
+\end{bmatrix}</script><script type="math/tex; mode=display">
+b_{ij}=e_{ij}^T\Omega_{ij}J_{ij}=
+\begin{bmatrix} 
+···\\A^T_{ij}\Omega_{ij}e_{ij}\\···\\B^T_{ij}\Omega_{ij}e_{ij}\\···
+\end{bmatrix}</script><p>所以，要使得误差最小，只需要使得：</p>
+<script type="math/tex; mode=display">
+H\Delta x = -b\tag{11}</script><p>根据修正量，修正$x$的值，即完成依次迭代：</p>
+<script type="math/tex; mode=display">
+x^*=x+\Delta x\tag{12}</script><p>多次迭代，直至残差满足收敛条件时，则终止循环，完成优化。</p>
+]]></content>
       <categories>
         <category>SLAM十四讲</category>
       </categories>
@@ -1467,7 +1679,6 @@ c=\frac{1}{|S|·\parallel X^L_{(k,i)}\parallel} \sum_{j\in S,j\ne i} \parallel (
 <hr>
 <h2 id="A-激光雷达数据的畸变"><a href="#A-激光雷达数据的畸变" class="headerlink" title="A.激光雷达数据的畸变"></a>A.激光雷达数据的畸变</h2><p>激光雷达数据产生的畸变又叫<strong>激光雷达自运动畸变</strong>，对于多数激光雷达而言，尽管激光的发射与接收很快，但构成点云的每一个点仍非同一时刻生成的。一般我们会将$100ms $(对应典型值$10Hz$) 内累积的数据作为一帧点云输出。若在这$100ms$内，激光雷达本体或安装所在的机体发生绝对位置的变化，那么<strong>此帧点云中每一个点的坐标系就是不同的。</strong>直观上看，这一帧点云数据就会发生一定的“变形”，不能真实对应所探测到的环境信息，类似于拍照时手抖了，拍出来的照片就会糊。这便是激光雷达的自运动畸变。</p>
 <p>举一个例子，激光雷达对面有一面平行的墙面，理想状况下激光处于位置A或者位置B位置墙面的点云应该一样，但实际上，由于在这$100ms$内，激光雷达本身在运动，所以这一帧的墙面的点云中，某些点的坐标系就变得不同了，进而失去了原始平行墙面的特征，所以说，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑。</p>
-<p>如果是一堵平行的墙面，理想状况下激光处于A或者B位置测量到的同一点云的距离应该一样，但是实际中，激光雷达的位置发生了变化，所以这一帧的墙面的点云中，每一个点的坐标系就是不同的，失去了原始平行墙面的特征，进行激光SLAM时，AB位置的差距必须要考虑，或者说激光在这期间的运动必须要考虑</p>
 <p><img src="/images/loam论文深度解析/image-20220411193701848.png" alt="image-20220411193701848" style="zoom:33%;" /></p>
 <h2 id="B-将点与线和面匹配的原因"><a href="#B-将点与线和面匹配的原因" class="headerlink" title="B.将点与线和面匹配的原因"></a>B.将点与线和面匹配的原因</h2><p>理想情况下，没有畸变，激光雷达在短时间里获取的相邻帧数据是<strong>含有大量同一特征点</strong>的，也就是$P_k$和$P_{k+1}$中很多特征点只是雷达在不同位置下观察的同一个点。所以只要找到一个变化关系$T$使得$P_k$和$P_{k+1}$对应的点的匹配，这个$T$就是表示激光雷达的帧间运动。为了减少计算量，增加鲁棒性，不直接使用点与点的匹配，而是使用边缘点和对应的线特征，平面点和对应的面特征，这样也可以得到变换关系 $T$。</p>
 <p>但是实际情况下，激光雷达的点云数据是含有畸变的，所以作者将矫正的$P_k$重新投影到时间戳$t_{k+1}$，得到$\overline{P}_k$。我们的目的就是：从$\overline{P}_k$中找到与$\xi_{k+1}$中的点对应的边线，从平面图中找到与$H_{k+1}$中的点对应的平面贴片(patch)。那么现在就是一边进行矫正，一边进行匹配，然后进行迭代。迭代过程中，$T$的值不断变化，直到寻找到一个$T$使得<strong>所有点和对应特征区域距离和最小</strong>。</p>
@@ -2637,7 +2848,7 @@ z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>SLAM实践</tag>
+        <tag>后端优化</tag>
         <tag>卡尔曼滤波器</tag>
       </tags>
   </entry>
@@ -2921,7 +3132,7 @@ f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>]]></content>
         <category>SLAM十四讲</category>
       </categories>
       <tags>
-        <tag>SLAM实践</tag>
+        <tag>后端优化</tag>
         <tag>卡尔曼滤波器</tag>
       </tags>
   </entry>

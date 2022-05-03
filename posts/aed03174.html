@@ -23,19 +23,23 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="东北大学控制工程研究生">
+  <meta name="description" content="BA 能精确地优化每个相机位姿与特征点位置。不过在更大的场景中，大量特征点的存在会严重降低计算效率，导致计算量越来越大以至于无法实时化。本讲介绍两种在更大场景下使用的后端优化方法：位姿图。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="后端位姿图优化">
 <meta property="og:url" content="https://lukeyalvin.top/posts/aed03174.html">
 <meta property="og:site_name" content="Lukey Alvin">
-<meta property="og:description" content="东北大学控制工程研究生">
+<meta property="og:description" content="BA 能精确地优化每个相机位姿与特征点位置。不过在更大的场景中，大量特征点的存在会严重降低计算效率，导致计算量越来越大以至于无法实时化。本讲介绍两种在更大场景下使用的后端优化方法：位姿图。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/后端位姿图优化/fc51f93b-322d-475b-bfa5-cae57a6750f9.jpeg">
+<meta property="og:image" content="https://lukeyalvin.top/images/后端位姿图优化/32fa19ca-c057-4ccb-8075-802d0a456991.jpeg">
+<meta property="og:image" content="https://lukeyalvin.top/images/后端位姿图优化/image-20220503095925699.png">
 <meta property="article:published_time" content="2022-05-02T13:26:34.855Z">
-<meta property="article:modified_time" content="2022-05-02T13:28:15.029Z">
+<meta property="article:modified_time" content="2022-05-03T10:35:42.132Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="后端优化">
 <meta property="article:tag" content="位姿图优化">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/后端位姿图优化/fc51f93b-322d-475b-bfa5-cae57a6750f9.jpeg">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/aed03174.html">
 
@@ -219,10 +223,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-05-02 21:26:34 / 修改时间：21:28:15" itemprop="dateCreated datePublished" datetime="2022-05-02T21:26:34+08:00">2022-05-02</time>
+              <time title="创建时间：2022-05-02 21:26:34" itemprop="dateCreated datePublished" datetime="2022-05-02T21:26:34+08:00">2022-05-02</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-03 18:35:42" itemprop="dateModified" datetime="2022-05-03T18:35:42+08:00">2022-05-03</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -260,14 +270,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>0</span>
+              <span>5.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>5 分钟</span>
             </span>
 
         </div>
@@ -279,7 +289,164 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>BA 能精确地优化每个相机位姿与特征点位置。不过在更大的场景中，大量特征点的存在会严重降低计算效率，导致计算量越来越大以至于无法实时化。本讲介绍两种在更大场景下使用的后端优化方法：位姿图。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="后端优化的基本原理"><a href="#后端优化的基本原理" class="headerlink" title="后端优化的基本原理"></a>后端优化的基本原理</h1><ul>
+<li><strong>后端优化的目的：</strong></li>
+</ul>
+<p>利用回环检测结果和惯导先验位姿修正里程计误差，而回环在此提供的是两帧之间的相对位姿。</p>
+<ul>
+<li><strong>后端优化的方法：</strong></li>
+</ul>
+<p>假设马尔可夫性，简单的一阶马氏性认为，$k $时刻状态只与$ k − 1 $时刻状态有关，而与再之前的无关。如果做出这样的假设，我们就会得到以扩展卡尔曼滤波（EKF）为代表的滤波器方法。在滤波方法中，我们会从某时刻的状态估计，推导到下一个时刻。</p>
+<p>另外一种方法是依然考虑 $k$ 时刻状态与之前所有状态的关系，此时将得到非线性优化为主体的优化框架。在视觉SLAM中非线性优化如BA与图优化、位姿图优化等。</p>
+<ul>
+<li><strong>总结而言，后端优化的观测主要从这三个方面：</strong></li>
+</ul>
+<p>①连续两帧之间的相对位姿观测（里程计）</p>
+<p>②闭环匹配得到的相对位姿观测（闭环检测）</p>
+<p>③组合导航提供的先验位姿估计（IMU）</p>
+<p>①②的观测构成了<strong>基于回环的位姿修正</strong>，①③的观测构成了<strong>基于先验观测的位姿修正，</strong>当然三者也可以结合使用。三者的关系是，②③在①的基础上对位姿进行修正，这里对里程计的平滑性有一定的要求。</p>
+<h1 id="基于回环的位姿修正"><a href="#基于回环的位姿修正" class="headerlink" title="基于回环的位姿修正"></a>基于回环的位姿修正</h1><h2 id="回环检测"><a href="#回环检测" class="headerlink" title="回环检测"></a>回环检测</h2><p><img src="/images/后端位姿图优化/fc51f93b-322d-475b-bfa5-cae57a6750f9.jpeg" alt="回环检测是什么"></p>
+<p>首先我们需要了解什么是回环检测，如是上图所示，对于里程计而言，它用来估计帧与帧之间的位姿估计，而这个位姿估计会因为噪声而产生漂移，（即使每一帧之间我们都进行了BA优化，但微小的漂移仍是无法避免的），由于里程计帧之间的位姿估计有很多，因此积少成多，漂移最终累积特别大，就会导致机器人在达到初始位置是，观测显示已经回到初始位置，而位姿估计却显示与初始位置相差一段距离，如上图所示。</p>
+<p>我们通过构建位姿估计的位置和初始位置的残差项，对整个回环进行优化和修正，进而得到如下的地图。（理论而言，没有漂移的情况下，位姿估计的位置和初始位置是重合的。）</p>
+<p><img src="/images/后端位姿图优化/32fa19ca-c057-4ccb-8075-802d0a456991.jpeg" alt="什么是回环检测"></p>
+<p>因此，回环检测的目的就是消除累积误差。</p>
+<h2 id="位姿图优化"><a href="#位姿图优化" class="headerlink" title="位姿图优化"></a>位姿图优化</h2><p>与之前的BA优化不同，比如我们之前学习的重投影模型，它考虑的是相邻帧之间的位姿估计，需要优化每个相机的位姿和特征点的位置，即使我们使用关键帧，对于大场景而言，特征点的观测是非常巨大的，这种计算量也是巨大的。</p>
+<p>而位姿图优化，构建一个只有轨迹的图优化，而位姿节点之间的边，可以由两个关键帧之间通过特征匹配之后得到的运动估计来给定初始值。不同的是，一旦初始估计完成，我们就不再优化那些路标点的位置，而只关心所有的相机位姿之间的联系了。</p>
+<p><img src="/images/后端位姿图优化/image-20220503095925699.png" alt="image-20220503095925699" style="zoom:50%;" /></p>
+<h2 id="基于回环的位姿修正-1"><a href="#基于回环的位姿修正-1" class="headerlink" title="基于回环的位姿修正"></a>基于回环的位姿修正</h2><h3 id="构建残差"><a href="#构建残差" class="headerlink" title="构建残差"></a>构建残差</h3><p>在上文，我们找到如何构建残差项，下一步就是对残差项进行修正，那么我们就需要求得残差项对相应状态量的雅可比矩阵，从而才能知道从哪个方向修正状态量能够达到优化的目的。</p>
+<p>位姿图优化关心的是两帧之间的观测，这两帧并不一定是相邻的两帧，比如回环检测中的两帧。设第$i$和第$j$帧之间的观测，在李群SE3上可以表示为：</p>
+<script type="math/tex; mode=display">
+\Delta T_{ij}=T_i^{-1}T_j.\tag{1}</script><p>很容易理解，如果说第$i$和第$j$帧构成回环，那么$T_i^{-1}T_j=I$，也就不存在误差。</p>
+<p>也可以用李代数表示：</p>
+<script type="math/tex; mode=display">
+\Delta \xi_{ij}=\xi^{-1}_i◦\xi_j=\ln(T_i^{-1}T_j)^{\lor}.\tag{2}</script><p>构建残差：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+e_{ij}&=\ln(\Delta T_{ij}^{-1}T_i^{-1}T_j)^{\lor}\\
+&=\ln(\exp((-\xi_{ij})^{\land})\exp((-\xi_i)^{\land})\exp(\xi^{\land}_j))^{\lor}
+\end{align*}.\tag{3}</script><p>位姿图优化的思想是通过调整状态量（即位姿），使残差项的值最小化，这就是需要用残差项求雅可比矩阵，才能使用梯度下降方法进行迭代优化。</p>
+<h3 id="求雅可比矩阵"><a href="#求雅可比矩阵" class="headerlink" title="求雅可比矩阵"></a>求雅可比矩阵</h3><p>我们对位姿$T_i$和$T_j$分别左乘一个扰动$\Delta T=\exp(\delta\xi^{\land})$</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\hat{e}_{ij}&=
+\ln \left(
+T_{ij}^{-1}T_i^{-1}
+\exp((-\delta\xi_i)^{\land})
+\exp(\delta\xi_j^{\land})T_j
+\right)^{\lor}\\
+&=\ln \left( T_{ij}^{-1}T_i^{-1}T_j
+\exp\left(  (-Ad(T_j^{-1})\delta\xi_i)^{\land}  \right)
+\exp\left(    (Ad(T_j^{-1})\delta\xi_j)^{\land} \right)
+\right)^{\lor}\\
+&\approx\ln \left( 
+\exp(e_{ij})
+\exp\left(
+(-Ad(T_j^{-1})\delta\xi_i)^{\land}+(Ad(T_j^{-1})\delta\xi_j)^{\land}
+\right)
+\right)^{\lor}\\
+&\approx e_{ij}-\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\delta\xi_i+\mathcal{J}_r^{-1}Ad(T_j^{-1})\delta\xi_j
+\end{align*}
+\tag{4}</script><hr>
+<p>这里推导过程的第一步到第二步利用了李群的伴随性质：</p>
+<ul>
+<li><strong>SO(3)上的伴随性质</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+R\exp(p^{\land})R^T=\exp((Rp)^{\land})\\</script><ul>
+<li><strong>SE(3)上的伴随性质</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+T\exp(\xi^{\land})T^{-1}=\exp((Ad(T)\xi)^{\land})\\</script><p>其中伴随矩阵的定义如下：</p>
+<script type="math/tex; mode=display">
+Ad(T)=\begin{bmatrix}R&t^{\land}R\\ 0&R\end{bmatrix}</script><p>第二步第三步使用的是BCH公式：</p>
+<ul>
+<li><strong>SO(3)上的BCH公式</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+\ln(\exp(\phi_1^{\land})\exp(\phi_2^{\land}))\approx
+\left\{
+\begin{aligned}
+J_l(\phi_2)^{-1}\phi_1+\phi_2\ ,\ 当\phi_1为小量 \\
+J_r(\phi_1)^{-1}\phi_2+\phi_1\ ,\ 当\phi_2为小量
+\end{aligned}
+\right.</script><p>其中左乘雅可比为：</p>
+<script type="math/tex; mode=display">
+J_l=\frac{\sin\theta}{\theta}I+(1-\frac{\sin\theta}{\theta})aa^T+\frac{1-\cos\theta}{\theta}a^{\land}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+J_l^{-1}=\frac{\theta}{2}\cot\frac{\theta}{2}I+(1-\frac{\theta}{2}\cot\frac{\theta}{2})aa^T-\frac{\theta}{2}a^{\land}</script><p>右乘雅可比仅需要在左乘雅可比的基础上对自变量取负号，即：</p>
+<script type="math/tex; mode=display">
+J_r(\phi)=J_l(-\phi)</script><ul>
+<li><strong>SE(3)上的BCH公式</strong></li>
+</ul>
+<script type="math/tex; mode=display">
+\ln(\exp(\xi_1^{\land})\exp(\xi_2^{\land}))^{\lor}\approx
+\left\{
+\begin{aligned}
+J_l(\xi_2)^{-1}\xi_1+\xi_2\ ,\ 当\xi_1为小量 \\
+J_r(\xi_1)^{-1}\xi_2+\xi_1\ ,\ 当\xi_2为小量
+\end{aligned}
+\right.</script><p>其中右乘雅可比为：</p>
+<script type="math/tex; mode=display">
+\mathcal{J}_r^{-1}(\xi)\approx I+\frac{1}{2}\begin{bmatrix}\phi^{\land}&\rho^{\land}\\0&\phi^{\land}\end{bmatrix}</script><p>一般情况下，若$\xi$非常小，该雅克比矩阵可以直接使用单位阵，此时：</p>
+<script type="math/tex; mode=display">
+\ln(\exp(\xi_1^{\land})\exp(\xi_2^{\land}))^{\lor}\approx\ln(\exp(\xi_1^{\land}+\xi_2^{\land}))^{\lor}</script><p>这里第二步到第三步的推导用的就是这个式子。</p>
+<hr>
+<p>所以，残差关于$T_i$的雅可比为：</p>
+<script type="math/tex; mode=display">
+A_{ij}=\frac{\partial e_{ij} }{\partial \delta \xi_i}=-\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\tag{5}</script><p>残差关于$T_j$的雅可比为：</p>
+<script type="math/tex; mode=display">
+B_{ij}=\frac{\partial e_{ij} }{\partial \delta \xi_j}=\mathcal{J}_r^{-1}(e_{ij})Ad(T_j^{-1})\tag{6}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\mathcal{J}_r^{-1}(\xi)\approx I+\frac{1}{2}\begin{bmatrix}\phi_e^{\land}&\rho_e^{\land}\\0&\phi_e^{\land}\end{bmatrix}\tag{7}</script><p>为了找到梯度方向，需要对残差进行一阶泰勒展开：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&e_{ij}(x_i+\Delta x_i,x_j+\Delta x_j)\\
+=&e_{ij}(x+\Delta x)\\
+\approx&e_{ij}+J_{ij}\Delta x
+\end{align*}\tag{8}</script><p>其中$J_{ij}$即为前面推导的残差关于位姿的雅可比组成的矩阵：</p>
+<script type="math/tex; mode=display">
+J_{ij}=(0···0\ A_{ij}\ 0···0 \ B_{ij} \ 0···0)</script><p>至此，我们就把非线性优化变成了一个线性化问题。</p>
+<h3 id="进行优化"><a href="#进行优化" class="headerlink" title="进行优化"></a>进行优化</h3><p>位姿图优化就是把所有的观测和状态放在一起优化，在实际使用中，各个残差会被分配一个权重，也就是信息矩阵，它相当于对残差进行加权，考虑信息矩阵后，总的残差可以表示为:</p>
+<script type="math/tex; mode=display">
+F(x)=\sum_{i,j\in \mathcal{C} }F_{ij}=\sum_{i,j\in \mathcal{C}} e_{ij}^T\Omega_{ij}e_{ij}\tag{9}</script><blockquote>
+<p>权重矩阵又称为信息矩阵，它是协方差矩阵的逆，即为：$\Omega_{ij}=\Sigma_{ij}^{-1}$，因为每个残差都看作高斯分布，而每个高斯分布都可以归一化为标准的高斯分布$N(0,1)$，这种归一化操作是减去均值求平方然后除以方差。残差预期均值为0，所以不用减只需要除以方差，扩展到多维的话就变成了信息矩阵加权形式。</p>
+</blockquote>
+<p>所以此时的优化问题就是：</p>
+<script type="math/tex; mode=display">
+x^*=\arg\underset{x}{\min}\ F(x)\tag{10}</script><p>对于每一个残差块，都有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&F_{ij}(x+\Delta x)\\
+&=e_{ij}(x+\Delta x)^T\Omega_{ij}e_{ij}(x+\Delta x)\\
+&\approx e_{ij}^T\Omega_{ij}e_{ij}+2e_{ij}^T\Omega_{ij}J_{ij}\Delta x+\Delta x^TJ_{ij}^T\Omega_{ij}J_{ij}\Delta x\\
+&=c_{ij}+2b^T_{ij}\Delta x+\Delta x^TH_{ij}\Delta x
+\end{align*}\tag{11}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+c_{ij}=e_{ij}^T\Omega_{ij}e_{ij}</script><script type="math/tex; mode=display">
+H^T_{ij}=J_{ij}^T\Omega_{ij}J_{ij}=
+\begin{bmatrix}
+··· & ··· & ··· & ··· \\
+··· &A^T_{ij}\Omega_{ij}A_{ij}&···&A^T_{ij}\Omega_{ij}B_{ij}\\
+··· & ··· & ··· & ··· \\
+··· &B^T_{ij}\Omega_{ij}A_{ij}&···&B^T_{ij}\Omega_{ij}B_{ij}\\
+··· & ··· & ··· & ··· \\
+\end{bmatrix}</script><script type="math/tex; mode=display">
+b_{ij}=e_{ij}^T\Omega_{ij}J_{ij}=
+\begin{bmatrix} 
+···\\A^T_{ij}\Omega_{ij}e_{ij}\\···\\B^T_{ij}\Omega_{ij}e_{ij}\\···
+\end{bmatrix}</script><p>所以，要使得误差最小，只需要使得：</p>
+<script type="math/tex; mode=display">
+H\Delta x = -b\tag{11}</script><p>根据修正量，修正$x$的值，即完成依次迭代：</p>
+<script type="math/tex; mode=display">
+x^*=x+\Delta x\tag{12}</script><p>多次迭代，直至残差满足收敛条件时，则终止循环，完成优化。</p>
+
     </div>
 
     
@@ -357,7 +524,10 @@
     <a href="/posts/3df51dc4.html" rel="prev" title="ScanContext解析与实践">
       <i class="fa fa-chevron-left"></i> ScanContext解析与实践
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/posts/f737dac5.html" rel="next" title="点云地图的建立">
+      点云地图的建立 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -416,6 +586,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-text">后端优化的基本原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%9B%9E%E7%8E%AF%E7%9A%84%E4%BD%8D%E5%A7%BF%E4%BF%AE%E6%AD%A3"><span class="nav-text">基于回环的位姿修正</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9E%E7%8E%AF%E6%A3%80%E6%B5%8B"><span class="nav-text">回环检测</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%8D%E5%A7%BF%E5%9B%BE%E4%BC%98%E5%8C%96"><span class="nav-text">位姿图优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%9B%9E%E7%8E%AF%E7%9A%84%E4%BD%8D%E5%A7%BF%E4%BF%AE%E6%AD%A3-1"><span class="nav-text">基于回环的位姿修正</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%AE%8B%E5%B7%AE"><span class="nav-text">构建残差</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B1%82%E9%9B%85%E5%8F%AF%E6%AF%94%E7%9F%A9%E9%98%B5"><span class="nav-text">求雅可比矩阵</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%9B%E8%A1%8C%E4%BC%98%E5%8C%96"><span class="nav-text">进行优化</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -431,7 +602,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -444,7 +615,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">46</span>
+        <span class="site-state-item-count">47</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -757,12 +928,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">386k</span>
+    <span title="站点总字数">392k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:51</span>
+    <span title="站点阅读时长">5:56</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
