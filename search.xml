@@ -1,7 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>点云地图的建立</title>
+    <title>滤波器基本原理</title>
+    <url>/posts/b04da399.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>基于滤波器的激光SLAM方法，目前已经相对落后，因为滤波是用于估计当前的状态，如果我们之前的数据出现错误，是没有办法进行修正的，所以这个方法的整体效果并不是特别好。但是这个方法在整个激光SLAM的发展中还是占有很重要的地位的，而且这里蕴含的很多数学知识是非常重要的。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p><strong>滤波器的本质：</strong>结合预测和观测，得到“最精确”的后验值。这个精确值是相对的，因为实际中，预测和观测均是从传感器而来的，因此滤波器的作用就是结合各个传感器得到一个最好的融合结果。这就是一个数据融合的过程，关于数据融合的介绍可以参考：<a href="https://lukeyalvin.top/posts/8369.html#%E6%95%B0%E6%8D%AE%E8%9E%8D%E5%90%88">数据融合</a></p>
+<p><img src="/images/滤波器基本原理/image-20220504151009319.png" alt="image-20220504151009319" style="zoom:50%;" /></p>
+<p>1) 实际中预测往往从IMU、编码器等传感器递推而来；<br>2) 观测往往从GPS、雷达、相机等传感器而来；<br>3) 后验为融合后的结果，即定位模块的输出。</p>
+<h1 id="状态估计模型"><a href="#状态估计模型" class="headerlink" title="状态估计模型"></a>状态估计模型</h1><p>实际状态估计任务中，待估计的后验概率密度可以表示为：</p>
+<script type="math/tex; mode=display">
+p(x_k|\tilde{x}_0,v_{1:k},y_{0:k})\tag{1}</script><p>其中：$\tilde{x}_0$表示的是状态初始值；$v_{1:k}$表示从第1时刻到第$k$时刻的输入；$y_{0:k}$表示从第0时刻到第$k$时刻的观测。</p>
+<p>因此，滤波问题可以直观表示为，根据所有历史数据（输入、观测、初始状态），得出的最终的融合结果。历史数据之间的关系，可以用下面的图模型表示，</p>
+<p><img src="/images/滤波器基本原理/image-20220504205031587.png" alt="image-20220504205031587" style="zoom: 33%;" /></p>
+<p>图模型中体现了<strong>马尔可夫性</strong>，即当前状态只跟前一时刻状态相关，和其他历史时刻状态无关。数学表达该性质，</p>
+<script type="math/tex; mode=display">
+\left\{
+\begin{aligned}
+运动方程：x_k&=f(x_{k-1},v_k,w_k)\\
+观测方程：y_k&=g(x_k,n_k)
+\end{aligned}
+\right.\tag{2}</script><h1 id="贝叶斯滤波"><a href="#贝叶斯滤波" class="headerlink" title="贝叶斯滤波"></a>贝叶斯滤波</h1><p>根据贝叶斯公式，$k$时刻后验概率密度可以表示为</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p(x_k|\tilde{x}_0,v_{1:k},y_{0:k})&=\frac
+{p(y_k|x_k,\tilde{x}_0,v_{1:k},y_{0:k-1})p(x_k|\tilde{x}_0,v_{1:k},y_{0:k-1})}
+{p(y_k|\tilde{x}_0,v_{1:k},y_{0:k-1})}\\
+&=\eta p(y_k|x_k,\tilde{x}_0,v_{1:k},y_{0:k-1})p(x_k|\tilde{x}_0,v_{1:k},y_{0:k-1})
+\end{align*}\tag{3}</script><p>根据观测方程，$y_k$只与$x_k$相关，因此上式可以简写为：</p>
+<script type="math/tex; mode=display">
+p(x_k|\tilde{x}_0,v_{1:k},y_{0:k})=\eta p(y_k|x_k)p(x_k|\tilde{x}_0,v_{1:k},y_{0:k-1})\tag{4}</script><p>应用系统的马尔可夫性进一步化简公式，</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&p(x_k|\tilde{x}_0,v_{1:k},y_{0:k-1})\\
+&=\int p(x_k,x_{k-1}|\tilde{x}_0,v_{1:k},y_{0:k-1})dx_{k-1}\\
+&=\int p(x_k|x_{k-1}，\tilde{x}_0,v_{1:k},y_{0:k-1})p(x_{k-1}|\tilde{x}_0,v_{1:k},y_{0:k-1})dx_{k-1}\\
+&=\int p(x_k|x_{k-1},v_{k})p(x_{k-1}|\tilde{x}_0,v_{1:k},y_{0:k-1})dx_{k-1}
+\end{align*}\tag{3}</script><p>经过以上化简，最终后验概率可以写为</p>
+<p><img src="/images/滤波器基本原理/image-20220504211503741.png" alt="image-20220504211503741" style="zoom: 50%;" /></p>
+<p>根据以上结果，可以画出贝叶斯滤波的信息流图如下</p>
+<p><img src="/images/滤波器基本原理/image-20220504210156815.png" alt="image-20220504210156815"></p>
+<p>贝叶斯滤波分为很多种实现形式：</p>
+<p><img src="/images/滤波器基本原理/image-20220504211643228.png" alt="image-20220504211643228" style="zoom: 50%;" /></p>
+<p>实际中，粒子滤波（PF）多用于(早期的)2D激光SLAM方案中。在高斯假设前提下，用贝叶斯滤波的原始形式比较复杂，可以利用高斯的特征得到简化形式，即广义高斯滤波，后面KF、EKF、IEKF、UKF的推导均采用这种形式，只有PF例外，因为它是针对非高斯的。</p>
+]]></content>
+      <categories>
+        <category>激光SLAM</category>
+      </categories>
+      <tags>
+        <tag>滤波器</tag>
+        <tag>概率基础</tag>
+        <tag>贝叶斯滤波</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>滤波器及其概率基础</title>
+    <url>/posts/664a0a9d.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>基于滤波器的激光SLAM方法，目前已经相对落后，因为滤波是用于估计当前的状态，如果我们之前的数据出现错误，是没有办法进行修正的，所以这个方法的整体效果并不是特别好。但是这个方法在整个激光SLAM的发展中还是占有很重要的地位的，而且这里蕴含的很多数学知识是非常重要的。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="滤波器的作用"><a href="#滤波器的作用" class="headerlink" title="滤波器的作用"></a>滤波器的作用</h1><p><strong>滤波器的本质：</strong>结合预测和观测，得到“最精确”的后验值。这个精确值是相对的，因为实际中，预测和观测均是从传感器而来的，因此滤波器的作用就是结合各个传感器得到一个最好的融合结果。这就是一个数据融合的过程，关于数据融合的介绍可以参考：<a href="https://lukeyalvin.top/posts/8369.html#%E6%95%B0%E6%8D%AE%E8%9E%8D%E5%90%88">数据融合</a></p>
+<p><img src="/images/滤波器及其概率基础/image-20220504151009319.png" alt="image-20220504151009319" style="zoom:50%;" /></p>
+<p>1) 实际中预测往往从IMU、编码器等传感器递推而来；<br>2) 观测往往从GPS、雷达、相机等传感器而来；<br>3) 后验为融合后的结果，即定位模块的输出。</p>
+<h1 id="概率基础知识"><a href="#概率基础知识" class="headerlink" title="概率基础知识"></a>概率基础知识</h1><h2 id="1-概率以及概率密度"><a href="#1-概率以及概率密度" class="headerlink" title="1. 概率以及概率密度"></a>1. 概率以及概率密度</h2><p><img src="/images/滤波器及其概率基础/image-20220504151219788.png" alt="image-20220504151219788" style="zoom:50%;" /></p>
+<p>上图中，$p(x)$为$x$在区间$[a,b]$上的<strong>概率密度</strong>，它表示的是随机变量在区间的分布情况。$P_r$代表的是$x$在区间$[c,d]$上的<strong>概率</strong>，它是概率密度的积分。<br>我们平时所说“高斯分布”、“非高斯分布”均是指它的<strong>概率密度</strong>。</p>
+<h2 id="2-联合概率"><a href="#2-联合概率" class="headerlink" title="2. 联合概率"></a>2. 联合概率</h2><p>$x\in[a,b]$和$y\in[r,s]$的联合概率密度函数可以表示为$p(x,y)$，其积分表示$x$和$y$同时处在某个区间的<br>概率，满足下式：</p>
+<script type="math/tex; mode=display">
+\int^a_b\int^s_rp(x,y)dydx=1\tag{1}</script><p>特别地，当$x$和$y$相互独立的时候，有：</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x)p(y)\tag{2}</script><h2 id="3-条件概率"><a href="#3-条件概率" class="headerlink" title="3. 条件概率"></a>3. 条件概率</h2><p>$x$关于$y$的条件概率密度函数可以表示为：</p>
+<script type="math/tex; mode=display">
+p(x|y)</script><p>它的含义是，在$y\in[r,s]$的前提下，$x\in[a,b]$的概率分布。满足下式：</p>
+<script type="math/tex; mode=display">
+p(x)=\int^s_rp(x|y)p(y)dy\tag{3}</script><p>特别地，当$x$和$y$相互独立的时候，有：</p>
+<script type="math/tex; mode=display">
+p(x|y)=p(x)\tag{4}</script><h2 id="4-贝叶斯公式"><a href="#4-贝叶斯公式" class="headerlink" title="4. 贝叶斯公式"></a>4. 贝叶斯公式</h2><p>联合概率分解成条件概率和边缘概率的乘积，即:</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x|y)p(y)=p(y|x)p(x)\tag{6}</script><p>重新整理:</p>
+<script type="math/tex; mode=display">
+p(x|y)=\frac{p(y|x)p(x)}{p(y)}\tag{7}</script><h2 id="5-贝叶斯估计"><a href="#5-贝叶斯估计" class="headerlink" title="5. 贝叶斯估计"></a>5. 贝叶斯估计</h2><p>贝叶斯估计也叫贝叶斯推断，贝叶斯推断可以理解为贝叶斯公式的运用，它是指，如果已知<strong>先验概率密度函数</strong>$p(x)$，以及<strong>传感器模型</strong>$p(y|x)$，那么就可以根据贝叶斯公式推断出<strong>后验概率密度</strong>。</p>
+<script type="math/tex; mode=display">
+p(x|y)=\frac{p(y|x)p(x)}{\int p(y|x)p(x)dx}\tag{8}</script><h2 id="6-高斯概率密度函数"><a href="#6-高斯概率密度函数" class="headerlink" title="6. 高斯概率密度函数"></a>6. 高斯概率密度函数</h2><ul>
+<li>一维情况下，高斯概率密度函数表示为：</li>
+</ul>
+<script type="math/tex; mode=display">
+p(x|\mu,\sigma^2)=\frac{1}{\sqrt{2\pi\sigma^2} }\exp(-\frac{(x-\mu)^2}{2\sigma^2})\tag{9}</script><p>其中$\mu$为均值，$\sigma^2$为方差。</p>
+<ul>
+<li>多维的情况下，高斯概率密度函数表示为：</li>
+</ul>
+<script type="math/tex; mode=display">
+p(x|\mu,\Sigma)=\frac{1}{\sqrt{(2\pi)^N\det\Sigma} }\exp\left(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\right)\tag{10}</script><p>其中$\mu$为均值，$\Sigma$为方差。</p>
+<p>一般把高斯分布写成$x\sim \mathcal{N}(\mu,\Sigma)$。</p>
+<h2 id="7-联合高斯概率密度函数"><a href="#7-联合高斯概率密度函数" class="headerlink" title="7. 联合高斯概率密度函数"></a>7. 联合高斯概率密度函数</h2><p>如有高斯分布$p(x)= \mathcal{N}(\mu_x,\Sigma_{xx})$，$p(y)= \mathcal{N}(\mu_y,\Sigma_{yy})$。则它们的联合概率密度函数可以表示为：</p>
+<script type="math/tex; mode=display">
+p(x,y)=\mathcal{N}
+\left(
+\begin{bmatrix}\mu_x\\\mu_y\end{bmatrix},
+\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}
+\right)\tag{11}</script><p>由于高斯分布中指数项包含方差的求逆，而此处联合概率的方差是一个高维矩阵，对它求逆的简洁办法是运用舒尔补。</p>
+<p>舒尔补的主要目的是把矩阵分解成<strong>上三角矩阵、对角阵、下三角矩</strong>阵乘积的形式，方便运算，即</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}A&B\\C&D\end{bmatrix}=
+\begin{bmatrix}I&BD^{-1}\\0&I\end{bmatrix}
+\begin{bmatrix}\Delta D&0\\0&D\end{bmatrix}
+\begin{bmatrix}I&0\\D^{-1}C&I\end{bmatrix}\tag{12}</script><p>其中$\Delta D=A-BD^{-1}C$称为矩阵$D$关于原矩阵的舒尔补。</p>
+<p>此时有：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}A&B\\C&D\end{bmatrix}^{-1}=
+\begin{bmatrix}I&0\\-D^{-1}C&I\end{bmatrix}
+\begin{bmatrix}\Delta D^{-1}&0\\0&D^{-1}\end{bmatrix}
+\begin{bmatrix}I&-BD^{-1}\\0&I\end{bmatrix}\tag{12}</script><p>因此，利用舒尔补，联合分布的方差矩阵可以写为</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}=
+\begin{bmatrix}1&\Sigma_{xy}\Sigma_{yy}^{-1}\\0&1\end{bmatrix}
+\begin{bmatrix}\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}&0\\0&\Sigma_{yy}\end{bmatrix}
+\begin{bmatrix}1&0\\\Sigma_{yy}^{-1}\Sigma_{yx}&1\end{bmatrix}\tag{13}</script><p>它的逆矩阵为:</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}^{-1}=
+\begin{bmatrix}1&0\\-\Sigma_{yy}^{-1}\Sigma_{yx}&1\end{bmatrix}
+\begin{bmatrix}\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}&0\\0&\Sigma_{yy}\end{bmatrix}
+\begin{bmatrix}1&-\Sigma_{xy}\Sigma_{yy}^{-1}\\0&1\end{bmatrix}
+\tag{14}</script><p>对于$(11)$中的$p(x,y)$，它仍然是一个概率分布，它的指数部分的二次项包含如下内容</p>
+<p><img src="/images/滤波器及其概率基础/image-20220504160750871.png" alt="image-20220504160750871"></p>
+<p>由于联合概率满足下式:</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x|y)p(y)</script><p>该式在高斯分布的前提下可以重新分解。且$p(y)= \mathcal{N}(\mu_y,\Sigma_{yy})$</p>
+<p>最后得到两个二次项的和，由于同底数幂相乘后，底数不变，指数相加:</p>
+<script type="math/tex; mode=display">
+p(x|y)=\frac{p(x,y)}{p(y)}=\mathcal{N}
+\left(
+\mu_x+\Sigma_{xy}\Sigma_{yy}^{-1}(y-\mu_y),\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}
+\right)\tag{15}</script><h2 id="8-高斯随机变量的线性分布"><a href="#8-高斯随机变量的线性分布" class="headerlink" title="8. 高斯随机变量的线性分布"></a>8. 高斯随机变量的线性分布</h2><p>在前面的基础上，若已知$x$和$y$的关系有如下的关系：</p>
+<script type="math/tex; mode=display">
+y=Gx+n\tag{16}</script><p>其中$G$是一个常量矩阵，$n\in\mathcal{N}(0,R)$为零均值白噪声，在实际中指的是观测噪声。则$x$和$y$的均值和方差之间必然存在联系，其联系可通过以下推导获得。</p>
+<ul>
+<li>均值</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mu_y&=E[y]\\
+&=E[Gx+n]\\
+&=GE[x]+E[n]\\
+&=G\mu_x
+\end{align*}\tag{17}</script><ul>
+<li>方差</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Sigma_{yy}&=\Sigma(Gx)+\Sigma(n)\\
+&=E[(Gx-\mu_y)(Gx-\mu_y)^T]+R\\
+&=GE[(x-\mu_y)(x-\mu_y)^T]G^T+R\\
+&=G\Sigma_{xx}G^T+R\\
+\end{align*}\tag{18}</script><ul>
+<li>方差的交叉项</li>
+</ul>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Sigma_{xy}&=E[(x-\mu_x)(y-\mu_y)^T]\\
+&=E[(x-\mu_x)(Gx-G\mu_x+n)^T]\\
+&=E[(x-\mu_x)(Gx-G\mu_x)^T+(x-\mu_x)n^T]\\
+&=\Sigma_{xx}G^T+E[(x-\mu_x)n^T]\\
+&=\Sigma_{xx}G^T
+\end{align*}\tag{19}</script><p>同理可得：</p>
+<script type="math/tex; mode=display">
+\Sigma_{yx}=\Sigma_{xy}^T=G\Sigma_{xx}\tag{20}</script>]]></content>
+      <categories>
+        <category>激光SLAM</category>
+      </categories>
+      <tags>
+        <tag>滤波器</tag>
+        <tag>概率基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>点云地图的建立、畸变补偿和定位</title>
     <url>/posts/f737dac5.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -10,7 +191,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="整体流程"><a href="#整体流程" class="headerlink" title="整体流程"></a>整体流程</h1><p>建图流程设计的核心原则是准确、高效地把<strong>里程计相对位姿</strong>、<strong>回环相对位姿</strong>、<strong>惯导先验位姿</strong>进行融合。</p>
+<h1 id="建图流程"><a href="#建图流程" class="headerlink" title="建图流程"></a>建图流程</h1><p>建图流程设计的核心原则是准确、高效地把<strong>里程计相对位姿</strong>、<strong>回环相对位姿</strong>、<strong>惯导先验位姿</strong>进行融合。</p>
 <p><img src="/images/点云地图的建立/image-20220503190523343.png" alt="image-20220503190523343" style="zoom: 33%;" /></p>
 <ul>
 <li>轨迹对齐</li>
@@ -35,9 +216,7 @@
 <li><strong>补偿方法：</strong></li>
 </ul>
 <p>对于每一个激光点坐标做补偿，补偿量为激光点云与原点（即当时激光雷达坐标）相对于该帧起始时刻的变换。</p>
-<ul>
-<li><strong>补偿公式</strong></li>
-</ul>
+<h2 id="计算相对坐标"><a href="#计算相对坐标" class="headerlink" title="计算相对坐标"></a>计算相对坐标</h2><p>在匀速模型假设前提下，坐标 = 运动×时间。</p>
 <p>假设第一帧点云的起始位姿为：</p>
 <script type="math/tex; mode=display">
 T_0=\begin{bmatrix}R_0&t_0\\0&1\end{bmatrix}\tag{1}</script><p>第$i$个激光点采集时，雷达的位姿为：</p>
@@ -46,13 +225,34 @@ T_i=\begin{bmatrix}R_i&t_i\\0&1\end{bmatrix}\tag{2}</script><p>第$i$个激光�
 <script type="math/tex; mode=display">
 P_i=[p_{ix} \ p_{iy} \ p_{iz}]^T\tag{3}</script><p>则第$i$个激光点补偿畸变后的坐标应该为：</p>
 <script type="math/tex; mode=display">
-\overline{P}_i=T_0^{-1}T_iP_i\tag{4}</script>]]></content>
+\overline{P}_i=T_0^{-1}T_iP_i\tag{4}</script><p>上式可以理解为，只需要计算$0$到$i$时刻，激光雷达的相对旋转和相对平移变换即可。</p>
+<p>实际上，雷达点云是局部坐标系下的表示，当以0时刻雷达的位姿为基准坐标系的时候，此时$T_0$为单位阵，$T_i$即为$0$到$i$时刻的相对旋转和平移。</p>
+<p>此时有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+R_i&=\omega\nabla t\\
+t_i&=V\nabla t
+\end{align*}\tag{5}</script><p>即，只需要知道$0$到$i$时刻的平均角速度和平均速度即可。</p>
+<p><strong>那么时间差如何进行求取呢？</strong></p>
+<p>由于是顺序扫描，我们可以通过$\arctan\frac{y}{x}$来计算出该激光点相对于第一个激光点旋转过的角度$\beta$，已知雷达内部旋转$360°$用了$100ms$，那么旋转$\beta$角度所用的时间就可以计算出来了。</p>
+<p>但是由于$\arctan\frac{y}{x}\in[-90°,90°]$的范围。而雷达的周期是$360°$，因此计算出来的$\arctan\frac{y}{x}$还需要进行角度补偿。</p>
+<p>下面摘自：<a href="https://zhuanlan.zhihu.com/p/109379384">从零开始做自动驾驶定位(八): 点云畸变补偿</a></p>
+<h2 id="点云数据排列方式"><a href="#点云数据排列方式" class="headerlink" title="点云数据排列方式"></a>点云数据排列方式</h2><p>做激光定位的多数都看过loam的程序，会发现在计算激光点采集时刻这一步上我们和它是有区别的，这就是这个点云排列方式导致的。</p>
+<p>从激光雷达原理上讲，每次采集一列，边扫描边采集，所以数据应该是一列一列地存储，这样保证第一个点一定是最早时刻被采集的，最后一个点是最晚时刻被采集的，这样做有一个好处，那就是可以计算雷达真正扫描了多少度，因为它就是第一个点和最后一个点的角度差。</p>
+<p>而在这个bag文件里，是按行存储的，也就是先索引第一根线上的点，再第二根，依次类推，直到最后一根，这样的缺点是，我们无法通过这个来计算雷达实际扫描角度了，因为第一个点不一定是时间最早的点，如果第一根线前半部分被遮挡，那么你就会得到错误的计算角度，所以这时候，像我们这样直接强制把扫描角度设置成360度是更稳妥的，缺点就是它不够精确。</p>
+<p>这个问题的原因应该是数据的二次加工导致的，kitti先把数据存成bin文件，kitti2bag再转成bag文件，改变了原来的排列方式。一般雷达驱动中输出的数据都是按列排列的。</p>
+<p>所以如果各位以后使用的数据是列排列的，那么时间计算上可以使用loam里的方法，会更准确。</p>
+<h1 id="定位流程"><a href="#定位流程" class="headerlink" title="定位流程"></a>定位流程</h1><p>在地图匹配的过程中，鲁棒性和运行速度特别重要，因此实际中，基于NDT的匹配使用更为广泛。由于NDT匹配需要较准确的初始位姿，因此在定位之前需要初始化环节，给出载体的初始位姿。<br>按照难度由低到高，常见的初始化需求有这样几种：</p>
+<p>1）已知位姿的初始化<br>2）位置已知而姿态未知的初始化<br>3）位置和姿态均未知的初始化</p>
+<p><img src="/images/点云地图的建立/image-20220504092212456.png" alt="image-20220504092212456" style="zoom: 50%;" /></p>
+]]></content>
       <categories>
         <category>激光SLAM</category>
       </categories>
       <tags>
         <tag>激光SLAM</tag>
         <tag>建图</tag>
+        <tag>畸变补偿</tag>
       </tags>
   </entry>
   <entry>
@@ -1110,13 +1310,7 @@ w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
     <url>/posts/28639.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：</p>
-<ul>
-<li>IMU 的工作原理和噪声方程</li>
-<li>视觉与 IMU 紧耦合的基础理论</li>
-<li>从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）</li>
-</ul>
-<p>相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
+            <p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -2850,6 +3044,7 @@ z_{k}&=h(\widetilde{x}_{k},v_k)+H(x_k-\widetilde{x}_{k})+Vv_k
       <tags>
         <tag>后端优化</tag>
         <tag>卡尔曼滤波器</tag>
+        <tag>扩展卡尔曼滤波</tag>
       </tags>
   </entry>
   <entry>
