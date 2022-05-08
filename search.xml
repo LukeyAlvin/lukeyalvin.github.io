@@ -1394,59 +1394,6 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
       </tags>
   </entry>
   <entry>
-    <title>三、基于优化的IMU预积分与视觉信息融合</title>
-    <url>/posts/60742.html</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>本节主要对IMU的运动模型以及误差模型进行了分析，并针对连续时间和离散模型的处理做了简单的概要。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-<h1 id="Ⅰ-基于BA的-VIO-融合"><a href="#Ⅰ-基于BA的-VIO-融合" class="headerlink" title="Ⅰ.基于BA的 VIO 融合"></a>Ⅰ.基于BA的 VIO 融合</h1><p>BA为问题早在学习《视觉SLAM十四讲》的时候我们就接触过，当时提到的PnP问题，涉及到的重投影误差，如下图所示，我们通过对相机的位姿进行优化，就可以得到最小的误差$e$，这个问题就是一个BA问题。类似的还有直接法中的光度误差。</p>
-<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425154741376.png" alt="image-20220425154741376.png" style="zoom:50%;" /></p>
-<p>所谓的 Bundle Adjustment，是指从视觉重建中提炼出最优的 3D 模型和相机参数（内参数和外参数）。从每一个特征点反射出来的几束光线（bundles of light rays），在我们把相机姿态和特征点空间位置做出最优的调整 (adjustment) 之后，最后收束到相机光心的这个过程，简称为 BA。</p>
-<p>但是在实际的VIO中不仅涉及到类似的重投影误差问题，还需要考虑IMU的优化问题，如图所示，图中：$q_{bc},p_{bc}$分别表示相机坐标系到机器人本体坐标系的旋转四元数和平移向量。$f_i,f_j$则是我们观察到的特征点的3D坐标。$z_{f_j}^{c_i}$z在相机不同的位姿$c_1,c_2,c_3$下的观测值。</p>
-<p><img src="/images/3手写VIO-基于优化的IMU预积分和视觉传感器融合/image-20220425153047596.png" alt="image-20220425153047596"></p>
-<p>我们的优化问题有两个：</p>
-<p>①首先就是相机位姿的优化，我们通过特征匹配得到相邻两帧中的特征点的匹配，然后用过相机位姿将两帧的特征点统一在某一帧上，理论上，这两个点应该重合，这时由于偏差，两点会出现偏差$e$，其实就是之前的重投影误差，然后对相机的位姿进行优化，这里优化的就是$q_{bc},p_{bc}$，来缩小这个偏差的过程，就是求解BA的过程。</p>
-<p>求解BA实际上就是一个最小二乘的求解问题，构建误差函数如下：</p>
-<script type="math/tex; mode=display">
-\underset{q,p,f}{\arg\min}\sum^m_{i=1}\sum^m_{j=1}||\pi(q_{wc_i},p_{wc_i},f_{j})-z^{c_i}_{f_j} ||_{\sum_{ij} }\tag{1}</script><p>其中函数$\pi(\cdot)$表示投影函数，$\sum_{ij}$表示范数，然后这个误差函数可以通过之前学习的Ceres或g2o等库来进行求解。具体算法后文会介绍，比如高斯牛顿法，LM算法等。</p>
-<p>②然后就是构建IMU的误差$z_{b_1b_2}$，这个构建的过程主要就是通过预积分，通过上图可以发现，图像中$b_3$与$b_2$之间的小点就是IMU的数据，这些数据通过预积分的操作，就可以把这么多IMU数据变成一个约束$z_{b_2b_3}$。关于此知识点，高博在《视觉SLAM14讲》中并未提及，这也是本章介绍的重点。</p>
-<h1 id="Ⅱ-最小二乘问题的求解"><a href="#Ⅱ-最小二乘问题的求解" class="headerlink" title="Ⅱ.最小二乘问题的求解"></a>Ⅱ.最小二乘问题的求解</h1><p>最小二乘在之前的文章中有提及过，只不过叙述的是线性最小二乘，如果对最小二乘的概念理解不够透彻，从线性最小二乘入手不失为一种比较好的方式：<a href="https://lukeyalvin.top/2022/04/04/%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/">线性最小二乘</a></p>
-<p>最小二乘的定义：找到一个 $n$ 维的变量 $x^*\in\mathbb{R} ^n$，使得损失函数$ F (x)$ 取局部最小值：</p>
-<script type="math/tex; mode=display">
-F(x)=\frac{1}{2}\sum^m_{i=1}(f_i(x))^2</script><p>其中$ f_i $是残差函数，比如测量值和预测值之间的差，且有 $m ≥ n$。局部最小值指对任意 $\parallel x − x ^∗ \parallel &lt; \delta$有 $F (x^∗ ) ≤ F (x)$</p>
-<p>假设损失函数是可导的且平滑的曲线，在$x$处进行二阶泰勒展开：</p>
-<script type="math/tex; mode=display">
-F(x+\Delta x)=F(x)+J\Delta x+\frac{1}{2}\Delta x^TH\Delta x+O(\parallel \Delta x\parallel^3)\tag{2}</script><p>忽略泰勒展开的高阶项，损失函数变成了二次函数，可以轻易得到如下性质：</p>
-<blockquote>
-<p>如果在点 $x_s $处有导数为 $0$ ，则称这个点为稳定点。在点 $x_s $ 处对应的 Hessian 为$H$：</p>
-</blockquote>
-<ul>
-<li>如果$H$是正定矩阵，即它的特征值都大于  $0$，则在 $x_s $处有$ F (x) $为局部最小值;</li>
-<li>如果$H$是负定矩阵，即它的特征值都小于  $0$，则在 $x_s $处有$ F (x) $为局部最大值;</li>
-<li>如果$H$是不定矩阵，即它的特征值大于  $0$ 也有小于  $0$ 的，则 $x_s $处为鞍点。</li>
-</ul>
-<h2 id="A-基础：最速下降法、牛顿法"><a href="#A-基础：最速下降法、牛顿法" class="headerlink" title="A.基础：最速下降法、牛顿法"></a>A.基础：最速下降法、牛顿法</h2><h3 id="1-下降法"><a href="#1-下降法" class="headerlink" title="1.下降法"></a>1.下降法</h3><p>下降法包括梯度下降法以及最速下降法，<strong>梯度下降法</strong>和<strong>最速下降法</strong>都是针对<strong>无约束优化问题</strong>的<strong>搜索方向选择算法</strong>，他们的主要区别就是每一步选择迭代方向$d$的做法不同。</p>
-<h4 id="梯度下降法："><a href="#梯度下降法：" class="headerlink" title="梯度下降法："></a><strong>梯度下降法：</strong></h4><p>找一个下降方向$d$使损失函数随$ x $的迭代逐渐减小，直到$ x$ 收敛到$ x^∗$ ：</p>
-<script type="math/tex; mode=display">
-F(x_{k+1})<F(x_k)</script><p>因此整个过程分为两个部分：第一，找下降方向<strong>单位向量$d$</strong>，第二，确定下降步长$\alpha$.这两者共同决定了该搜索算法的好坏。</p>
-<p>假设$\alpha$足够小，我们可以对损失函数$F (x) $进行一阶泰勒展开：</p>
-<script type="math/tex; mode=display">
-F(x+\alpha d)\approx F(x)+\alpha Jd</script><p>其中下降方向满足：$Jd&lt;0$，</p>
-<p>通过 line search 方法找到下降的步长：$\alpha^*=\arg\min_{\alpha&gt;0}\{F(x+\alpha d)\}$</p>
-<h4 id="最速下降法："><a href="#最速下降法：" class="headerlink" title="最速下降法："></a><strong>最速下降法：</strong></h4><p>通过对梯度下降法的介绍，我们知道其迭代过程中最重要的就是为下次迭代选择一个合适的方向$d$，人们利用了<strong>梯度方向是函数值增长最快的方向</strong>的思想，来让迭代点沿着负梯度方向前进，保证函数的 “最速” 下降。</p>
-]]></content>
-      <categories>
-        <category>从零开始手写VIO</category>
-      </categories>
-      <tags>
-        <tag>VIO</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>二、IMU运动学模型以及误差模型</title>
     <url>/posts/19228.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -1541,7 +1488,7 @@ w_W^{\land}\dot r_W&=w_W^{\land}(v+w_W^{\land}r_W)\\
 \end{align*}</script><hr>
 <p>整个过程的作用是什么？</p>
 <p>我们在已知$B$坐标系下的物体的加速度、速度以及旋转轴的角速度，我们就可以求得对应世界坐标系下的相应的物理量，那么相应的求可以求得世界坐标系下的位姿（速度积分得到位姿）、四元数（根据角速度）。</p>
-<h1 id="Ⅱ-IMU-测量模型及运动模型"><a href="#Ⅱ-IMU-测量模型及运动模型" class="headerlink" title="Ⅱ.IMU 测量模型及运动模型"></a>Ⅱ.IMU 测量模型及运动模型</h1><h2 id="A-加速度计工作原理"><a href="#A-加速度计工作原理" class="headerlink" title="A.加速度计工作原理"></a>A.加速度计工作原理</h2><p>测量原理可以用一个简单的质量块 + 弹簧 + 指示计来表示:</p>
+<h1 id="Ⅱ-IMU-工作原理"><a href="#Ⅱ-IMU-工作原理" class="headerlink" title="Ⅱ.IMU 工作原理"></a>Ⅱ.IMU 工作原理</h1><h2 id="A-加速度计工作原理"><a href="#A-加速度计工作原理" class="headerlink" title="A.加速度计工作原理"></a>A.加速度计工作原理</h2><p>测量原理可以用一个简单的质量块 + 弹簧 + 指示计来表示:</p>
 <p><img src="/images/2手写VIO-IMU传感器/image-20220422191601477.png" alt="image-20220422191601477.png" style="zoom:33%;" /></p>
 <p>注意这里的加速度计测量值$a_m$为弹簧拉力对应的加速度，所以有：</p>
 <script type="math/tex; mode=display">
@@ -1562,7 +1509,7 @@ a_m=\frac{f}{m}=a-g\tag{5}</script><p>其中$f $为弹簧拉力，$a$ 为物体�
 <p><strong>但是为啥要用这么做呢? 一个质量块不行么？</strong></p>
 <p>①利用二倍的科氏力对应的电压指数更大，测量也变得更准确；②因为有可能在科氏力方向上物体本身具有一定的加速度，所以利用音叉陀螺仪构成差分模型，可以将两个外部力相互抵消（科氏力方向物体本身的加速度），消除自身的影响，是的获得的科氏力更准。</p>
 <p>但是，实际上，两个质量块不可能完全一致，也就是说陀螺仪的测量可能会受到外部加速度的影响，即常称的 <strong>G-sensitivity</strong>，一般的IMU手册里面都会有这个指数，它的含义就是告诉你IMU受加速度影响的系数有多大。</p>
-<h1 id="Ⅲ-IMU-误差模型"><a href="#Ⅲ-IMU-误差模型" class="headerlink" title="Ⅲ.IMU 误差模型"></a>Ⅲ.IMU 误差模型</h1><p>误差的分类：加速度计和陀螺仪的误差可以分为：确定性误差以及随机的误差，确定性的误差一般是事先通过标定确定，但是随机误差通常情况下假设噪声服从的是高斯分布。</p>
+<h1 id="Ⅲ-IMU-中的误差及其标定"><a href="#Ⅲ-IMU-中的误差及其标定" class="headerlink" title="Ⅲ.IMU 中的误差及其标定"></a>Ⅲ.IMU 中的误差及其标定</h1><p>误差的分类：加速度计和陀螺仪的误差可以分为：确定性误差以及随机的误差，确定性的误差一般是事先通过标定确定，但是随机误差通常情况下假设噪声服从的是高斯分布。</p>
 <h2 id="A-确定性误差与标定"><a href="#A-确定性误差与标定" class="headerlink" title="A.确定性误差与标定"></a>A.确定性误差与标定</h2><h3 id="1-确定性误差"><a href="#1-确定性误差" class="headerlink" title="1.确定性误差"></a>1.确定性误差</h3><ul>
 <li><strong>Bias</strong></li>
 </ul>
@@ -1697,7 +1644,7 @@ w[k]\sim N(0,1)\\
 <p>得到的艾伦曲线如下图所示：</p>
 <p><img src="/images/2手写VIO-IMU传感器/image-20220423162352964.png" alt="image-20220423162352964" style="zoom: 33%;" /></p>
 <p>从艾伦方差曲线中可以辨识出 IMU 的五种噪声，分别为：量化噪声、角度随机游走、零偏不稳定性噪声，角速率随机游走，速率斜坡，一般在 IMU 噪声辨识中用的比较多的是中间 3 种。</p>
-<h2 id="C-误差模型"><a href="#C-误差模型" class="headerlink" title="C .误差模型"></a>C .误差模型</h2><h3 id="1-加速度计的误差模型"><a href="#1-加速度计的误差模型" class="headerlink" title="1.加速度计的误差模型"></a>1.加速度计的误差模型</h3><p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
+<h1 id="Ⅳ-IMU误差模型"><a href="#Ⅳ-IMU误差模型" class="headerlink" title="Ⅳ.IMU误差模型"></a>Ⅳ.IMU误差模型</h1><h3 id="1-加速度计的误差模型"><a href="#1-加速度计的误差模型" class="headerlink" title="1.加速度计的误差模型"></a>1.加速度计的误差模型</h3><p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
 <p>理论测量值：</p>
 <script type="math/tex; mode=display">
 a_m^B=R_{BG}(a^G-g^G)
@@ -1710,14 +1657,15 @@ w^B_m=S_gw^B+n_g+nb_g\tag{18}</script><p>低端传感器，考虑加速度对陀
 <script type="math/tex; mode=display">
 w^B_m=S_gw^B+S_{ga}a^B+n_g+nb_g\tag{19}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
 <p><img src="/images/2手写VIO-IMU传感器/image-20220423190440715.png" alt="image-20220423190440715" style="zoom: 33%;" /></p>
-<h1 id="Ⅳ-运动模型离散时间处理"><a href="#Ⅳ-运动模型离散时间处理" class="headerlink" title="Ⅳ.运动模型离散时间处理"></a>Ⅳ.运动模型离散时间处理</h1><p>忽略 scale 的影响，只考虑白噪声和 bias 随机游走：</p>
+<h1 id="Ⅴ-IMU-运动模型"><a href="#Ⅴ-IMU-运动模型" class="headerlink" title="Ⅴ.IMU 运动模型"></a>Ⅴ.IMU 运动模型</h1><p>忽略 scale 的影响，只考虑白噪声和 bias 随机游走：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \tilde{w}^B&=w^B+b_g+n_g\tag{20}
 \end{align*}</script><script type="math/tex; mode=display">
 \begin{align*}
-\tilde{a}^B&=q_{BW}(a^W+g^W)+b_a+n_a\tag{21}
-\end{align*}</script><p>上标$ g$ 表示 gyro，a 表示 acc，$W$表示在世界坐标系 world，$B$表示imu 机体坐标系 body。IMU 的真实值为$w, a$, 测量值为$\tilde w, a$。</p>
+\tilde{a}^B&=q_{BW}(a^W+g^W)+b_a+n_a
+\end{align*}
+\tag{21}</script><p>上标$ g$ 表示 gyro，a 表示 acc，$W$表示在世界坐标系 world，$B$表示imu 机体坐标系 body。IMU 的真实值为$w, a$, 测量值为$\tilde w, a$。</p>
 <p>P(ose),V(elocity),Q(uaternion) 对时间的导数可写成：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -1755,78 +1703,7 @@ q_{wb_{k+1} }&=q_{wb_k}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \delta t\end{bmat
 \begin{align*}
 a&=\frac{1}{2}[q_{wb_{k} }(a^{b_k}-b^a_k)-g^w+q_{wb_{k+1} }(a^{b_{k+1} }-b^a_k)-g^w]\\
 w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]
-\end{align*}\tag{27}</script><h1 id="Ⅴ-IMU-数据仿真"><a href="#Ⅴ-IMU-数据仿真" class="headerlink" title="Ⅴ.IMU 数据仿真"></a>Ⅴ.IMU 数据仿真</h1><ul>
-<li>思路 1：指定轨迹方程，求一阶导得到速度, 角速度，求二阶导得到加速度。</li>
-</ul>
-<p>我们可以指定物体运动的轨迹，比如是圆周运动还是正弦运动，也就是可以指定其运动方程，进而可以对方程直接求导得到速度和加速度。</p>
-<ul>
-<li>思路 2：已有 pose 轨迹，不知道方程，利用 B-Spline 产生 IMU数据。</li>
-</ul>
-<h2 id="A-旋转基础知识"><a href="#A-旋转基础知识" class="headerlink" title="A.旋转基础知识"></a>A.旋转基础知识</h2><h3 id="1-旋转积分的几种方式"><a href="#1-旋转积分的几种方式" class="headerlink" title="1.旋转积分的几种方式"></a>1.旋转积分的几种方式</h3><ul>
-<li>四元数形式</li>
-</ul>
-<script type="math/tex; mode=display">
-q_{wb^\prime }=q_{wb}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \Delta t\end{bmatrix}\tag{28}</script><ul>
-<li>SO3形式</li>
-</ul>
-<script type="math/tex; mode=display">
-R_{wb^\prime}=R_{wb}\exp(w\cdot\Delta t)\tag{29}</script><ul>
-<li>欧拉角形式</li>
-</ul>
-<script type="math/tex; mode=display">
-\vartheta_{wb^\prime}=\vartheta_{wb}+E_{wb}\cdot w\Delta t\tag{30}</script><p>其中$\vartheta=(\psi_{roll},\theta_{pitch},\phi_{yaw})^T$,$E_{wb}$表示IMU坐标系（Body坐标系）下的角速度转换成欧拉角角速度。</p>
-<h3 id="2-欧拉角形式的旋转变换"><a href="#2-欧拉角形式的旋转变换" class="headerlink" title="2.欧拉角形式的旋转变换"></a>2.欧拉角形式的旋转变换</h3><p>世界坐标系$\left\{ W \right\}$一个点旋转到机器人本体坐标系$\left\{ B \right\}$，很容易想到使用旋转矩阵表示，但是实际上使用欧拉角则更为方便，直观性更好。</p>
-<p>$step\ 1. $绕着惯性坐标系的$ z$轴旋转，得到新的坐标系$b^1$</p>
-<script type="math/tex; mode=display">
-x^1_b=
-\begin{bmatrix}
-\cos\phi&\sin\phi&0\\
--\sin\phi&\cos\phi&0\\
-0&0&1
-\end{bmatrix}x^0_b=R(\phi)x^0_b</script><p>$step\ 2. $绕着新的坐标系$b^1$的$ y$轴旋转，得到新的坐标系$b^2$</p>
-<script type="math/tex; mode=display">
-x^2_b=
-\begin{bmatrix}
-\cos\theta&0&-\sin\theta\\
-0&1&0\\
-\sin\theta&0&\cos\theta
-\end{bmatrix}x^1_b=R(\theta)x^1_b</script><p>$step\ 3. $绕着新的坐标系$b^2$的$ x$轴旋转，得到新的坐标系$b^3$，$b^3$就是我们的body 坐标系。</p>
-<script type="math/tex; mode=display">
-x^3_b=
-\begin{bmatrix}
-1&0&0\\
-0&\cos\psi&\sin\psi\\
-0&-\sin\psi&\cos\psi
-\end{bmatrix}x^2_b=R(\psi)x^2_b</script><p>综合起来，得到：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-x_b&=R(\psi)R(\theta)R(\phi)x\\
-&=\begin{bmatrix}
-c\theta c\phi &c\theta s\phi &-s\theta \\
--c\psi s\phi +s\psi s\theta c\phi &c\psi c\phi +s\psi s\theta s\phi &s\psi c\theta \\
-s\psi s\phi +c\psi s\theta c\phi &-s\psi c\phi +c\psi s\theta s\phi &c\psi c\theta 
-\end{bmatrix}x\\
-&=R(\psi,\theta,\phi)x
-\end{align*}\tag{31}</script><h3 id="3-欧拉角速度和-body-角速度的转换"><a href="#3-欧拉角速度和-body-角速度的转换" class="headerlink" title="3.欧拉角速度和 body 角速度的转换"></a>3.欧拉角速度和 body 角速度的转换</h3><p>欧拉角速度和 body 角速度的转换:</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-w&=R(\psi)R(\theta)\begin{bmatrix}0\\0\\\frac{d\phi}{dt}\end{bmatrix}
-+R(\psi)\begin{bmatrix}0\\\frac{d\theta}{dt}\\0\end{bmatrix}
-+\begin{bmatrix}\frac{d\psi}{dt}\\0\\0\end{bmatrix}\\
-&=\begin{bmatrix}
-1&0&-\sin\theta\\
-0&\cos\psi&\sin\psi\cos\theta\\
-0&-\sin\psi&\cos\psi\cos\theta
-\end{bmatrix}
-\begin{bmatrix}\frac{d\psi}{dt}\\\frac{d\theta}{dt}\\\frac{d\phi}{dt}\end{bmatrix}\\
-\end{align*}\tag{32}</script><p>公式$ (31)$ 取逆就能得到，body 角速度到欧拉角速度的变换：</p>
-<script type="math/tex; mode=display">
-\frac{d\vartheta}{dt}=
-\begin{bmatrix}
-1&\sin\psi\tan\theta&\cos\psi\tan\theta\\
-0&\cos\psi&-\sin\psi\\
-0&\sin\psi/cos\theta&\cos\psi/\cos\theta
-\end{bmatrix}\overrightarrow{w}\tag{33}</script><h2 id="B-仿真"><a href="#B-仿真" class="headerlink" title="B.仿真"></a>B.仿真</h2>]]></content>
+\end{align*}\tag{27}</script>]]></content>
       <categories>
         <category>从零开始手写VIO</category>
       </categories>
