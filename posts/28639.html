@@ -30,17 +30,17 @@
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="本课程专注于视觉 +IMU 融合定位的基础理论和实现，作为视觉SLAM 的进阶课程在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://lukeyalvin.top/images/1手写VIO-课程概要/image-20220420150139375.png">
-<meta property="og:image" content="https://lukeyalvin.top/images/1手写VIO-课程概要/image-20220420150543613.png">
-<meta property="og:image" content="https://lukeyalvin.top/images/1手写VIO-课程概要/image-20220420151628700.png">
-<meta property="og:image" content="https://lukeyalvin.top/images/1手写VIO-课程概要/image-20220420151708384.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150139375.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150543613.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151628700.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151708384.png">
 <meta property="article:published_time" content="2022-04-25T09:17:10.447Z">
-<meta property="article:modified_time" content="2022-05-08T13:19:44.353Z">
+<meta property="article:modified_time" content="2022-05-10T09:24:46.091Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="刚体运动">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lukeyalvin.top/images/1手写VIO-课程概要/image-20220420150139375.png">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150139375.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/28639.html">
 
@@ -232,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-08 21:19:44" itemprop="dateModified" datetime="2022-05-08T21:19:44+08:00">2022-05-08</time>
+                <time title="修改时间：2022-05-10 17:24:46" itemprop="dateModified" datetime="2022-05-10T17:24:46+08:00">2022-05-10</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -308,12 +308,12 @@
 <ul>
 <li>典型 6 轴 IMU 本身由一个陀螺仪和一个加速度计组成，分别测量自身的角速度和加速度，并以较高频率（≥ 100Hz）返回。</li>
 </ul>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;" /></p>
+<p><img src="/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150139375.png" alt="image-20220420150139375" style="zoom: 33%;" /></p>
 <ul>
 <li>但是IMU，受自身温度、零偏、振动等因素干扰，积分得到的平移和旋转容易漂移</li>
 </ul>
 <p>手机等电子产品多使用价格低廉的 MEMS IMU（如 MPU 6050），自动驾驶类则多使用几万元的 IMU（如 Apollo 中使用的 Novatel SPAN-IGM-A1）</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;" /></p>
+<p><img src="/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150543613.png" alt="image-20220420150543613" style="zoom: 50%;" /></p>
 <p>视觉 Visual Odometry</p>
 <ul>
 <li>以图像形式记录数据，频率较低（15 − 60Hz 居多）</li>
@@ -356,12 +356,12 @@
 <li><strong>松耦合</strong></li>
 </ul>
 <p>松耦合将 IMU 定位与视觉/GNSS 的位姿直接进行融合，融合过程对二者本身不产生影响，作为后处理方式输出。典型方案为卡尔曼滤波器。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;" /></p>
+<p><img src="/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151628700.png" alt="image-20220420151628700" style="zoom: 33%;" /></p>
 <ul>
 <li><strong>紧耦合</strong></li>
 </ul>
 <p>紧耦合则是使用两个传感器的原始数据共同估计一组变量，传感器噪声也是相互影响的，紧耦合算法上比较复杂，但充分利用了传感器数据，可以实现更好的效果，是目前研究的重点。典型方案为 MSCKF 和非线性优化。</p>
-<p><img src="/images/1手写VIO-课程概要/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;" /></p>
+<p><img src="/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151708384.png" alt="image-20220420151708384" style="zoom:33%;" /></p>
 <p><strong>为什么要使用紧耦合？</strong></p>
 <ul>
 <li>单纯凭（单目）视觉或 IMU 都不具备估计 Pose 的能力：视觉存在尺度不确定性、IMU 存在零偏导致漂移；</li>
@@ -635,7 +635,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -961,12 +961,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">448k</span>
+    <span title="站点总字数">461k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:47</span>
+    <span title="站点阅读时长">6:59</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
