@@ -1,25 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>五、VIO视觉残差的构建以及雅可比的求取</title>
+    <title>SLAM中的概率基础</title>
+    <url>/posts/2613d057.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><h2 id="概率与概率密度"><a href="#概率与概率密度" class="headerlink" title="概率与概率密度"></a>概率与概率密度</h2><p><img src="/images/SLAM中的概率基础/image-20220511204935450.png" alt="image-20220511204935450" style="zoom:50%;" /></p>
+<p>图中，函数 $p(x)$ 表示 $x$ 在区间 $[a,b]$ 上的<strong>概率密度</strong>，它表示的是随机变量在区间的分布情况。</p>
+<p>$Pr$ 代表的是 $x$ 在区间 $[c,d]$ 上的<strong>概率</strong>，它是概率密度函数的积分：</p>
+<script type="math/tex; mode=display">
+Pr(c\leq x \leq d)=\int^d_c p(x)dx\tag{1}</script><p>我们平时所说“高斯分布”、“非高斯分布”均是指它的概率密度。</p>
+<h2 id="联合概率"><a href="#联合概率" class="headerlink" title="联合概率"></a>联合概率</h2><p><strong>联合概率</strong>表示两个事件共同发生的概率。事件 $A$ 和事件 $B$ 的联合概率表示为 $P(A\cap B),P(A,B),P(AB)$ </p>
+<p>比如 $x\in[a,b]$ 和 $y\in[r,s]$ 的联合概率密度函数可以表示为 $p(x,y)$，其积分表示 $x,y$ 同处在某个区间的概率，满足下式：</p>
+<script type="math/tex; mode=display">
+\int^b_a\int^s_rp(x,y)dydx=1\tag{2}</script><p>特别地，当 $x$ 和 $y$ 相互独立的时候：</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x)p(y)\tag{3}</script><h2 id="条件概率"><a href="#条件概率" class="headerlink" title="条件概率"></a>条件概率</h2><p>就是事件 $A$ 在事件 $B$ 发生的条件下发生的概率。即为 $P(B|A)$.</p>
+<p>比如 $x\in[a,b]$ 和 $y\in[r,s]$ ，当在 $y$ 已知的前提下，$x$ 的概率分布满足下式：</p>
+<script type="math/tex; mode=display">
+p(x)=\int^s_r p(x|y)p(y)dy\tag{4}</script><p>特别地，当 $x$ 和 $y$ 相互独立的时候：</p>
+<script type="math/tex; mode=display">
+p(x|y)=p(x)\tag{5}</script><h2 id="边缘概率"><a href="#边缘概率" class="headerlink" title="边缘概率"></a>边缘概率</h2><p><strong>边缘概率</strong>是某个事件发生的概率。边缘概率是这样得到的：在联合概率中，把最终结果中不需要的那些事件合并成其事件的全概率而消失（对离散随机变量用求和得全概率，对连续随机变量用积分得全概率）。这称为边缘化（marginalization）。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>六、VIO视觉残差的构建以及雅可比的求取</title>
     <url>/posts/c041a7d0.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>、本节主要讨论VIO视觉残差的构建，以及残差对于各个雅可比矩阵的求解。</p>
+            <p>在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和视觉的误差怎么分配权重并且求其最小值呢，这是这篇博客想要解决的问题。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和视觉的误差怎么分配权重并且求其最小值呢，这是这篇博客想要解决的问题。</p>
 <h1 id="VIO残差构建"><a href="#VIO残差构建" class="headerlink" title="VIO残差构建"></a>VIO残差构建</h1><p>VIO重投影误差：</p>
 <p>具体详解见：<a href="https://lukeyalvin.top/posts/ddbf64.html#VIO%E9%87%8D%E6%8A%95%E5%BD%B1%E8%AF%AF%E5%B7%AE"><a href="https://lukeyalvin.top/posts/ddbf64.html#VIO重投影误差">VIO重投影误差</a></a></p>
-<p><img src="/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811.png" alt="image-20220505205125811" style="zoom: 33%;" /></p>
+<p><img src="/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811-16522560257751.png" alt="image-20220505205125811" style="zoom: 33%;" /></p>
 <p>特征点逆深度在第$i$帧中初始化得到，在第 $j$ 帧又被观测到，预测其在第$ j$ 中的坐标为：  </p>
 <script type="math/tex; mode=display">
 \begin{bmatrix}X_{cj}\\Y_{cj}\\Z_{cj}\\1\end{bmatrix}=
 T^{-1}_{bc}T^{-1}_{wb_j}T_{wb_i}T_{bc}
-\begin{bmatrix}\frac{1}{\lambda}u_{ci}\\\frac{1}{\lambda}v_{ci}\\\frac{1}{\lambda}\\1\end{bmatrix}\tag{1}</script><p>对应的残差：</p>
+\begin{bmatrix}\frac{1}{\lambda}u_{ci}\\\frac{1}{\lambda}v_{ci}\\\frac{1}{\lambda}\\1\end{bmatrix}\tag{1}</script><p>设特征点$P$经过特征匹配，得到在$i,j$两帧上的投影观测值，目前特征点在$i$帧的观测值是初始化值，所以在$i$帧相机坐标为$\begin{bmatrix}\frac{1}{\lambda}u_{cj}\\\frac{1}{\lambda}v_{cj}\\\frac{1}{\lambda}\\1\end{bmatrix}$，然后使用估计的位姿变换$T^{-1}_{bc}T^{-1}_{wb_j}T_{wb_i}T_{bc}$进行一系列坐标变换，得到的是该特征点在第$j$帧估计的相机坐标$\begin{bmatrix}X_{cj}\\Y_{cj}\\Z_{cj}\\1\end{bmatrix}$，把它化为归一化坐标，得到$\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }\\\frac{Y_{cj} }{Z_{cj} }\end{bmatrix}$,我们知道，在忽略$K$的前提下，归一化坐标就是像素坐标，由于一直第$j$帧下的像素坐标观测值为$\begin{bmatrix}u_{c_j}\\v_{c_j}\end{bmatrix}$,所以，就可以构建如下的残差项：</p>
 <script type="math/tex; mode=display">
-r_c=\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }-u_{c_j}\\\frac{Y_{cj} }{Z_{cj} }-v_{c_j}\end{bmatrix}\tag{2}</script><h1 id="VIO残差的雅可比推导"><a href="#VIO残差的雅可比推导" class="headerlink" title="VIO残差的雅可比推导"></a>VIO残差的雅可比推导</h1><p>按照变换矩阵和旋转矩阵之间的关系：</p>
+r_c=\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }-u_{cj}\\\frac{Y_{cj} }{Z_{cj} }-v_{cj}\end{bmatrix}\tag{2}</script><h1 id="VIO残差的雅可比推导"><a href="#VIO残差的雅可比推导" class="headerlink" title="VIO残差的雅可比推导"></a>VIO残差的雅可比推导</h1><p>按照变换矩阵和旋转矩阵之间的关系：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 T_{bc}^{-1}&=\begin{bmatrix}R^T_{bc}&-R^T_{bc}p_{bc}\\0^T&1\end{bmatrix},\ 
@@ -69,9 +97,9 @@ J=\begin{bmatrix}
 <ol>
 <li><strong>对 $i$ 时刻的状态量求导</strong></li>
 </ol>
-<p>① 对 $i$ 时刻的位移求导，可以直接写出如下：</p>
+<p>① 对 $i$ 时刻的<strong>位移</strong>求导，可以直接写出如下：</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_ib_i^\prime} }=R^{T}_{bc}R^{T}_{wb_j}\tag{8}</script><p>② 对 $i$ 时刻的角度增量求导</p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_ib_i^\prime} }=R^{T}_{bc}R^{T}_{wb_j}\tag{8}</script><p>② 对 $i$ 时刻的<strong>角度</strong>增量求导</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}=
@@ -106,9 +134,9 @@ R^{T}_{bc}R^{T}_{wb_j}{\color{red}R_{wb_i} }[f_{b_i}]^{\land} [\delta\theta_{b_i
 \end{align*}\tag{10}</script><ol>
 <li><strong>对 $j$ 时刻的状态量求导</strong></li>
 </ol>
-<p>① 对 $j$ 时刻的位移求导，可以直接写出如下：</p>
+<p>① 对 $j$ 时刻的<strong>位移</strong>求导，可以直接写出如下：</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_jb_j^\prime} }=-R^{T}_{bc}R^{T}_{wb_j}\tag{11}</script><p>② 对 $j$ 时刻的角度增量求导</p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_jb_j^\prime} }=-R^{T}_{bc}R^{T}_{wb_j}\tag{11}</script><p>② 对 $j$ 时刻的<strong>角度</strong>增量求导</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}&=
@@ -142,9 +170,9 @@ R^{T}_{bc}[f_{b_j}]^{\land}[\delta\theta_{b_ib^\prime_j}] }{\partial\delta\theta
 \end{align*}\tag{13}</script><ol>
 <li><strong>对 imu 和相机之间的外参求导</strong>  </li>
 </ol>
-<p>① 对位移求导</p>
+<p>① 对<strong>位移</strong>求导</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{cc^\prime} }=R^{T}_{bc}(R^{T}_{wb_j}R_{wb_i}-I_{3\times 3})\tag{14}</script><p>② 对角度增量求导，由于 $f_{c_j}$ 都和 $R_{bc}$ 有关，并且比较复杂，所以这次分两部分求导  </p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{cc^\prime} }=R^{T}_{bc}(R^{T}_{wb_j}R_{wb_i}-I_{3\times 3})\tag{14}</script><p>② 对<strong>角度</strong>增量求导，由于 $f_{c_j}$ 都和 $R_{bc}$ 有关，并且比较复杂，所以这次分两部分求导  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}&=
@@ -211,7 +239,7 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
       </tags>
   </entry>
   <entry>
-    <title>四、预积分残差的雅克比求取</title>
+    <title>五、预积分残差的雅克比求取</title>
     <url>/posts/b68d674.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -220,7 +248,13 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="预积分残差的雅克比求取"><a href="#预积分残差的雅克比求取" class="headerlink" title="预积分残差的雅克比求取"></a>预积分残差的雅克比求取</h1><p>定义：一段时间内 IMU 构建的预积分量作为<strong>测量值</strong>，对两时刻之间的状态量进行约束，  </p>
+<h1 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h1><p>对于右乘雅可比，我们做如下的公式简化：</p>
+<script type="math/tex; mode=display">
+\frac{\partial x_a}{\partial \delta\theta}=
+\underset{\delta\theta\rightarrow0}{lim}\frac{R_{ab}\exp([\delta\theta]^{\land})x_b-R_{ab}x_b}{\delta\theta}</script><p>后续简写为：</p>
+<script type="math/tex; mode=display">
+\frac{\partial x_a}{\partial \delta\theta}=
+\frac{R_{ab}\exp([\delta\theta]^{\land})x_b}{\delta\theta}</script><h1 id="预积分残差的雅克比求取"><a href="#预积分残差的雅克比求取" class="headerlink" title="预积分残差的雅克比求取"></a>预积分残差的雅克比求取</h1><p>定义：一段时间内 IMU 构建的预积分量作为<strong>测量值</strong>，对两时刻之间的状态量进行约束，  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \mathbf{e}_{B}(x_i,x_j)=\begin{bmatrix}
@@ -234,7 +268,13 @@ q_{b_iw}(v^w_j-v^w_i+g^w\Delta t)-{\color{blue}\beta_{b_ib_j} }\\
 b^a_j-b^a_i\\
 b^g_j-b^g_i
 \end{bmatrix}
-\end{align*}\tag{1}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第二项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
+\end{align*}\tag{1}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha_{b_ib_j}&=\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
+\beta_{b_ib_j}&=\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
+q_{b_ib_j}&=\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t}\end{bmatrix}\delta t
+\end{align*}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第二项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
 <p>在求解非线性方程时，需要知道误差 $\mathbf{e}_{B}$ 对两个关键帧 $i, j$ 的状态量 $p, q, v, ba, bg$ 的雅可比。对 $i, j$ 时刻的状态量 $p, q, v$ 求导还是比较直观的，直接对误差公式进行计算就行。但是对 $i$ 时刻的 $b^a_i , b^g_i$ 求导就显得十分复杂，下面我们详细讨论。  </p>
 <p>因为 $i$ 时刻的 bias 相关的预积分计算是通过迭代一步一步累计递推的，可以算但是太复杂。所以对于预积分量直接在 $i$ 时刻的 bias 附近用<strong>一阶泰勒展开</strong>来近似，而不用真的去迭代计算。  </p>
 <script type="math/tex; mode=display">
@@ -264,14 +304,13 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
 &=
 \frac{\partial -[R_{b_iw}(v^w_j-v^w_i+g^w\Delta t)]^{\land}[\delta \theta_{b_ib^\prime_i}]}{\partial\delta \theta_{b_ib^\prime_i} }\\
 &=[R_{b_iw}(v^w_j-v^w_i+g^w\Delta t)]^{\land}
-\end{align*}\tag{5}</script><p>这里使用的是右乘扰动，省略了部分极限的常规步骤，分子仅仅摘取了与求导相关的。</p>
-<p>③ 对 $i$ 时刻<strong>速度</strong>的雅可比</p>
+\end{align*}\tag{5}</script><p>③ 对 $i$ 时刻<strong>速度</strong>的雅可比</p>
 <script type="math/tex; mode=display">
 \frac{\partial r_v}{\partial\delta v_i^w}=-R_{b_iw}\tag{6}</script><p>④ 对 $i$ 时刻<strong>加速度 bais</strong>的雅可比 ,注意 bias 量只和预积分 $\beta$ 有关：  </p>
 <script type="math/tex; mode=display">
 \frac{\partial r_v}{\partial\delta b_i^a}
 =-\frac{\partial \beta_{b_ib_j} }{\partial\delta b_i^a}
-=-J^{\beta}_{b^a_i}\tag{7}</script><h2 id="r-p-对各状态量的雅可比"><a href="#r-p-对各状态量的雅可比" class="headerlink" title="$r_p$ 对各状态量的雅可比"></a>$r_p$ 对各状态量的雅可比</h2><p>① 对 $i$ 时刻<strong>旋转</strong>的雅可比</p>
+=-J^{\beta}_{b^a_i}\tag{7}</script><h2 id="r-q-对各状态量的雅可比"><a href="#r-q-对各状态量的雅可比" class="headerlink" title="$r_q$ 对各状态量的雅可比"></a>$r_q$ 对各状态量的雅可比</h2><p>① 对 $i$ 时刻<strong>旋转</strong>的雅可比</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \frac{\partial r_q}{\partial \delta\theta_{b_ib^\prime_i} }
@@ -366,162 +405,35 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
       </tags>
   </entry>
   <entry>
-    <title>三、预积分模型以及误差递推方程的推导</title>
-    <url>/posts/285413d6.html</url>
+    <title>四、IMU误差状态传递方程的推导</title>
+    <url>/posts/aaff1b40.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本节主要讨论IMU 的积分模型以及预积分模型，读者可以清楚为什么使用预积分，以及使用预积分如何推导IMU  噪声与预积分量之间的<strong>线性递推关系</strong>，以及递推关系中雅可比矩阵的推导过程。</p>
+            <p>本节主要研究上一帧的误差如何传到下一帧的，传递误差的方程是如何推导的。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="IMU的误差模型"><a href="#IMU的误差模型" class="headerlink" title="IMU的误差模型"></a>IMU的误差模型</h1><ul>
-<li><strong>加速度计的误差模型</strong></li>
-</ul>
-<p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
-<p>理论测量值：</p>
-<script type="math/tex; mode=display">
-a_m^B=R_{BG}(a^G-g^G)
-\tag{1}</script><p>如果考虑高斯白噪声，bias，以及尺度因子(通常假设尺度因子为单位矩阵。)，则为：</p>
-<script type="math/tex; mode=display">
-a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{2}</script><p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220423171217806.png" alt="image-20220423171217806" style="zoom:50%;" /></p>
-<ul>
-<li><strong>陀螺仪的误差模型</strong></li>
-</ul>
-<p>考虑尺度因子，高斯白噪声，以及 bias, 陀螺仪的误差模型如下：</p>
-<script type="math/tex; mode=display">
-w^b_m=S_gw^b+n_g+b_g\tag{3}</script><p>低端传感器，考虑加速度对陀螺仪的影响，即 g-灵敏度：</p>
-<script type="math/tex; mode=display">
-w^b_m=S_gw^b+S_{ga}a^b+n_g+b_g\tag{4}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
-<p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220423190440715.png" alt="image-20220423190440715" style="zoom: 50%;" /></p>
-<h1 id="IMU的积分模型"><a href="#IMU的积分模型" class="headerlink" title="IMU的积分模型"></a>IMU的积分模型</h1><p>忽略 scale 的影响，根据imu的误差模型我们可以假设：角速度读数会在真实值的基础上受到<strong>bias和白噪声</strong>的影响，加速度除了受到<strong>bias和白噪声</strong>的影响，还会受到<strong>重力</strong>的影响。</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\tilde{w}^b&=w^b+b_g+n_g\tag{5}
-\end{align*}</script><script type="math/tex; mode=display">
-\begin{align*}
-\tilde{a}^b&=q_{bw}(a^w+g^w)+b_a+n_a\tag{6}
-\end{align*}</script><p>上标$ g$ 表示 gyro，a 表示 acc，$w $表示在世界坐标系 world，$b $表示imu 机体坐标系 body。IMU 的真实值为$w, a$, 测量值为$\tilde w, \tilde a$。 </p>
-<p>P(ose)，V(elocity)，Q(uaternion) 对时间的导数可写成：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\dot p_{wb}&=v^w_t\\
-\dot v^w_t &=a^w_t\\
-\dot q_{wb_t} &=q_{wb_t} \otimes 
-\begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}
-\end{align*}\tag{7}</script><p>四元数求导参考 <a href="https://lukeyalvin.top/posts/28639.html#B-%E5%9B%9B%E5%85%83%E6%95%B0">一、VIO概述以及三维刚体运动知识点回顾</a></p>
-<h2 id="连续形式"><a href="#连续形式" class="headerlink" title="连续形式"></a>连续形式</h2><p>根据上面的导数关系，可以从第$ i $时刻的 PVQ，通过对 IMU 的测量值进行积分，得到第$ j$ 时刻的 PVQ:</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_j}&=p_{wb_i}+v^w_i \Delta t+\iint_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t^2\\
-v^w_j&=v^w_i+\int_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t\\
-q_{wb_j}&=\int_{t\in[i,j]}q_{wb_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}\delta t
-\end{align*}\tag{8}</script><p>以上三个式子中，积分符号里面的项，就是需要预积分的项，可见，他们和$i$时刻的状态无关。</p>
-<h2 id="离散形式"><a href="#离散形式" class="headerlink" title="离散形式"></a>离散形式</h2><p>实际使用中使用离散形式，而非连续形式，且在解算中，一般采用<strong>中值积分方法</strong>。</p>
-<p><strong>1.欧拉法</strong></p>
-<p>使用欧拉法，即两个相邻时刻 $k$ 到 $k+1 $的位姿是用第$k$ 时刻的测量值 $a, w$ 来计算</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_{k+1} }&=p_{wb_k}+v^w_k \Delta t +\frac{1}{2}a\Delta t^2\\
-v^w_{k+1}&=v^w_k+a\Delta t \\
-q_{wb_{k+1} }&=q_{wb_k}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \delta t\end{bmatrix}
-\end{align*}\tag{9}</script><p>其中，</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-a&=q_{wb_{k+1} }(a^{b_k}-b^a_k)-g^w\\
-w&=w^{b_k}-b^g_k
-
-\end{align*}\tag{10}</script><p><strong>2.中值法</strong></p>
-<p>使用 mid-point 方法，即两个相邻时刻$ k$到$ k+1$ 的位姿是用两个时刻的测量值$ a,w $的平均值来计算。</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_{k+1} }&=p_{wb_k}+v^w_k \Delta t +\frac{1}{2}a\Delta t^2\\
-v^w_{k+1}&=v^w_k+a\Delta t \\
-q_{wb_{k+1} }&=q_{wb_k}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \delta t\end{bmatrix}
-\end{align*}\tag{11}</script><p>其中，</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-a&=\frac{1}{2}[q_{wb_{k} }(a^{b_k}-b^a_k)-g^w+q_{wb_{k+1} }(a^{b_{k+1} }-b^a_k)-g^w]\\
-w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]
-\end{align*}\tag{12}</script><h1 id="IMU预积分模型"><a href="#IMU预积分模型" class="headerlink" title="IMU预积分模型"></a>IMU预积分模型</h1><h2 id="IMU-预积分"><a href="#IMU-预积分" class="headerlink" title="IMU 预积分"></a>IMU 预积分</h2><p>从公式$(8)$可以看出：<strong>角速度$w$</strong>积分得到<strong>姿态$q$</strong>，<strong>加速度$a$</strong>积分得到<strong>速度$v$</strong>，<strong>速度$v$</strong>积分得到<strong>位移$p$</strong>。由于加速度和角速度受到bias和白噪声的影响，所以积分的过程中会累计误差，因此<strong>我们可以利用相机或激光的位姿估计结果来估计出IMU的bias，并优化位姿、速度的估计值。</strong> </p>
-<p>IMU的约束是通过惯性积分得到的，而惯性积分是以它前一时刻的位姿为初始值得到的，但是位姿$q_{wb_t}$每次优化后会发生变化，这导致其后的IMU惯性积分就要重新进行，显然运算量过大。</p>
-<p>这个问题的解决思路就是<strong>直接计算两帧之间的相对位姿，而不依赖初始值影响</strong>，即所谓的<strong>预积分</strong>。</p>
-<p>由于相机或激光的频率是明显低于IMU的采样频率的，而在SLAM中我们通常是求解各个关键帧的相机或雷达的位姿，因此需要对两帧图像/激光之间的IMU观测进行累加。如下图所示：</p>
-<p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220506142556174-16521033725145.png" alt="image-20220506142556174"></p>
-<p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220507202527649-16521033725156.png" alt="image-20220507202527649"></p>
-<p>一个很简单的公式转换，就可以将积分模型转为预积分模型：  </p>
-<script type="math/tex; mode=display">
-q_{wb_t}=q_{wb_i}\otimes q_{b_ib_t}\tag{13}</script><p>那么， PVQ 积分公式中的积分项则变成相对于第 $i$ 时刻的姿态，而不是相对于世界坐标系的姿态，则公式$(8)$变换为：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_j}&=p_{wb_i}+v^w_i \Delta t-\frac{1}{2}g^w\Delta t^2+
-q_{wb_i}\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
-v^w_j&=v^w_i-g^w\Delta t+q_{wb_i}\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
-q_{wb_j}&=q_{wb_i}\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}\delta t
-\end{align*}\tag{14}</script><p>这样的话，积分里的把相对于世界坐标系的状态量 $q_{wb_i}$ 移出去了，积分里面都是相对于第 $i$ 时刻的状态量 $q_{b_ib_t}$。</p>
-<p>定义预积分量如下，预积分量仅仅跟 IMU 测量值有关，它将一段时间内的 IMU 数据直接积分起来就得到了<strong>预积分量</strong>：  </p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\alpha_{b_ib_j}&=\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
-\beta_{b_ib_j}&=\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
-q_{b_ib_j}&=\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t}\end{bmatrix}\delta t
-\end{align*}\tag{15}</script><p>由公式$(14)$与$(15)$重新整理PVQ的积分公式，有：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\begin{bmatrix}
-p_{wb_j}\\v^w_{j}\\q_{wb_j}\\b^a_j\\b^g_j
-\end{bmatrix}=
-\begin{bmatrix}
-p_{wb_i}+v^w_i \Delta t-\frac{1}{2}g^w\Delta t^2+
-q_{wb_i}\alpha_{b_ib_j}\\
-v^w_i-g^w\Delta t+q_{wb_i}\beta_{b_ib_j}\\
-q_{wb_i}q_{b_ib_j}\\b^a_i\\b^g_i
-\end{bmatrix}
-\end{align*}\tag{16}</script><h2 id="IMU-预积分残差"><a href="#IMU-预积分残差" class="headerlink" title="IMU 预积分残差"></a>IMU 预积分残差</h2><p>定义：一段时间内 IMU 构建的预积分量作为测量值，对两时刻之间的状态量进行约束，  </p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\begin{bmatrix}
-r_p\\r_v\\r_q\\r_{ba}\\r_{bg}
-\end{bmatrix}_{15\times1}=
-\begin{bmatrix}
-q_{b_iw}(p_{wb_j}-p_{wb_i}-v^w_i \Delta t+\frac{1}{2}g^w\Delta t^2)-
-{\color{red}\alpha_{b_ib_j} }\\
-q_{b_iw}(v^w_j-v^w_i+g^w\Delta t)-{\color{red}\beta_{b_ib_j} }\\
-2[{\color{red}q_{b_jb_i} }\otimes(q_{b_iw}\otimes q_{wb_j})]_{xyz}\\
-b^a_j-b^a_i\\
-b^g_j-b^g_i
-\end{bmatrix}
-\end{align*}\tag{16}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第三项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
-<h2 id="IMU-预积分残差的离散形式"><a href="#IMU-预积分残差的离散形式" class="headerlink" title="IMU 预积分残差的离散形式"></a>IMU 预积分残差的离散形式</h2><p>使用 mid-point 方法，即两个相邻时刻$ k$到$ k+1$ 的位姿是用两个时刻的测量值$ a,w $的平均值来计算。参考公式$(11)(12)$:</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-a&=\frac{1}{2}[q_{b_ib_k}(a^{b_k}-b^a_k)+q_{b_ib_{k+1} }(a^{b_{k+1} }-b^a_k)]\\
-w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]\\
-{\color{blue}q_{b_ib_{k+1} } }&=q_{b_ib_k}\otimes\begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}\\
-{\color{blue}\alpha_{b_ib_{k+1} } }&=\alpha_{b_ib_k}+\beta_{b_ib_k}\delta t +\frac{1}{2}a\delta t^2\\
-{\color{blue}\beta_{b_ib_{k+1} } }&=\beta_{b_ib_k}+a\delta t\\
-b^a_{k+1}&=b^a_k+n_{b^a_k}\delta t\\
-b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
-\end{align*}\tag{17}</script><h2 id="预积分量的方差"><a href="#预积分量的方差" class="headerlink" title="预积分量的方差"></a>预积分量的方差</h2><h3 id="协方差的传播"><a href="#协方差的传播" class="headerlink" title="协方差的传播"></a>协方差的传播</h3><p>例如，已知一个变量$y=Ax,x\in \mathcal{N}(0,\Sigma_{x})$，则有$\Sigma_y=A\Sigma_xA^T$</p>
+<h1 id="IMU误差状态传递方程的推导"><a href="#IMU误差状态传递方程的推导" class="headerlink" title="IMU误差状态传递方程的推导"></a>IMU误差状态传递方程的推导</h1><h2 id="协方差的传播"><a href="#协方差的传播" class="headerlink" title="协方差的传播"></a>协方差的传播</h2><p>例如，已知一个变量$y=Ax,x\in \mathcal{N}(0,\Sigma_{x})$，则有$\Sigma_y=A\Sigma_xA^T$</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \Sigma_y&=E((Ax)(Ax)^T)\\
 &=E(Axx^TA^T)\\
 &=A\Sigma_xA^T
-\end{align*}\tag{18}</script><p>我们知道，一个IMU数据作为测量值的噪声方差我们可以标定 （类似公式$(18)$中的已知量$x$），那么一段时间的多个IMU数据形成的IMU数据积分形式的预积分量的方差（类似公式$(18)$中的已知量$y$），就可以通过以上形式求解，关键是找出IMU  噪声与预积分量之间的<strong>线性递推关系</strong>（类似公式$(18)$中的已知量$y=Ax$）。</p>
-<p>假设已知了相邻时刻误差的线性传递方程：</p>
+\end{align*}\tag{1}</script><p>我们知道，一个IMU数据作为测量值的噪声方差我们可以标定 （类似公式$(1)$中的已知量$x$），那么一段时间的多个IMU数据形成的IMU数据积分形式的预积分量的方差（类似公式$(1)$中的已知量$y$），就可以通过以上形式求解，关键是找出IMU  噪声与预积分量之间的<strong>线性递推关系</strong>（类似公式$(1)$中的已知量$y=Ax$）。</p>
+<p>假设已知了<strong>相邻时刻误差的线性传递方程：</strong></p>
 <script type="math/tex; mode=display">
-\eta_{ik}=\mathbf{F}_{k-1}\eta_{ik-1}+\mathbf{G}_{k-1}\mathbf{n}_{k-1}\tag{19}</script><p>比如：状态量误差为 $\eta_{ik}=[\delta\theta_{ik},\delta\mathbf{v}_{ik},\delta\mathbf{p}_{ik}]$，测量噪声为 $\mathbf{n}_{k}=[\mathbf{n}_{k}^a,\mathbf{n}_{k}^g]$，因此，误差的传递由两部分组成，即当前时刻的误差传递给下一时刻，当前时刻的测量噪声传递给下一时刻。</p>
-<p>协方差矩阵可以通过递推计算得到：</p>
+\eta_{ik}=\mathbf{F}_{k-1}\eta_{ik-1}+\mathbf{G}_{k-1}\mathbf{n}_{k-1}\tag{2}</script><p>比如：状态量误差为 $\eta_{ik}=[\delta\theta_{ik},\delta\mathbf{v}_{ik},\delta\mathbf{p}_{ik}]$，$\eta_{ik}$为当前时刻的误差，$\eta_{ik-1}$为上一时刻的误差；<strong>测量噪声</strong>为 $\mathbf{n}_{k}=[\mathbf{n}_{k}^a,\mathbf{n}_{k}^g]$，因此，误差的传递由两部分组成，即<strong>当前时刻的误差传递给下一时刻，当前时刻的测量噪声传递给下一时刻</strong>。</p>
+<p>如果已知上面的误差状态传递方程，那么一段时间内IMU积分的协方差矩阵就可以轻松递推算出：</p>
 <script type="math/tex; mode=display">
-\Sigma_{ik}=\mathbf{F}_{k-1}\Sigma_{ik-1}\mathbf{F}_{k-1}^T+\mathbf{G}_{k-1}\Sigma_\mathbf{n}\mathbf{G}_{k-1}^T\tag{20}</script><p>其中，$\Sigma_n$是测量噪声的协方差矩阵，方差从 $i$ 时刻开始进行递推，$\Sigma_{ii}=0$</p>
-<h3 id="状态误差线性递推方程的推导"><a href="#状态误差线性递推方程的推导" class="headerlink" title="状态误差线性递推方程的推导"></a>状态误差线性递推方程的推导</h3><p>通常情况下，对于状态量之间的递推关系是非线性的方程，如 $x_k=f(x_{k-1},\mathbf{u}_{k-1})$，其中状态量 $x,\mathbf{u}$ 为系统的输入量。</p>
+\Sigma_{ik}=\mathbf{F}_{k-1}\Sigma_{ik-1}\mathbf{F}_{k-1}^T+\mathbf{G}_{k-1}\Sigma_\mathbf{n}\mathbf{G}_{k-1}^T\tag{3}</script><p>其中，$\Sigma_n$是<strong>测量噪声的协方差矩阵</strong>，方差从 $i$ 时刻开始进行递推，$\Sigma_{ii}=0$</p>
+<h2 id="状态误差线性递推方程的推导"><a href="#状态误差线性递推方程的推导" class="headerlink" title="状态误差线性递推方程的推导"></a>状态误差线性递推方程的推导</h2><p>通常情况下，对于状态量之间的递推关系是非线性的方程，如 $x_k=f(x_{k-1},\mathbf{u}_{k-1})$，其中状态量 $x,\mathbf{u}$ 为系统的输入量。</p>
 <p>我们可以用两种方法来推导误差传递的线性递推关系：</p>
 <ul>
 <li>一种是<strong>基于一阶泰勒展开</strong>的误差传递方程，主要应用于 EKF 的协方差预测。</li>
 <li>一种是<strong>基于误差随时间变化</strong>的递推方程。</li>
 </ul>
-<h4 id="基于一阶泰勒展开"><a href="#基于一阶泰勒展开" class="headerlink" title="基于一阶泰勒展开"></a>基于一阶泰勒展开</h4><p>令状态量为 $x=\hat{x}+\delta x$，其中，真值为$\hat{x}$，误差为 $\delta x$，另外输入量 $\mathbf{u}$ 的噪声为 $\mathbf{n}$。</p>
+<h3 id="基于一阶泰勒展开"><a href="#基于一阶泰勒展开" class="headerlink" title="基于一阶泰勒展开"></a>基于一阶泰勒展开</h3><p>令状态量为 $x=\hat{x}+\delta x$，其中，真值为$\hat{x}$，误差为 $\delta x$，另外输入量 $\mathbf{u}$ 的噪声为 $\mathbf{n}$。</p>
 <p>对于非线性系统  $x_k=f(x_{k-1},\mathbf{u}_{k-1})$ 进行一阶泰勒展开有：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -529,28 +441,28 @@ x_k&=f(x_{k-1},\mathbf{u}_{k-1})\\
 \hat{x}_k+\delta x_k&=f(\hat{x}_{k-1}+\delta x_{k-1},\hat{\mathbf{u} }_{k-1}+\mathbf{n}_{k-1})\\
 {\color{blue}\hat{x}_k}+\delta x_k&=
 {\color{blue}f(\hat{x}_{k-1},\hat{\mathbf{u} }_{k-1})}+\mathbf{F}\delta x_{k-1}+\mathbf{G}\mathbf{n}_{k-1}
-\end{align*}\tag{21}</script><p>可以看出蓝色字体部分表示真值，他们相互抵消掉了，剩下的就是误差的线性递推关系：</p>
+\end{align*}\tag{4}</script><p>可以看出蓝色字体部分表示真值，他们相互抵消掉了，剩下的就是误差的线性递推关系：</p>
 <script type="math/tex; mode=display">
-\delta x_k = \mathbf{F}\delta x_{k-1}+\mathbf{G}\mathbf{n}_{k-1}\tag{22}</script><p>其中，$\mathbf{F}$ 是状态量 $x_k$ 对状态量 $x_{k-1}$ 的雅可比矩阵， $\mathbf{G}$ 是状态量 $x_k$ 对输入量 $\mathbf{u}_{k-1}$ 的雅可比矩阵。</p>
-<h4 id="基于误差随时间变化"><a href="#基于误差随时间变化" class="headerlink" title="基于误差随时间变化"></a>基于误差随时间变化</h4><p>如果我们能够推导状态误差随着时间变换的倒数关系，比如：</p>
+\delta x_k = \mathbf{F}\delta x_{k-1}+\mathbf{G}\mathbf{n}_{k-1}\tag{5}</script><p>其中，$\mathbf{F}$ 是状态量 $x_k$ 对状态量 $x_{k-1}$ 的雅可比矩阵， $\mathbf{G}$ 是状态量 $x_k$ 对输入量 $\mathbf{u}_{k-1}$ 的雅可比矩阵。</p>
+<h3 id="基于误差随时间变化"><a href="#基于误差随时间变化" class="headerlink" title="基于误差随时间变化"></a>基于误差随时间变化</h3><p>如果我们能够推导状态误差随着时间变换的倒数关系，比如：</p>
 <script type="math/tex; mode=display">
-\dot{\delta x}=\mathbf{A}\delta x+\mathbf{B}\mathbf{n}\tag{23}</script><p>则误差状态的递推方程为：</p>
+\dot{\delta x}=\mathbf{A}\delta x+\mathbf{B}\mathbf{n}\tag{6}</script><p>则误差状态的递推方程为：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 &\delta x_k = \delta x_{k-1} + \dot{\delta x_{k-1} }\Delta t\\
 \rightarrow&\delta x_k=(\mathbf{I}+\mathbf{A}\Delta t)\delta x_{k-1}+\mathbf{B}\Delta t \mathbf{n}_{k-1} 
-\end{align*}\tag{24}</script><p>综合两种方法可以发现：</p>
+\end{align*}\tag{7}</script><p>综合两种方法可以发现：</p>
 <script type="math/tex; mode=display">
-\mathbf{F}=\mathbf{I}+\mathbf{A}\Delta t,\ \ \ \ \mathbf{G}=\mathbf{B}\Delta t\tag{25}</script><p>由于在 VIO 系统中我们已经知道了状态的导数与状态之间的旋转矩阵，如公式 $(26)$:</p>
+\mathbf{F}=\mathbf{I}+\mathbf{A}\Delta t,\ \ \ \ \mathbf{G}=\mathbf{B}\Delta t\tag{8}</script><p>由于在 VIO 系统中我们已经知道了状态的导数与状态之间的旋转矩阵，如公式 $(26)$:</p>
 <script type="math/tex; mode=display">
-\dot{\mathbf{v} }=Ra^b+g\tag{26}</script><p>那么我们就可以推导<strong>速度误差</strong>和<strong>状态误差</strong>之间的关系，再每一项上都加上各自的误差，既有：</p>
+\dot{\mathbf{v} }=Ra^b+g\tag{9}</script><p>那么我们就可以推导<strong>速度误差</strong>和<strong>状态误差</strong>之间的关系，再每一项上都加上各自的误差，既有：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \dot{\mathbf{v} }+\dot{\delta\mathbf{v} }&=R(\mathbf{I}+[\delta\theta]^{\land})(a^b+\delta a^b)+g+\delta g\\
 \dot{\delta\mathbf{v} }&=R\delta a^b+R[\delta\theta]^{\land}(a^b+\delta a^b)+\delta g\\
 \dot{\delta\mathbf{v} }&=R\delta a^b-R[a^b]^{\land}\delta\theta+\delta g
-\end{align*}\tag{27}</script><p>由此就可以以此类推，很轻易的写出整个 $\mathbf{A}$ 和 $\mathbf{B}$ ，这也是此方法的优点。 </p>
-<h1 id="基于一阶泰勒展开的推导"><a href="#基于一阶泰勒展开的推导" class="headerlink" title="基于一阶泰勒展开的推导"></a>基于一阶泰勒展开的推导</h1><p>由公式$(17)$：IMU 预积分误差的离散形式 ，此时将噪声模型也考虑进去：</p>
+\end{align*}\tag{10}</script><p>由此就可以以此类推，很轻易的写出整个 $\mathbf{A}$ 和 $\mathbf{B}$ ，这也是此方法的优点。 </p>
+<h1 id="基于一阶泰勒展开的推导"><a href="#基于一阶泰勒展开的推导" class="headerlink" title="基于一阶泰勒展开的推导"></a>基于一阶泰勒展开的推导</h1><p>由上一节的公式$(17)$：IMU 预积分误差的离散形式 ，此时将噪声模型也考虑进去：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 a&=\frac{1}{2}[q_{b_ib_k}(a^{b_k}{\color{red}+\mathbf{n}^a_{k} }-b^a_k)+q_{b_ib_{k+1} }(a^{b_{k+1} }{\color{red}+\mathbf{n}^a_{k+1} }-b^a_k)]\\
@@ -560,7 +472,7 @@ w&=\frac{1}{2}[(w^{b_k}{\color{red}+\mathbf{n}^g_{k} }-b^g_k)+(w^{b_{k+1} }{\col
 {\color{blue}\beta_{b_ib_{k+1} } }&=\beta_{b_ib_k}+a\delta t\\
 b^a_{k+1}&=b^a_k+n_{b^a_k}\delta t\\
 b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
-\end{align*}\tag{28}</script><p>用前面一阶泰勒展开的推导方式，我们希望能推导出如下的形式：</p>
+\end{align*}\tag{11}</script><p>用前面一阶泰勒展开的推导方式，我们希望能推导出如下的形式：</p>
 <script type="math/tex; mode=display">
 \begin{bmatrix}
 \delta\alpha_{b_{k+1}b^{\prime}_{k+1} }\\
@@ -583,7 +495,7 @@ b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
 \mathbf{n}^g_{k+1}\\
 \mathbf{n}_{\mathbf{b}^a_k}\\
 \mathbf{n}_{\mathbf{b}^g_k}\\
-\end{bmatrix}\tag{29}</script><p>$\mathbf{F},\mathbf{G}$为两个时刻间的协方差传递矩阵。</p>
+\end{bmatrix}\tag{12}</script><p>$\mathbf{F},\mathbf{G}$为两个时刻间的协方差传递矩阵。</p>
 <p>这里我们直接给出 $\mathbf{F},\mathbf{G}$ 的最终形式，后面会对部分项进行详细推导：  </p>
 <script type="math/tex; mode=display">
 \mathbf{F}=
@@ -593,7 +505,7 @@ b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
 0&f_{32}&\mathbf{I}&-\frac{1}{2}(q_{b_ib_{k} }+q_{b_ib_{k+1} })\delta t&f_{35}\\
 0&0&0&\mathbf{I}&0\\
 0&0&0&0&\mathbf{I}
-\end{bmatrix}\tag{30}</script><script type="math/tex; mode=display">
+\end{bmatrix}\tag{13}</script><script type="math/tex; mode=display">
 \mathbf{G}=
 \begin{bmatrix}
 \frac{1}{4}q_{b_ib_k}\delta t^2&g_{12}&\frac{1}{4}q_{b_ib_{k+1} }\delta t^2&g_{14}&0&0\\
@@ -601,18 +513,18 @@ b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
 \frac{1}{2}q_{b_ib_k}\delta t&g_{32}&\frac{1}{2}q_{b_ib_{k+1} }\delta t&g_{34}&0&0\\
 0&0&0&0&\mathbf{I}\delta t&0\\
 0&0&0&0&0&\mathbf{I}\delta t
-\end{bmatrix}\tag{31}</script><p>其中的系数如下：</p>
-<p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220509150144881-16521033725157.png" alt="image-20220509150144881"></p>
+\end{bmatrix}\tag{14}</script><p>其中的系数如下：</p>
+<p><img src="/images/3-2-IMU误差状态传递的推导/image-20220509150144881-16521033725157.png" alt="image-20220509150144881"></p>
 <h2 id="雅克比矩阵-mathbf-F-的推导"><a href="#雅克比矩阵-mathbf-F-的推导" class="headerlink" title="雅克比矩阵 $\mathbf{F}$ 的推导"></a>雅克比矩阵 $\mathbf{F}$ 的推导</h2><h3 id="速度预积分量的雅可比"><a href="#速度预积分量的雅可比" class="headerlink" title="速度预积分量的雅可比"></a>速度预积分量的雅可比</h3><p>$\beta$ 对于各个状态量的雅可比矩阵推导，即 $\mathbf{F}$ 矩阵第三行。速度预积分量 $\beta$ 的递推计算形式:  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \beta_{b_ib_{k+1} }&=\beta_{b_ib_k}+a\delta t\\
 &=\beta_{b_ib_k}+\frac{1}{2}[q_{b_ib_k}(a^{b_k}-b^a_k)+q_{b_ib_{k+1} }(a^{b_{k+1} }-b^a_k)]\delta t
-\end{align*}\tag{32}</script><p>$f_{33}$: 对上一时刻<strong>速度预积分量</strong>的 雅可比：</p>
+\end{align*}\tag{15}</script><p>$f_{33}$: 对上一时刻<strong>速度预积分量</strong>的 雅可比：</p>
 <script type="math/tex; mode=display">
 f_{33}=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\beta_{b_{k}b^{\prime}_{k} } }
 =\mathbf{I}_{3\times 3}
-\tag{33}</script><p>$f_{32}$: 对上一时刻<strong>角度预积分量</strong>的 雅可比：</p>
+\tag{16}</script><p>$f_{32}$: 对上一时刻<strong>角度预积分量</strong>的 雅可比：</p>
 <p>首先将公式 $(32)$写成如下形式：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -620,11 +532,11 @@ f_{33}=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\beta_{b_{k}b^{\prime}
 &=\beta_{b_ib_k}+\frac{1}{2}[q_{b_ib_k}(a^{b_k}-b^a_k)+
 q_{b_ib_{k} }\otimes\begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}
 (a^{b_{k+1} }-b^a_k)]\delta t
-\end{align*}\tag{34}</script><p>那么，<strong>速度的预积分量对角度预积分量</strong>的 雅可比：  </p>
+\end{align*}\tag{17}</script><p>那么，<strong>速度的预积分量对角度预积分量</strong>的 雅可比：  </p>
 <script type="math/tex; mode=display">
 f_{32}=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\theta_{b_{k}b^{\prime}_{k} } }
 =\frac{\partial a\delta t}{\partial\delta\theta_{b_{k}b^{\prime}_{k} } }
-\tag{35}</script><p>其中分子可以写成：</p>
+\tag{18}</script><p>其中分子可以写成：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 a\delta t &=\frac{1}{2}q_{b_ib_{k} }\otimes\begin{bmatrix}
@@ -634,7 +546,7 @@ a\delta t &=\frac{1}{2}q_{b_ib_{k} }\otimes\begin{bmatrix}
 (a^{b_{k+1} }-b^a_k)\delta t\\
 &=\frac{1}{2}R_{b_ib_{k} }\exp([\delta\theta_{b_kb^{\prime}_{k} }]^{\land})(a^{b_{k} }-b^a_k)\delta t\\
 &+\frac{1}{2}R_{b_ib_{k} }\exp([\delta\theta_{b_kb^{\prime}_{k} }]^{\land})\exp([\omega\delta t]^{\land})(a^{b_{k+1} }-b^a_k)\delta t
-\end{align*}\tag{36}</script><p>分别对分子的两项进行求导：</p>
+\end{align*}\tag{19}</script><p>分别对分子的两项进行求导：</p>
 <p>①第一项</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -648,7 +560,7 @@ a\delta t &=\frac{1}{2}q_{b_ib_{k} }\otimes\begin{bmatrix}
 \frac{\partial R_{b_ib_{k} }[(a^{b_{k} }-b^a_k)\delta t]^{\land}[\delta\theta_{b_kb^{\prime}_{k} }]}
 {\partial\delta\theta_{b_{k}b^{\prime}_{k} } }\\
 &=-R_{b_ib_{k} }[(a^{b_{k} }-b^a_k)\delta t]^{\land}
-\end{align*}\tag{37}</script><p>②第二项</p>
+\end{align*}\tag{20}</script><p>②第二项</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 &\frac{\partial R_{b_ib_{k} }\exp([\delta\theta_{b_kb^{\prime}_{k} }]^{\land})\exp([\omega\delta t]^{\land})(a^{b_{k+1} }-b^a_k)\delta t}
@@ -670,7 +582,7 @@ a\delta t &=\frac{1}{2}q_{b_ib_{k} }\otimes\begin{bmatrix}
 &=-R_{b_ib_{k+1} }[(a^{b_{k+1} }-b^a_k)\delta t]^{\land}\exp([-\omega\delta t]^{\land})\\
 &\approx-R_{b_ib_{k+1} }[(a^{b_{k+1} }-b^a_k)\delta t]^{\land}(I-[\omega\delta t]^{\land})
 \end{align*}
-\tag{38}</script><p>将上面两部分综合起来就能得到  :</p>
+\tag{21}</script><p>将上面两部分综合起来就能得到  :</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{32}&=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\theta_{b_{k}b^{\prime}_{k} } }\\
@@ -678,7 +590,7 @@ f_{32}&=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\theta_{b_{k}b^{\prim
 R_{b_ib_{k+1} }[a^{b_{k+1} }-b^a_k]^{\land}(I-[\omega]^{\land}\delta t)
 \delta t \right)
 \end{align*}
-\tag{39}</script><p>$f_{35}$: <strong>速度预积分量</strong>对 $k$ 时刻<strong>角速度 bias</strong> 的 雅可比：</p>
+\tag{22}</script><p>$f_{35}$: <strong>速度预积分量</strong>对 $k$ 时刻<strong>角速度 bias</strong> 的 雅可比：</p>
 <p>递推公式如下:</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -689,7 +601,7 @@ R_{b_ib_{k+1} }[a^{b_{k+1} }-b^a_k]^{\land}(I-[\omega]^{\land}\delta t)
 1\\{\color{red}\frac{1}{2}w\delta t}
 \end{bmatrix}
 (a^{b_{k+1} }-b^a_k)]\delta t
-\end{align*}\tag{40}</script><p>只有红色公式部分和角速度 bias 有关系，因此雅克比的推导只考虑红色公式部分。  </p>
+\end{align*}\tag{23}</script><p>只有红色公式部分和角速度 bias 有关系，因此雅克比的推导只考虑红色公式部分。  </p>
 <script type="math/tex; mode=display">
 \begin{align}
 f_{35}&=\frac{\partial \beta_{b_ib_{k+1} } }{\partial\delta\mathbf{b}^g_k}\\
@@ -727,19 +639,19 @@ R_{b_ib_{k+1} }(a^{b_{k+1} }-b^a_k)\delta t
 [-\delta\mathbf{b}^g_k\delta t]}
 {\partial\delta\mathbf{b}^g_k}\\
 &=-\frac{1}{2}(R_{b_ib_{k+1} }[(a^{b_{k+1} }-b^a_k)]^{\land}\delta t)(-\delta t)
-\end{align}\tag{41}</script><h3 id="旋转预积分量的雅可比"><a href="#旋转预积分量的雅可比" class="headerlink" title="旋转预积分量的雅可比"></a>旋转预积分量的雅可比</h3><p>旋转预积分的递推公式为：  </p>
+\end{align}\tag{24}</script><h3 id="旋转预积分量的雅可比"><a href="#旋转预积分量的雅可比" class="headerlink" title="旋转预积分量的雅可比"></a>旋转预积分量的雅可比</h3><p>旋转预积分的递推公式为：  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 q_{b_ib_{k+1} }&=q_{b_ib_{k} }\otimes\begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}\\
 &=q_{b_ib_{k} }\otimes\begin{bmatrix}1\\
 \frac{1}{2}(\frac{1}{2}(\omega^{b_k}+\omega^{b_{k+1} })-\mathbf{b}^g_k)\delta t
 \end{bmatrix}
-\end{align*}\tag{42}</script><p>$f_{22}$: 前一时刻的旋转误差 $\delta\theta_{b_{k}b^{\prime}_{k} }$ 如何影响当前的旋转误差  $\delta\theta_{b_{k+1}b^{\prime}_{k+1} }$ ？</p>
+\end{align*}\tag{25}</script><p>$f_{22}$: 前一时刻的旋转误差 $\delta\theta_{b_{k}b^{\prime}_{k} }$ 如何影响当前的旋转误差  $\delta\theta_{b_{k+1}b^{\prime}_{k+1} }$ ？</p>
 <p>假设两个时刻的真值为 $q_{b_ib_{k+1} },\ q_{b_ib_{k} }$，两个时间的增量真值为 $q_{b_kb_{k+1} }$。推导过程只考虑一个变量，即旋转误差 $\delta\theta_{b_{k}b^{\prime}_{k} }$ 的影响，而不考虑测量值 角速度 bias 误差影响，可以假设 $q_{b_kb_{k+1} }\approx\begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}$。</p>
 <p>另外，三元组四元数相乘有如下性质：</p>
 <script type="math/tex; mode=display">
 \mathbf{q}\otimes\mathbf{p}\otimes\mathbf{q}^*=
-[\mathbf{q}]_L[\mathbf{q}]_R^T\mathbf{p}=\begin{bmatrix}p_w\\R\mathbf{p}_v\end{bmatrix}\tag{43}</script><p>其中 $R$是 $\mathbf{q}$ 对应的旋转矩阵，$\mathbf{q}^*$ 是 $\mathbf{q}$ 的共轭， $p_w$ 为 $\mathbf{p}$ 的实部，  $\mathbf{p}_v$ 为  $\mathbf{p}$ 的虚部。</p>
+[\mathbf{q}]_L[\mathbf{q}]_R^T\mathbf{p}=\begin{bmatrix}p_w\\R\mathbf{p}_v\end{bmatrix}\tag{26}</script><p>其中 $R$是 $\mathbf{q}$ 对应的旋转矩阵，$\mathbf{q}^*$ 是 $\mathbf{q}$ 的共轭， $p_w$ 为 $\mathbf{p}$ 的实部，  $\mathbf{p}_v$ 为  $\mathbf{p}$ 的虚部。</p>
 <p>下面开始详细推导：  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -755,17 +667,166 @@ q_{b_ib_{k+1} }\otimes\begin{bmatrix}1\\\frac{1}{2}\delta\theta_{b_{k+1}b^{\prim
 \begin{bmatrix}1\\\frac{1}{2}\delta\theta_{b_{k}b^{\prime}_{k} }\end{bmatrix}\otimes
 \begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}\\
 &=\begin{bmatrix}1\\\frac{1}{2}R\delta\theta_{b_{k}b^{\prime}_{k} }\end{bmatrix}
-\end{align*}\tag{44}</script><p>注意：上面推导过程，也可以用李代数的右扰动   $R\exp([\delta\theta_{k+1}]^{\land})$</p>
-<p>只考虑公式 $(44)$ 中的虚部：</p>
+\end{align*}\tag{27}</script><p>注意：上面推导过程，也可以用李代数的右扰动   $R\exp([\delta\theta_{k+1}]^{\land})$</p>
+<p>只考虑公式 $(27)$ 中的虚部：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \delta\theta_{b_{k+1}b^{\prime}_{k+1} }
 &=R\delta\theta_{b_{k+1}b^{\prime}_{k+1} }\\
 &=\exp([-w\delta t]^{\land})\delta\theta_{b_{k}b^{\prime}_{k} }\\
 &\approx (I-[w\delta t]^{\land})\delta\theta_{b_{k}b^{\prime}_{k} }
-\end{align*}\tag{45}</script><p>那么，第 $k+1$ 时刻的旋转预积分的误差相对于第 $k$ 时刻的 雅可比为：</p>
+\end{align*}\tag{28}</script><p>那么，第 $k+1$ 时刻的旋转预积分的误差相对于第 $k$ 时刻的 雅可比为：</p>
 <script type="math/tex; mode=display">
-f_{22}=\frac{\partial \delta\theta_{b_{k+1}b^{\prime}_{k+1} } }{\partial \delta\theta_{b_{k}b^{\prime}_{k} } }=I-[w\delta t]^{\land}\tag{46}</script>]]></content>
+f_{22}=\frac{\partial \delta\theta_{b_{k+1}b^{\prime}_{k+1} } }{\partial \delta\theta_{b_{k}b^{\prime}_{k} } }=I-[w\delta t]^{\land}\tag{29}</script>]]></content>
+      <categories>
+        <category>从零开始手写VIO</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>预积分理论</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>三、预积分模型以及残差的构建</title>
+    <url>/posts/285413d6.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>本节主要讨论IMU 的误差模型、积分模型以及预积分模型，读者可以清楚为什么使用预积分，以及如何构建预积分的残差。</p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="IMU的误差模型"><a href="#IMU的误差模型" class="headerlink" title="IMU的误差模型"></a>IMU的误差模型</h1><ul>
+<li><strong>加速度计的误差模型</strong></li>
+</ul>
+<p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
+<p>理论测量值：</p>
+<script type="math/tex; mode=display">
+a_m^B=R_{BG}(a^G-g^G)
+\tag{1}</script><p>如果考虑高斯白噪声，bias，以及尺度因子(通常假设尺度因子为单位矩阵。)，则为：</p>
+<script type="math/tex; mode=display">
+a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{2}</script><p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220423171217806.png" alt="image-20220423171217806" style="zoom:50%;" /></p>
+<ul>
+<li><strong>陀螺仪的误差模型</strong></li>
+</ul>
+<p>考虑尺度因子，高斯白噪声，以及 bias, 陀螺仪的误差模型如下：</p>
+<script type="math/tex; mode=display">
+w^b_m=S_gw^b+n_g+b_g\tag{3}</script><p>低端传感器，考虑加速度对陀螺仪的影响，即 g-灵敏度：</p>
+<script type="math/tex; mode=display">
+w^b_m=S_gw^b+S_{ga}a^b+n_g+b_g\tag{4}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
+<p><img src="/images/三、VIO预积分的残差构建以及雅可比求解/image-20220423190440715.png" alt="image-20220423190440715" style="zoom: 50%;" /></p>
+<h1 id="IMU模型与运动积分"><a href="#IMU模型与运动积分" class="headerlink" title="IMU模型与运动积分"></a>IMU模型与运动积分</h1><p>忽略 scale 的影响，根据imu的误差模型我们可以假设：角速度读数会在真实值的基础上受到<strong>bias和白噪声</strong>的影响，加速度除了受到<strong>bias和白噪声</strong>的影响，还会受到<strong>重力</strong>的影响。因此我们可以从IMU中得到角速度和加速度的读数，如公式$(5)(6)$的等式左边，它们都是基于IMU坐标系的。</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\tilde{w}^b&=w^b+b_g+n_g\tag{5}
+\end{align*}</script><script type="math/tex; mode=display">
+\begin{align*}
+\tilde{a}^b&=q_{bw}(a^w-g^w)+b_a+n_a\tag{6}
+\end{align*}</script><p>上标$ g$ 表示 gyro，a 表示 acc，$^w $表示在世界坐标系 world，$^b$表示imu 机体坐标系 body。IMU 的真实值为$w, a$, 测量值为$\tilde w, \tilde a$，测量值即为IMU的读数。 </p>
+<p>我们知道<strong>角速度$w$</strong>积分得到<strong>姿态$q$</strong>，<strong>加速度$a$</strong>积分得到<strong>速度$v$</strong>，<strong>速度$v$</strong>积分得到<strong>位移$p$</strong>。而现在的目标是从 IMU 测量中推断系统的运动。为此，我们引入了以下运动学模型， <strong>P(ose)（位置），V(elocity)（速度），Q(uaternion) （旋转）</strong>对时间的导数可写成：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\dot p_{wb}&=v^w_t\\
+\dot v^w_t &=a^w_t\\
+\dot q_{wb_t} &=q_{wb_t} \otimes 
+\begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}
+\end{align*}\tag{7}</script><p>它描述了 IMU坐标系 的姿势和速度的演变。</p>
+<p>第三项，四元数求导参考 <a href="https://lukeyalvin.top/posts/28639.html#B-%E5%9B%9B%E5%85%83%E6%95%B0">一、VIO概述以及三维刚体运动知识点回顾</a></p>
+<p> $t + \Delta t $时刻的状态是通过积分方程$(7)$获得的：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_{wb}(t+\Delta t)&=p_{wb}(t)+\int^{t+\Delta t}_t v^w(\tau)d\tau+\iint^{t+\Delta t}_t a^w d\tau^2\\
+v^w(t+\Delta t)&=v^w(t)+\int^{t+\Delta t}_t a^w d\tau\\
+q_{wb}(t+\Delta t)&=\int^{t+\Delta t}_t q_{wb}(\tau)\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b}(\tau)\end{bmatrix}d\tau
+\end{align*}\tag{8}</script><p>根据积分的性质，这里的 $\tau$ 是把 $[t,t+\Delta t]$分割的无限小部分。</p>
+<p>假设 $a^w$ 和 $q_{wb}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b}\end{bmatrix}$ 在时间间隔 $[t, t + \Delta t]$ 内保持不变，我们可以写成：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_{wb}(t+\Delta t)&=p_{wb}(t)+ v^w(t)\Delta t+\frac{1}{2} a^w \Delta t^2\\
+v^w(t+\Delta t)&=v^w(t)+ a^w \Delta t\\
+q_{wb}(t+\Delta t)&= q_{wb}(t)\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b}(t)\Delta t\end{bmatrix}
+\end{align*}\tag{9}</script><p>根据公式$(5)(6)$可以将 $a^w$ 和 $q_{wb}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b}\end{bmatrix}$ 写成 IMU 测量的函数，因此 $(9)$ 变为:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_{wb}(t+\Delta t)&=p_{wb}(t)+ v^w(t)\Delta t+\frac{1}{2}g^w\Delta t^2+\frac{1}{2}q_{wb}(t)\left(\tilde a(t)-b_a(t)-n_a(t)\right)\Delta t^2\\
+v^w(t+\Delta t)&=v^w(t)+g^w\Delta t+ q_{wb}(t)\left(\tilde a(t)-b_a(t)-n_a(t)\right)\Delta t\\
+q_{wb}(t+\Delta t)&= q_{wb}(t)\otimes \begin{bmatrix}0\\ \frac{1}{2}(\tilde{w}^b(t)-b_g(t)-n_g(t))\Delta t\end{bmatrix}
+\end{align*}\tag{10}</script><p>方程 $(10)$  将时间 $t$ 和 $t + \Delta t$ 的状态关联起来，其中 $\Delta t$ 是 IMU 的采样周期。<strong>这样就可以得到旋转，速度，平移与 IMU 读数之间的关系，进而可以根据IMU 的读数来估计位姿。</strong></p>
+<h1 id="IMU预积分模型"><a href="#IMU预积分模型" class="headerlink" title="IMU预积分模型"></a>IMU预积分模型</h1><h2 id="IMU-预积分"><a href="#IMU-预积分" class="headerlink" title="IMU 预积分"></a>IMU 预积分</h2><p>如图所示，相机的采样频率是明显低于 IMU 的采样频率的，相机或激光一般在几十 HZ，而 IMU 可以达到几百 HZ，而在 SLAM 中我们通常是求解每一帧图像/激光的位姿，因此需要对两帧图像/激光之间的所有IMU观测进行累加，可以得到 $i$ 帧和 $j$ 帧两个关键帧之间的单个复合的测量值，我们称之为<strong>预积分</strong>。</p>
+<p><img src="/images/3-预积分模型以及误差递推方程的推导/image-20220507202527649-16521033725156.png" alt="image-20220507202527649"></p>
+<p>我们假设 IMU 与相机同步，并在离散时间 $k$ 处提供测量值（参见图 4）。在时间 $k = i$ 和 $k= j$ 处对两个连续关键帧之间的所有 $\Delta t$ 间隔迭代使用 IMU 积分 $(10)$，我们发现：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+{p_{wb} }_j&={p_{wb} }_i+\sum^{j-1}_{k=i}\left[
+v^w(t)\Delta t+\frac{1}{2}g^w\Delta t^2+\frac{1}{2}q_{wb_k}\left(\tilde a_k-b_{ak}-n_{ak}\right)\Delta t^2\right]\\
+v^w_j&=v^w_i+g^w\Delta t_{ij}+ \prod^{j-1}_{k=i} q_{wb_k}(t)\left(\tilde a_k-b_{ak}-n_{ak}\right)\Delta t\\
+q_{wb_j}&= q_{wb_i}\otimes \begin{bmatrix}0\\ \frac{1}{2}\prod^{j-1}_{k=i}(\tilde{w}^b_k-b_{gk}-n_{gk})\Delta t\end{bmatrix}
+\end{align*}\tag{11}</script><p>为了便于阅读，我们引入了简写 $\Delta t_{ij} \doteq  \sum^{j−1}_{k=i} \Delta t$ 和 $(·)_i \doteq (·)(t_i)$。 $(11)$ 已经提供了时间 $t_i$ 和 $t_j$ 之间运动的估计，它的缺点是，只要时间 $t_i$  的线性化点发生变化，就必须重复 $(11)$ 中的积分（直观地说，旋转 $q_{wb_i}$ 的变化，意味着所有未来旋转 $q_{wb_k}、k = i,…,j-1$ 的变化，因此有必要重新评估 $(11)$ 中的求和和乘积。</p>
+<blockquote>
+<p>这里没有找到离散形势下使用四元数的预积分推导相关资料，而在高博等人的《从零开始手写VIO》课程中，用的是如下连续形式进行推导的，事实上，我认为 $(12)$ 中的连续形式中在递推 $p_{wb_j}$的时候，对速度没有积分是不对的，此处暂且留疑点。</p>
+</blockquote>
+<p>同样的，连续形式下，可以得到:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_{wb_j}&=p_{wb_i}+v^w_i \Delta t+\iint_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t^2\\
+v^w_j&=v^w_i+\int_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t\\
+q_{wb_j}&=\int_{t\in[i,j]}q_{wb_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}\delta t
+\end{align*}\tag{12}</script><p>其中，不难发现，旋转 $q_{wb_i}$ 的变化，意味着所有未来旋转 $q_{wb_t}、t \in [i,j]$ 的变化，导致对 $(12)$中的积分进行重复计算。</p>
+<p>一个很简单的公式转换，就可以将积分模型转为预积分模型：  </p>
+<script type="math/tex; mode=display">
+q_{wb_t}=q_{wb_i}\otimes q_{b_ib_t}\tag{13}</script><p>其中 $\otimes$ 表示四元数的乘法，具体可以可以参考，<a href="https://lukeyalvin.top/posts/28639.html#B-%E5%9B%9B%E5%85%83%E6%95%B0"><strong>四元数的乘法运算</strong></a></p>
+<p>那么， PVQ 积分公式中的积分项则变成相对于第 $i$ 时刻的姿态，而不是相对于世界坐标系的姿态，则公式$(12)$变换为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p_{wb_j}&=p_{wb_i}+v^w_i \Delta t-\frac{1}{2}g^w\Delta t^2+
+q_{wb_i}\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
+v^w_j&=v^w_i-g^w\Delta t+q_{wb_i}\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
+q_{wb_j}&=q_{wb_i}\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}\delta t
+\end{align*}\tag{14}</script><p>这样的话，积分里的把相对于世界坐标系的状态量 $q_{wb_i}$ 移出去了，积分里面都是相对于第 $i$ 时刻的状态量 $q_{b_ib_t}$。</p>
+<p>定义预积分量如下，预积分量仅仅跟 IMU 测量值有关，它将一段时间内的 IMU 数据直接积分起来就得到了<strong>预积分量</strong>：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha_{b_ib_j}&=\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
+\beta_{b_ib_j}&=\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
+q_{b_ib_j}&=\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t}\end{bmatrix}\delta t
+\end{align*}\tag{15}</script><p>由公式$(14)$与$(15)$重新整理PVQ的积分公式，有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\begin{bmatrix}
+p_{wb_j}\\v^w_{j}\\q_{wb_j}\\b^a_j\\b^g_j
+\end{bmatrix}=
+\begin{bmatrix}
+p_{wb_i}+v^w_i \Delta t-\frac{1}{2}g^w\Delta t^2+
+q_{wb_i}\alpha_{b_ib_j}\\
+v^w_i-g^w\Delta t+q_{wb_i}\beta_{b_ib_j}\\
+q_{wb_i}q_{b_ib_j}\\b^a_i\\b^g_i
+\end{bmatrix}
+\end{align*}\tag{16}</script><h2 id="IMU-预积分残差"><a href="#IMU-预积分残差" class="headerlink" title="IMU 预积分残差"></a>IMU 预积分残差</h2><p>定义：一段时间内 <strong>IMU 构建的预积分量作为测量值</strong>，对两时刻之间的状态量进行约束，  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\begin{bmatrix}
+r_p\\r_v\\r_q\\r_{ba}\\r_{bg}
+\end{bmatrix}_{15\times1}=
+\begin{bmatrix}
+q_{b_iw}(p_{wb_j}-p_{wb_i}-v^w_i \Delta t+\frac{1}{2}g^w\Delta t^2)-
+{\color{red}\alpha_{b_ib_j} }\\
+q_{b_iw}(v^w_j-v^w_i+g^w\Delta t)-{\color{red}\beta_{b_ib_j} }\\
+2[{\color{red}q_{b_jb_i} }\otimes(q_{b_iw}\otimes q_{wb_j})]_{xyz}\\
+b^a_j-b^a_i\\
+b^g_j-b^g_i
+\end{bmatrix}
+\end{align*}\tag{16}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第三项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
+<h2 id="IMU-预积分残差的离散形式"><a href="#IMU-预积分残差的离散形式" class="headerlink" title="IMU 预积分残差的离散形式"></a>IMU 预积分残差的离散形式</h2><p>使用 mid-point 方法，即两个相邻时刻$ k$到$ k+1$ 的位姿是用两个时刻的测量值$ a,w $的平均值来计算。参考公式$(11)(12)$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+a&=\frac{1}{2}[q_{b_ib_k}(a^{b_k}-b^a_k)+q_{b_ib_{k+1} }(a^{b_{k+1} }-b^a_k)]\\
+w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]\\
+{\color{blue}q_{b_ib_{k+1} } }&=q_{b_ib_k}\otimes\begin{bmatrix}1\\\frac{1}{2}\omega\delta t\end{bmatrix}\\
+{\color{blue}\alpha_{b_ib_{k+1} } }&=\alpha_{b_ib_k}+\beta_{b_ib_k}\delta t +\frac{1}{2}a\delta t^2\\
+{\color{blue}\beta_{b_ib_{k+1} } }&=\beta_{b_ib_k}+a\delta t\\
+b^a_{k+1}&=b^a_k+n_{b^a_k}\delta t\\
+b^g_{k+1}&=b^g_k+n_{b^g_k}\delta t
+\end{align*}\tag{17}</script>]]></content>
       <categories>
         <category>从零开始手写VIO</category>
       </categories>
@@ -1360,129 +1421,6 @@ p(x_k|\tilde{x}_0,v_{1:k},y_{0:k})=\eta p(y_k|x_k)p(x_k|\tilde{x}_0,v_{1:k},y_{0
         <tag>滤波器</tag>
         <tag>概率基础</tag>
         <tag>贝叶斯滤波</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>滤波器概要及其概率基础</title>
-    <url>/posts/664a0a9d.html</url>
-    <content><![CDATA[<blockquote class="blockquote-center">
-            <i class="fa fa-quote-left"></i>
-            <p>基于滤波器的激光SLAM方法，目前已经相对落后，因为滤波是用于估计当前的状态，如果我们之前的数据出现错误，是没有办法进行修正的，所以这个方法的整体效果并不是特别好。但是这个方法在整个激光SLAM的发展中还是占有很重要的地位的，而且这里蕴含的很多数学知识是非常重要的。</p>
-
-            <i class="fa fa-quote-right"></i>
-          </blockquote>
-<span id="more"></span>
-<h1 id="滤波器的作用"><a href="#滤波器的作用" class="headerlink" title="滤波器的作用"></a>滤波器的作用</h1><p><strong>滤波器的本质：</strong>结合预测和观测，得到“最精确”的后验值。这个精确值是相对的，因为实际中，预测和观测均是从传感器而来的，因此滤波器的作用就是结合各个传感器得到一个最好的融合结果。这就是一个数据融合的过程，关于数据融合的介绍可以参考：<a href="https://lukeyalvin.top/posts/8369.html#%E6%95%B0%E6%8D%AE%E8%9E%8D%E5%90%88">数据融合</a></p>
-<p><img src="/images/滤波器及其概率基础/image-20220504151009319.png" alt="image-20220504151009319" style="zoom:50%;" /></p>
-<p>1) 实际中预测往往从IMU、编码器等传感器递推而来；<br>2) 观测往往从GPS、雷达、相机等传感器而来；<br>3) 后验为融合后的结果，即定位模块的输出。</p>
-<h1 id="概率基础知识"><a href="#概率基础知识" class="headerlink" title="概率基础知识"></a>概率基础知识</h1><h2 id="1-概率以及概率密度"><a href="#1-概率以及概率密度" class="headerlink" title="1. 概率以及概率密度"></a>1. 概率以及概率密度</h2><p><img src="/images/滤波器及其概率基础/image-20220504151219788.png" alt="image-20220504151219788" style="zoom:50%;" /></p>
-<p>上图中，$p(x)$为$x$在区间$[a,b]$上的<strong>概率密度</strong>，它表示的是随机变量在区间的分布情况。$P_r$代表的是$x$在区间$[c,d]$上的<strong>概率</strong>，它是概率密度的积分。<br>我们平时所说“高斯分布”、“非高斯分布”均是指它的<strong>概率密度</strong>。</p>
-<h2 id="2-联合概率"><a href="#2-联合概率" class="headerlink" title="2. 联合概率"></a>2. 联合概率</h2><p>$x\in[a,b]$和$y\in[r,s]$的联合概率密度函数可以表示为$p(x,y)$，其积分表示$x$和$y$同时处在某个区间的<br>概率，满足下式：</p>
-<script type="math/tex; mode=display">
-\int^a_b\int^s_rp(x,y)dydx=1\tag{1}</script><p>特别地，当$x$和$y$相互独立的时候，有：</p>
-<script type="math/tex; mode=display">
-p(x,y)=p(x)p(y)\tag{2}</script><h2 id="3-条件概率"><a href="#3-条件概率" class="headerlink" title="3. 条件概率"></a>3. 条件概率</h2><p>$x$关于$y$的条件概率密度函数可以表示为：</p>
-<script type="math/tex; mode=display">
-p(x|y)</script><p>它的含义是，在$y\in[r,s]$的前提下，$x\in[a,b]$的概率分布。满足下式：</p>
-<script type="math/tex; mode=display">
-p(x)=\int^s_rp(x|y)p(y)dy\tag{3}</script><p>特别地，当$x$和$y$相互独立的时候，有：</p>
-<script type="math/tex; mode=display">
-p(x|y)=p(x)\tag{4}</script><h2 id="4-贝叶斯公式"><a href="#4-贝叶斯公式" class="headerlink" title="4. 贝叶斯公式"></a>4. 贝叶斯公式</h2><p>联合概率分解成条件概率和边缘概率的乘积，即:</p>
-<script type="math/tex; mode=display">
-p(x,y)=p(x|y)p(y)=p(y|x)p(x)\tag{6}</script><p>重新整理:</p>
-<script type="math/tex; mode=display">
-p(x|y)=\frac{p(y|x)p(x)}{p(y)}\tag{7}</script><h2 id="5-贝叶斯估计"><a href="#5-贝叶斯估计" class="headerlink" title="5. 贝叶斯估计"></a>5. 贝叶斯估计</h2><p>贝叶斯估计也叫贝叶斯推断，贝叶斯推断可以理解为贝叶斯公式的运用，它是指，如果已知<strong>先验概率密度函数</strong>$p(x)$，以及<strong>传感器模型</strong>$p(y|x)$，那么就可以根据贝叶斯公式推断出<strong>后验概率密度</strong>。</p>
-<script type="math/tex; mode=display">
-p(x|y)=\frac{p(y|x)p(x)}{\int p(y|x)p(x)dx}\tag{8}</script><h2 id="6-高斯概率密度函数"><a href="#6-高斯概率密度函数" class="headerlink" title="6. 高斯概率密度函数"></a>6. 高斯概率密度函数</h2><ul>
-<li>一维情况下，高斯概率密度函数表示为：</li>
-</ul>
-<script type="math/tex; mode=display">
-p(x|\mu,\sigma^2)=\frac{1}{\sqrt{2\pi\sigma^2} }\exp(-\frac{(x-\mu)^2}{2\sigma^2})\tag{9}</script><p>其中$\mu$为均值，$\sigma^2$为方差。</p>
-<ul>
-<li>多维的情况下，高斯概率密度函数表示为：</li>
-</ul>
-<script type="math/tex; mode=display">
-p(x|\mu,\Sigma)=\frac{1}{\sqrt{(2\pi)^N\det\Sigma} }\exp\left(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\right)\tag{10}</script><p>其中$\mu$为均值，$\Sigma$为方差。</p>
-<p>一般把高斯分布写成$x\sim \mathcal{N}(\mu,\Sigma)$。</p>
-<h2 id="7-联合高斯概率密度函数"><a href="#7-联合高斯概率密度函数" class="headerlink" title="7. 联合高斯概率密度函数"></a>7. 联合高斯概率密度函数</h2><p>如有高斯分布$p(x)= \mathcal{N}(\mu_x,\Sigma_{xx})$，$p(y)= \mathcal{N}(\mu_y,\Sigma_{yy})$。则它们的联合概率密度函数可以表示为：</p>
-<script type="math/tex; mode=display">
-p(x,y)=\mathcal{N}
-\left(
-\begin{bmatrix}\mu_x\\\mu_y\end{bmatrix},
-\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}
-\right)\tag{11}</script><p>由于高斯分布中指数项包含方差的求逆，而此处联合概率的方差是一个高维矩阵，对它求逆的简洁办法是运用舒尔补。</p>
-<p>舒尔补的主要目的是把矩阵分解成<strong>上三角矩阵、对角阵、下三角矩</strong>阵乘积的形式，方便运算，即</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}A&B\\C&D\end{bmatrix}=
-\begin{bmatrix}I&BD^{-1}\\0&I\end{bmatrix}
-\begin{bmatrix}\Delta D&0\\0&D\end{bmatrix}
-\begin{bmatrix}I&0\\D^{-1}C&I\end{bmatrix}\tag{12}</script><p>其中$\Delta D=A-BD^{-1}C$称为矩阵$D$关于原矩阵的舒尔补。</p>
-<p>此时有：</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}A&B\\C&D\end{bmatrix}^{-1}=
-\begin{bmatrix}I&0\\-D^{-1}C&I\end{bmatrix}
-\begin{bmatrix}\Delta D^{-1}&0\\0&D^{-1}\end{bmatrix}
-\begin{bmatrix}I&-BD^{-1}\\0&I\end{bmatrix}\tag{12}</script><p>因此，利用舒尔补，联合分布的方差矩阵可以写为</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}=
-\begin{bmatrix}1&\Sigma_{xy}\Sigma_{yy}^{-1}\\0&1\end{bmatrix}
-\begin{bmatrix}\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}&0\\0&\Sigma_{yy}\end{bmatrix}
-\begin{bmatrix}1&0\\\Sigma_{yy}^{-1}\Sigma_{yx}&1\end{bmatrix}\tag{13}</script><p>它的逆矩阵为:</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}^{-1}=
-\begin{bmatrix}1&0\\-\Sigma_{yy}^{-1}\Sigma_{yx}&1\end{bmatrix}
-\begin{bmatrix}\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}&0\\0&\Sigma_{yy}\end{bmatrix}
-\begin{bmatrix}1&-\Sigma_{xy}\Sigma_{yy}^{-1}\\0&1\end{bmatrix}
-\tag{14}</script><p>对于$(11)$中的$p(x,y)$，它仍然是一个概率分布，它的指数部分的二次项包含如下内容</p>
-<p><img src="/images/滤波器及其概率基础/image-20220504160750871.png" alt="image-20220504160750871"></p>
-<p>由于联合概率满足下式:</p>
-<script type="math/tex; mode=display">
-p(x,y)=p(x|y)p(y)</script><p>该式在高斯分布的前提下可以重新分解。且$p(y)= \mathcal{N}(\mu_y,\Sigma_{yy})$</p>
-<p>最后得到两个二次项的和，由于同底数幂相乘后，底数不变，指数相加:</p>
-<script type="math/tex; mode=display">
-p(x|y)=\frac{p(x,y)}{p(y)}=\mathcal{N}
-\left(
-\mu_x+\Sigma_{xy}\Sigma_{yy}^{-1}(y-\mu_y),\Sigma_{xx}-\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}
-\right)\tag{15}</script><h2 id="8-高斯随机变量的线性分布"><a href="#8-高斯随机变量的线性分布" class="headerlink" title="8. 高斯随机变量的线性分布"></a>8. 高斯随机变量的线性分布</h2><p>在前面的基础上，若已知$x$和$y$的关系有如下的关系：</p>
-<script type="math/tex; mode=display">
-y=Gx+n\tag{16}</script><p>其中$G$是一个常量矩阵，$n\in\mathcal{N}(0,R)$为零均值白噪声，在实际中指的是观测噪声。则$x$和$y$的均值和方差之间必然存在联系，其联系可通过以下推导获得。</p>
-<ul>
-<li>均值</li>
-</ul>
-<script type="math/tex; mode=display">
-\begin{align*}
-\mu_y&=E[y]\\
-&=E[Gx+n]\\
-&=GE[x]+E[n]\\
-&=G\mu_x
-\end{align*}\tag{17}</script><ul>
-<li>方差</li>
-</ul>
-<script type="math/tex; mode=display">
-\begin{align*}
-\Sigma_{yy}&=\Sigma(Gx)+\Sigma(n)\\
-&=E[(Gx-\mu_y)(Gx-\mu_y)^T]+R\\
-&=GE[(x-\mu_y)(x-\mu_y)^T]G^T+R\\
-&=G\Sigma_{xx}G^T+R\\
-\end{align*}\tag{18}</script><ul>
-<li>方差的交叉项</li>
-</ul>
-<script type="math/tex; mode=display">
-\begin{align*}
-\Sigma_{xy}&=E[(x-\mu_x)(y-\mu_y)^T]\\
-&=E[(x-\mu_x)(Gx-G\mu_x+n)^T]\\
-&=E[(x-\mu_x)(Gx-G\mu_x)^T+(x-\mu_x)n^T]\\
-&=\Sigma_{xx}G^T+E[(x-\mu_x)n^T]\\
-&=\Sigma_{xx}G^T
-\end{align*}\tag{19}</script><p>同理可得：</p>
-<script type="math/tex; mode=display">
-\Sigma_{yx}=\Sigma_{xy}^T=G\Sigma_{xx}\tag{20}</script>]]></content>
-      <categories>
-        <category>激光SLAM</category>
-      </categories>
-      <tags>
-        <tag>滤波器</tag>
-        <tag>数学基础</tag>
       </tags>
   </entry>
   <entry>
@@ -2168,11 +2106,11 @@ c=\frac{1}{|S|\cdot\parallel r_i \parallel} \parallel \underset{j\in S,j\ne i}{\
       </tags>
   </entry>
   <entry>
-    <title>二、IMU运动学模型以及误差模型</title>
+    <title>二、IMU工作原理、误差及其标定</title>
     <url>/posts/19228.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本节主要对IMU的运动模型以及误差模型进行了分析，并针对连续时间和离散模型的处理做了简单的概要。</p>
+            <p>本节主要对IMU的工作原理做详细的介绍，分析IMU中的确定性误差以及随机误差，并给出误差标定的方法，如确定性误差使用六面法标定，随机误差使用艾伦方差标定等。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
@@ -2260,8 +2198,9 @@ R_{WB}\dot v_B=R_{WB}a_B=a</script><ul>
 w_W^{\land}\dot r_W&=w_W^{\land}(v+w_W^{\land}r_W)\\
 &=w_W^{\land}v+w_W^{\land}(w_W^{\land}r_W)
 \end{align*}</script><hr>
-<p>整个过程的作用是什么？</p>
-<p>我们在已知$B$坐标系下的物体的加速度、速度以及旋转轴的角速度，我们就可以求得对应世界坐标系下的相应的物理量，那么相应的求可以求得世界坐标系下的位姿（速度积分得到位姿）、四元数（根据角速度）。</p>
+<p><strong>整个过程的作用是什么？</strong></p>
+<p>我们在<strong>已知$B$坐标系下的物体的加速度、速度以及旋转轴的角速度</strong>，（这里的B就是我们今天的”IMU”），我们就可以求得对应世界坐标系下的相应的物理量，那么相应的求可以求得世界坐标系下的位姿（速度积分得到位姿）、四元数（根据角速度）。</p>
+<p>大篇幅地介绍这个案例，主要是使读者明白，三维世界中的运动物体，在旋转的坐标系下（IMU坐标系）,如何将其状态量转换到世界坐标系下。以及转换之后各个状态量多出来了什么？</p>
 <h1 id="Ⅱ-IMU-工作原理"><a href="#Ⅱ-IMU-工作原理" class="headerlink" title="Ⅱ.IMU 工作原理"></a>Ⅱ.IMU 工作原理</h1><h2 id="A-加速度计工作原理"><a href="#A-加速度计工作原理" class="headerlink" title="A.加速度计工作原理"></a>A.加速度计工作原理</h2><p>测量原理可以用一个简单的质量块 + 弹簧 + 指示计来表示:</p>
 <p><img src="/images/2-IMU运动学模型以及误差模型/image-20220422191601477.png" alt="image-20220422191601477.png" style="zoom:33%;" /></p>
 <p>注意这里的加速度计测量值$a_m$为弹簧拉力对应的加速度，所以有：</p>
@@ -2418,66 +2357,7 @@ w[k]\sim N(0,1)\\
 <p>得到的艾伦曲线如下图所示：</p>
 <p><img src="/images/2-IMU运动学模型以及误差模型/image-20220423162352964.png" alt="image-20220423162352964" style="zoom: 33%;" /></p>
 <p>从艾伦方差曲线中可以辨识出 IMU 的五种噪声，分别为：量化噪声、角度随机游走、零偏不稳定性噪声，角速率随机游走，速率斜坡，一般在 IMU 噪声辨识中用的比较多的是中间 3 种。</p>
-<h1 id="Ⅳ-IMU-误差模型"><a href="#Ⅳ-IMU-误差模型" class="headerlink" title="Ⅳ.IMU 误差模型"></a>Ⅳ.IMU 误差模型</h1><h3 id="1-加速度计的误差模型"><a href="#1-加速度计的误差模型" class="headerlink" title="1.加速度计的误差模型"></a>1.加速度计的误差模型</h3><p>设导航系$G$为东北天，$g^G=(0,0,-9.81)^T$。</p>
-<p>理论测量值：</p>
-<script type="math/tex; mode=display">
-a_m^B=R_{BG}(a^G-g^G)
-\tag{16}</script><p>如果考虑高斯白噪声，bias，以及尺度因子(通常假设尺度因子为单位矩阵。)，则为：</p>
-<script type="math/tex; mode=display">
-a_m^B=S_aR_{BG}(a^G-g^G)+n_a+b_a\tag{17}</script><p><img src="/images/2-IMU运动学模型以及误差模型/image-20220423171217806.png" alt="image-20220423171217806.png" style="zoom: 50%;" /></p>
-<h3 id="2-陀螺仪的误差模型"><a href="#2-陀螺仪的误差模型" class="headerlink" title="2.陀螺仪的误差模型"></a>2.陀螺仪的误差模型</h3><p>考虑尺度因子，高斯白噪声，以及 bias, 陀螺仪的误差模型如下：</p>
-<script type="math/tex; mode=display">
-w^B_m=S_gw^B+n_g+nb_g\tag{18}</script><p>低端传感器，考虑加速度对陀螺仪的影响，即 g-灵敏度：</p>
-<script type="math/tex; mode=display">
-w^B_m=S_gw^B+S_{ga}a^B+n_g+nb_g\tag{19}</script><p>陀螺仪受四种噪声的影响分别如下图所示：</p>
-<p><img src="/images/2-IMU运动学模型以及误差模型/image-20220423190440715.png" alt="image-20220423190440715" style="zoom: 33%;" /></p>
-<h1 id="Ⅴ-IMU-运动模型"><a href="#Ⅴ-IMU-运动模型" class="headerlink" title="Ⅴ.IMU 运动模型"></a>Ⅴ.IMU 运动模型</h1><p>忽略 scale 的影响，只考虑白噪声和 bias 随机游走：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\tilde{w}^B&=w^B+b_g+n_g\tag{20}
-\end{align*}</script><script type="math/tex; mode=display">
-\begin{align*}
-\tilde{a}^B&=q_{BW}(a^W+g^W)+b_a+n_a
-\end{align*}
-\tag{21}</script><p>上标$ g$ 表示 gyro，a 表示 acc，$W$表示在世界坐标系 world，$B$表示imu 机体坐标系 body。IMU 的真实值为$w, a$, 测量值为$\tilde w, a$。</p>
-<p>P(ose),V(elocity),Q(uaternion) 对时间的导数可写成：</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-\dot p_{wb}&=v^w_t\\
-\dot v^w_t &=a^w_t\\
-\dot q_{wb_t} &=q_{wb_t} \otimes 
-\begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}
-\end{align*}\tag{22}</script><h2 id="A-连续时间下-IMU-运动模型"><a href="#A-连续时间下-IMU-运动模型" class="headerlink" title="A.连续时间下 IMU 运动模型"></a>A.连续时间下 IMU 运动模型</h2><p>根据上面的导数关系，可以从第 i 时刻的 PVQ，通过对 IMU 的测量值进行积分，得到第 j 时刻的 PVQ:</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_j}&=p_{wb_i}+v^w_i \Delta t+\iint_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t^2\\
-v^w_j&=v^w_i+\int_{t\in[i,j]}(q_{wb_t}a^{b_t}-g^w)\delta t\\
-q_{wb_j}&=\int_{t\in[i,j]}q_{wb_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t} \end{bmatrix}\delta t
-\end{align*}\tag{23}</script><h2 id="B-运动模型的离散积分"><a href="#B-运动模型的离散积分" class="headerlink" title="B.运动模型的离散积分"></a>B.运动模型的离散积分</h2><h3 id="1-欧拉法"><a href="#1-欧拉法" class="headerlink" title="1.欧拉法"></a>1.欧拉法</h3><p>使用欧拉法，即两个相邻时刻 $k$ 到 $k+1 $的位姿是用第$k$ 时刻的测量值 $a, w$ 来计算</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_{k+1} }&=p_{wb_k}+v^w_k \Delta t +\frac{1}{2}a\Delta t^2\\
-v^w_{k+1}&=v^w_k+a\Delta t \\
-q_{wb_{k+1} }&=q_{wb_k}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \delta t\end{bmatrix}
-\tag{24}
-\end{align*}</script><p>其中，</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-a&=q_{wb_{k+1} }(a^{b_k}-b^a_k)-g^w\\
-w&=w^{b_k}-b^g_k
-
-\end{align*}\tag{25}</script><h3 id="2-中值法"><a href="#2-中值法" class="headerlink" title="2.中值法"></a>2.中值法</h3><p>使用 mid-point 方法，即两个相邻时刻$ k$到$ k+1$ 的位姿是用两个时刻的测量值$ a,w $的平均值来计算。</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-p_{wb_{k+1} }&=p_{wb_k}+v^w_k \Delta t +\frac{1}{2}a\Delta t^2\\
-v^w_{k+1}&=v^w_k+a\Delta t \\
-q_{wb_{k+1} }&=q_{wb_k}\otimes \begin{bmatrix}1\\ \frac{1}{2}w \delta t\end{bmatrix}
-\end{align*}\tag{26}</script><p>其中，</p>
-<script type="math/tex; mode=display">
-\begin{align*}
-a&=\frac{1}{2}[q_{wb_{k} }(a^{b_k}-b^a_k)-g^w+q_{wb_{k+1} }(a^{b_{k+1} }-b^a_k)-g^w]\\
-w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]
-\end{align*}\tag{27}</script>]]></content>
+]]></content>
       <categories>
         <category>从零开始手写VIO</category>
       </categories>
@@ -2491,18 +2371,19 @@ w&=\frac{1}{2}[(w^{b_k}-b^g_k)+(w^{b_{k+1} }-b^g_k)]
     <url>/posts/28639.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
+            <p>本节主要通过引言部分，提出问什么引入VIO以及它的作用是什么，其次介绍VIO的基本概念，并为了后续内容的展开，回顾了一些基本的数学基础。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：</p>
-<ul>
-<li>IMU 的工作原理和噪声方程</li>
-<li>视觉与 IMU 紧耦合的基础理论</li>
-<li>从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）</li>
-</ul>
-<p>相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
+<h1 id="引言：Why-VIO"><a href="#引言：Why-VIO" class="headerlink" title="引言：Why VIO ?"></a>引言：Why VIO ?</h1><h2 id="VO-的缺陷"><a href="#VO-的缺陷" class="headerlink" title="VO 的缺陷"></a>VO 的缺陷</h2><p>结合之前所学，我们首先考虑纯视觉的SLAM，即VO；</p>
+<p>首先是<strong>单目视觉SLAM:</strong> 它的优点就是便宜，简单易用，但是缺点也很明显，就是单目没有深度信息，主要存在三个方面的缺陷：①初度不确定性；②需要初始化；③存在尺度漂移；基于这些问题，这里不做详细的展开；</p>
+<p>为了解决单目视觉存在的问题，我们开始使用<strong>双目相机和 RGBD 相机</strong>，因为它们可以测量深度，这样的话就不存在初始化和尺度上的问题了，但是双目相机的标定很复杂，且视差计算深度比较消耗资源，而RGBD对环境的要求也比较苛刻、测量距离也很有限，其标定也比较复杂。</p>
+<p>但是由于传感器主要是相机，因此，<strong>纯视觉</strong>存在一些共性的弊端：比如在<strong>光照变化较大时，纹理特征缺失、快速运动导致模糊的情况下无法使用</strong>等缺陷；其中快速运动导致无法使用，主要是因为快速运动可能会导致跟丢，由于纯视觉不做任何处理，大部分都是基于第一帧作为世界坐标系而建立的，而不是相对于地球水平面 (世界坐标系) 的位姿，后者却是导航中真正需要的位姿，换言之，<strong>视觉方法估计的位姿不能和重力方向对齐</strong>。这可能会出现车在地上开，运动轨迹天上飞的现象。</p>
+<h2 id="VIO-的优点"><a href="#VIO-的优点" class="headerlink" title="VIO 的优点"></a>VIO 的优点</h2><p>VIO 就是一种非常优美的解决方式，因为 IMU 可以提供物理世界的尺度，短时间内也能提供比较准确的<strong>位姿估计</strong>，还能<strong>估计出惯性坐标系</strong>。这种互补的性质，让 VIO 在近几年得到了极大的关注。VIO能够解决这些问题的基础是它的初始化，VIO 初始化会把视觉 SLAM 所缺的东西全部都先估计出来，包括<strong>尺度信息，重力向量，位姿速度</strong>。</p>
+<p>通过将 IMU 估计的位姿序列和相机估计的位姿序列对齐可以<strong>估计出相机轨迹的真实尺度</strong>，而且 IMU 可以很好地预测出图像帧的位姿以及上一时刻特征点在下帧图像的位置，<strong>提高特征跟踪算法匹配速度和应对快速旋转的算法鲁棒性</strong>，最后 IMU 中加速度计提供的重力向量可以<strong>将估计的位置转为实际导航需要的世界坐标系中</strong>。</p>
+<p>另外还需要通过视觉 SLAM 帮助 IMU 去搞定陀螺仪和加速度计的初始 bias。如果这些东西一开始估计的很差，那整个系统的准确性会急剧下降。基于滤波的很可能很快就发散得很远了，基于非线性优化的可能经常会陷入局部最优解。</p>
+<p>综合以上，融合 IMU 和视觉信息的 VINS 算法可以很大程度地提高单目 SLAM 算法性能，是一种低成本高性能的导航方案，在机器人、AR/VR 领域得到了很大的关注。</p>
 <h1 id="Ⅰ-VIO-概述"><a href="#Ⅰ-VIO-概述" class="headerlink" title="Ⅰ.VIO 概述"></a>Ⅰ.VIO 概述</h1><h2 id="A-IMU与视觉里程"><a href="#A-IMU与视觉里程" class="headerlink" title="A.IMU与视觉里程"></a>A.IMU与视觉里程</h2><p>IMU（Inertial Measurement Unit），惯性测量单元，用于测量物体三轴姿态角(或角速率)以及加速度的装置。一般情况下，一个IMU内会装有三轴的陀螺仪和三个方向的加速度计，分别用来测量物体在三维空间中的角速度和加速度，并以此解算出物体的姿态。为了提高可靠性，还可以为每个轴配备更多的传感器。一般而言IMU要安装在被测物体的重心上。</p>
 <ul>
 <li>典型 6 轴 IMU 本身由一个陀螺仪和一个加速度计组成，分别测量自身的角速度和加速度，并以较高频率（≥ 100Hz）返回。</li>
@@ -2633,7 +2514,7 @@ R\leftarrow R\ exp(\phi^{\land})\tag{11}</script><p>其中$exp$为$\mathfrak{so}
 \frac{\partial(Rp)}{\partial \varphi}
 &=\underset{\varphi\rightarrow0}{lim}\frac{exp(\varphi^{\land})\cdot exp(\phi^{\land})p-exp(\phi^{\land})p}{\varphi}\\
 &\approx \underset{\varphi\rightarrow0}{lim}\frac{(I+\varphi^{\land})\cdot exp(\phi^{\land})p-exp(\phi^{\land})p}{\varphi} \ \ \ 一阶泰勒展开\\
-&=\underset{\varphi\rightarrow0}{lim}\frac{\varphi^{\land}Rp}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\and}a\\
+&=\underset{\varphi\rightarrow0}{lim}\frac{\varphi^{\land}Rp}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\land}a\\
 &=\underset{\varphi\rightarrow0}{lim}\frac{-(Rp)^{\land}\varphi}{\varphi}\\
 &=-(Rp)^{\land}
 \end{align*}\tag{12}</script><ul>
@@ -2644,7 +2525,7 @@ R\leftarrow R\ exp(\phi^{\land})\tag{11}</script><p>其中$exp$为$\mathfrak{so}
 \frac{\partial(Rp)}{\partial \varphi}
 &=\underset{\varphi\rightarrow0}{lim}\frac{ exp(\phi^{\land})\cdot exp(\varphi^{\land})p-exp(\phi^{\land})p}{\varphi}\\
 &\approx \underset{\varphi\rightarrow0}{lim}\frac{ exp(\phi^{\land})\cdot(I+\varphi^{\land})p-exp(\phi^{\land})p}{\varphi} \ \ \ 一阶泰勒展开\\
-&=\underset{\varphi\rightarrow0}{lim}\frac{R\varphi^{\land}p}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\and}a\\
+&=\underset{\varphi\rightarrow0}{lim}\frac{R\varphi^{\land}p}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\land}a\\
 &=\underset{\varphi\rightarrow0}{lim}\frac{-Rp^{\land}\varphi}{\varphi}\\
 &=-Rp^{\land}
 \end{align*}\tag{13}</script><ul>

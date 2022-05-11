@@ -23,20 +23,20 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="、本节主要讨论VIO视觉残差的构建，以及残差对于各个雅可比矩阵的求解。">
+  <meta name="description" content="在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和">
 <meta property="og:type" content="article">
-<meta property="og:title" content="五、VIO视觉残差的构建以及雅可比的求取">
+<meta property="og:title" content="六、VIO视觉残差的构建以及雅可比的求取">
 <meta property="og:url" content="https://lukeyalvin.top/posts/c041a7d0.html">
 <meta property="og:site_name" content="Lukey Alvin">
-<meta property="og:description" content="、本节主要讨论VIO视觉残差的构建，以及残差对于各个雅可比矩阵的求解。">
+<meta property="og:description" content="在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://lukeyalvin.top/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811-16522560257751.png">
 <meta property="article:published_time" content="2022-05-10T11:40:18.000Z">
-<meta property="article:modified_time" content="2022-05-10T11:41:36.257Z">
+<meta property="article:modified_time" content="2022-05-11T08:03:05.939Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lukeyalvin.top/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811.png">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811-16522560257751.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/c041a7d0.html">
 
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>五、VIO视觉残差的构建以及雅可比的求取 | Lukey Alvin</title>
+  <title>六、VIO视觉残差的构建以及雅可比的求取 | Lukey Alvin</title>
   
 
 
@@ -211,7 +211,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          五、VIO视觉残差的构建以及雅可比的求取
+          六、VIO视觉残差的构建以及雅可比的求取
         </h1>
 
         <div class="post-meta">
@@ -220,10 +220,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-05-10 19:40:18 / 修改时间：19:41:36" itemprop="dateCreated datePublished" datetime="2022-05-10T19:40:18+08:00">2022-05-10</time>
+              <time title="创建时间：2022-05-10 19:40:18" itemprop="dateCreated datePublished" datetime="2022-05-10T19:40:18+08:00">2022-05-10</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-11 16:03:05" itemprop="dateModified" datetime="2022-05-11T16:03:05+08:00">2022-05-11</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -261,14 +267,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>7.8k</span>
+              <span>8.7k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
+              <span>8 分钟</span>
             </span>
 
         </div>
@@ -282,21 +288,22 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>、本节主要讨论VIO视觉残差的构建，以及残差对于各个雅可比矩阵的求解。</p>
+            <p>在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和视觉的误差怎么分配权重并且求其最小值呢，这是这篇博客想要解决的问题。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
+<h1 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h1><p>在视觉 SLAM 中，我们通过最小化特征点在归一化平面上的位置（估计值）和图像中匹配到的该图像的位置（观测值）的差即重投影误差来对特征点和位姿进行优化。这里我们只有一个观测作为信息来源即相机获取的图像，而在 VIO 中，除了相机以外我们还有 IMU 的测量数据作为另一信息来源，这种情况下我们怎么对这个观测进行误差构建呢？并且对于 IMU 的误差和视觉的误差怎么分配权重并且求其最小值呢，这是这篇博客想要解决的问题。</p>
 <h1 id="VIO残差构建"><a href="#VIO残差构建" class="headerlink" title="VIO残差构建"></a>VIO残差构建</h1><p>VIO重投影误差：</p>
 <p>具体详解见：<a href="https://lukeyalvin.top/posts/ddbf64.html#VIO%E9%87%8D%E6%8A%95%E5%BD%B1%E8%AF%AF%E5%B7%AE"><a href="https://lukeyalvin.top/posts/ddbf64.html#VIO重投影误差">VIO重投影误差</a></a></p>
-<p><img src="/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811.png" alt="image-20220505205125811" style="zoom: 33%;" /></p>
+<p><img src="/images/5-VIO视觉残差的构建以及雅可比的求取/image-20220505205125811-16522560257751.png" alt="image-20220505205125811" style="zoom: 33%;" /></p>
 <p>特征点逆深度在第$i$帧中初始化得到，在第 $j$ 帧又被观测到，预测其在第$ j$ 中的坐标为：  </p>
 <script type="math/tex; mode=display">
 \begin{bmatrix}X_{cj}\\Y_{cj}\\Z_{cj}\\1\end{bmatrix}=
 T^{-1}_{bc}T^{-1}_{wb_j}T_{wb_i}T_{bc}
-\begin{bmatrix}\frac{1}{\lambda}u_{ci}\\\frac{1}{\lambda}v_{ci}\\\frac{1}{\lambda}\\1\end{bmatrix}\tag{1}</script><p>对应的残差：</p>
+\begin{bmatrix}\frac{1}{\lambda}u_{ci}\\\frac{1}{\lambda}v_{ci}\\\frac{1}{\lambda}\\1\end{bmatrix}\tag{1}</script><p>设特征点$P$经过特征匹配，得到在$i,j$两帧上的投影观测值，目前特征点在$i$帧的观测值是初始化值，所以在$i$帧相机坐标为$\begin{bmatrix}\frac{1}{\lambda}u_{cj}\\\frac{1}{\lambda}v_{cj}\\\frac{1}{\lambda}\\1\end{bmatrix}$，然后使用估计的位姿变换$T^{-1}_{bc}T^{-1}_{wb_j}T_{wb_i}T_{bc}$进行一系列坐标变换，得到的是该特征点在第$j$帧估计的相机坐标$\begin{bmatrix}X_{cj}\\Y_{cj}\\Z_{cj}\\1\end{bmatrix}$，把它化为归一化坐标，得到$\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }\\\frac{Y_{cj} }{Z_{cj} }\end{bmatrix}$,我们知道，在忽略$K$的前提下，归一化坐标就是像素坐标，由于一直第$j$帧下的像素坐标观测值为$\begin{bmatrix}u_{c_j}\\v_{c_j}\end{bmatrix}$,所以，就可以构建如下的残差项：</p>
 <script type="math/tex; mode=display">
-r_c=\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }-u_{c_j}\\\frac{Y_{cj} }{Z_{cj} }-v_{c_j}\end{bmatrix}\tag{2}</script><h1 id="VIO残差的雅可比推导"><a href="#VIO残差的雅可比推导" class="headerlink" title="VIO残差的雅可比推导"></a>VIO残差的雅可比推导</h1><p>按照变换矩阵和旋转矩阵之间的关系：</p>
+r_c=\begin{bmatrix}\frac{X_{cj} }{Z_{cj} }-u_{cj}\\\frac{Y_{cj} }{Z_{cj} }-v_{cj}\end{bmatrix}\tag{2}</script><h1 id="VIO残差的雅可比推导"><a href="#VIO残差的雅可比推导" class="headerlink" title="VIO残差的雅可比推导"></a>VIO残差的雅可比推导</h1><p>按照变换矩阵和旋转矩阵之间的关系：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 T_{bc}^{-1}&=\begin{bmatrix}R^T_{bc}&-R^T_{bc}p_{bc}\\0^T&1\end{bmatrix},\ 
@@ -346,9 +353,9 @@ J=\begin{bmatrix}
 <ol>
 <li><strong>对 $i$ 时刻的状态量求导</strong></li>
 </ol>
-<p>① 对 $i$ 时刻的位移求导，可以直接写出如下：</p>
+<p>① 对 $i$ 时刻的<strong>位移</strong>求导，可以直接写出如下：</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_ib_i^\prime} }=R^{T}_{bc}R^{T}_{wb_j}\tag{8}</script><p>② 对 $i$ 时刻的角度增量求导</p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_ib_i^\prime} }=R^{T}_{bc}R^{T}_{wb_j}\tag{8}</script><p>② 对 $i$ 时刻的<strong>角度</strong>增量求导</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}=
@@ -383,9 +390,9 @@ R^{T}_{bc}R^{T}_{wb_j}{\color{red}R_{wb_i} }[f_{b_i}]^{\land} [\delta\theta_{b_i
 \end{align*}\tag{10}</script><ol>
 <li><strong>对 $j$ 时刻的状态量求导</strong></li>
 </ol>
-<p>① 对 $j$ 时刻的位移求导，可以直接写出如下：</p>
+<p>① 对 $j$ 时刻的<strong>位移</strong>求导，可以直接写出如下：</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_jb_j^\prime} }=-R^{T}_{bc}R^{T}_{wb_j}\tag{11}</script><p>② 对 $j$ 时刻的角度增量求导</p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{b_jb_j^\prime} }=-R^{T}_{bc}R^{T}_{wb_j}\tag{11}</script><p>② 对 $j$ 时刻的<strong>角度</strong>增量求导</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}&=
@@ -419,9 +426,9 @@ R^{T}_{bc}[f_{b_j}]^{\land}[\delta\theta_{b_ib^\prime_j}] }{\partial\delta\theta
 \end{align*}\tag{13}</script><ol>
 <li><strong>对 imu 和相机之间的外参求导</strong>  </li>
 </ol>
-<p>① 对位移求导</p>
+<p>① 对<strong>位移</strong>求导</p>
 <script type="math/tex; mode=display">
-\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{cc^\prime} }=R^{T}_{bc}(R^{T}_{wb_j}R_{wb_i}-I_{3\times 3})\tag{14}</script><p>② 对角度增量求导，由于 $f_{c_j}$ 都和 $R_{bc}$ 有关，并且比较复杂，所以这次分两部分求导  </p>
+\frac{\partial f_{c_j} }{\partial\delta\mathbf{p}_{cc^\prime} }=R^{T}_{bc}(R^{T}_{wb_j}R_{wb_i}-I_{3\times 3})\tag{14}</script><p>② 对<strong>角度</strong>增量求导，由于 $f_{c_j}$ 都和 $R_{bc}$ 有关，并且比较复杂，所以这次分两部分求导  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f_{c_j}&=
@@ -514,7 +521,7 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://lukeyalvin.top/posts/c041a7d0.html" title="五、VIO视觉残差的构建以及雅可比的求取">https://lukeyalvin.top/posts/c041a7d0.html</a>
+    <a href="https://lukeyalvin.top/posts/c041a7d0.html" title="六、VIO视觉残差的构建以及雅可比的求取">https://lukeyalvin.top/posts/c041a7d0.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -553,10 +560,13 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/b68d674.html" rel="prev" title="四、预积分残差的雅克比求取">
-      <i class="fa fa-chevron-left"></i> 四、预积分残差的雅克比求取
+    <a href="/posts/b68d674.html" rel="prev" title="五、预积分残差的雅克比求取">
+      <i class="fa fa-chevron-left"></i> 五、预积分残差的雅克比求取
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/posts/2613d057.html" rel="next" title="SLAM中的概率基础">
+      SLAM中的概率基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -615,7 +625,7 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VIO%E6%AE%8B%E5%B7%AE%E6%9E%84%E5%BB%BA"><span class="nav-text">VIO残差构建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VIO%E6%AE%8B%E5%B7%AE%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94%E6%8E%A8%E5%AF%BC"><span class="nav-text">VIO残差的雅可比推导</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VIO%E6%AE%8B%E5%B7%AE%E6%9E%84%E5%BB%BA"><span class="nav-text">VIO残差构建</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VIO%E6%AE%8B%E5%B7%AE%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94%E6%8E%A8%E5%AF%BC"><span class="nav-text">VIO残差的雅可比推导</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -631,7 +641,7 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -644,7 +654,7 @@ u_{c_i}\\v_{c_i}\\1 \end{bmatrix})\\
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -957,12 +967,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">461k</span>
+    <span title="站点总字数">460k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:59</span>
+    <span title="站点阅读时长">6:58</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

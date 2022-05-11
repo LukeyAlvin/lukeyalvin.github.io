@@ -25,13 +25,13 @@
 
   <meta name="description" content="本节主要讨论预积分对于各个状态量的雅可比矩阵的求解。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="四、预积分残差的雅克比求取">
+<meta property="og:title" content="五、预积分残差的雅克比求取">
 <meta property="og:url" content="https://lukeyalvin.top/posts/b68d674.html">
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="本节主要讨论预积分对于各个状态量的雅可比矩阵的求解。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-05-10T11:38:28.000Z">
-<meta property="article:modified_time" content="2022-05-10T11:39:48.155Z">
+<meta property="article:modified_time" content="2022-05-11T07:54:42.928Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="预积分理论">
@@ -50,7 +50,7 @@
   };
 </script>
 
-  <title>四、预积分残差的雅克比求取 | Lukey Alvin</title>
+  <title>五、预积分残差的雅克比求取 | Lukey Alvin</title>
   
 
 
@@ -210,7 +210,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          四、预积分残差的雅克比求取
+          五、预积分残差的雅克比求取
         </h1>
 
         <div class="post-meta">
@@ -219,10 +219,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-05-10 19:38:28 / 修改时间：19:39:48" itemprop="dateCreated datePublished" datetime="2022-05-10T19:38:28+08:00">2022-05-10</time>
+              <time title="创建时间：2022-05-10 19:38:28" itemprop="dateCreated datePublished" datetime="2022-05-10T19:38:28+08:00">2022-05-10</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-11 15:54:42" itemprop="dateModified" datetime="2022-05-11T15:54:42+08:00">2022-05-11</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -260,7 +266,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>5.5k</span>
+              <span>6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -286,7 +292,13 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<h1 id="预积分残差的雅克比求取"><a href="#预积分残差的雅克比求取" class="headerlink" title="预积分残差的雅克比求取"></a>预积分残差的雅克比求取</h1><p>定义：一段时间内 IMU 构建的预积分量作为<strong>测量值</strong>，对两时刻之间的状态量进行约束，  </p>
+<h1 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h1><p>对于右乘雅可比，我们做如下的公式简化：</p>
+<script type="math/tex; mode=display">
+\frac{\partial x_a}{\partial \delta\theta}=
+\underset{\delta\theta\rightarrow0}{lim}\frac{R_{ab}\exp([\delta\theta]^{\land})x_b-R_{ab}x_b}{\delta\theta}</script><p>后续简写为：</p>
+<script type="math/tex; mode=display">
+\frac{\partial x_a}{\partial \delta\theta}=
+\frac{R_{ab}\exp([\delta\theta]^{\land})x_b}{\delta\theta}</script><h1 id="预积分残差的雅克比求取"><a href="#预积分残差的雅克比求取" class="headerlink" title="预积分残差的雅克比求取"></a>预积分残差的雅克比求取</h1><p>定义：一段时间内 IMU 构建的预积分量作为<strong>测量值</strong>，对两时刻之间的状态量进行约束，  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \mathbf{e}_{B}(x_i,x_j)=\begin{bmatrix}
@@ -300,7 +312,13 @@ q_{b_iw}(v^w_j-v^w_i+g^w\Delta t)-{\color{blue}\beta_{b_ib_j} }\\
 b^a_j-b^a_i\\
 b^g_j-b^g_i
 \end{bmatrix}
-\end{align*}\tag{1}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第二项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
+\end{align*}\tag{1}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha_{b_ib_j}&=\iint_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t^2\\
+\beta_{b_ib_j}&=\int_{t\in[i,j]}(q_{b_ib_t}a^{b_t})\delta t\\
+q_{b_ib_j}&=\int_{t\in[i,j]}q_{b_ib_t}\otimes \begin{bmatrix}0\\ \frac{1}{2}w^{b_t}\end{bmatrix}\delta t
+\end{align*}</script><p>上面误差中位移，速度，偏置都是直接相减得到。第二项是关于四元数的<strong>旋转误差</strong>，其中$[·]_{xyz }$表示只取四元数的虚部 $(x, y, z)$组成的三维向量。  </p>
 <p>在求解非线性方程时，需要知道误差 $\mathbf{e}_{B}$ 对两个关键帧 $i, j$ 的状态量 $p, q, v, ba, bg$ 的雅可比。对 $i, j$ 时刻的状态量 $p, q, v$ 求导还是比较直观的，直接对误差公式进行计算就行。但是对 $i$ 时刻的 $b^a_i , b^g_i$ 求导就显得十分复杂，下面我们详细讨论。  </p>
 <p>因为 $i$ 时刻的 bias 相关的预积分计算是通过迭代一步一步累计递推的，可以算但是太复杂。所以对于预积分量直接在 $i$ 时刻的 bias 附近用<strong>一阶泰勒展开</strong>来近似，而不用真的去迭代计算。  </p>
 <script type="math/tex; mode=display">
@@ -330,14 +348,13 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
 &=
 \frac{\partial -[R_{b_iw}(v^w_j-v^w_i+g^w\Delta t)]^{\land}[\delta \theta_{b_ib^\prime_i}]}{\partial\delta \theta_{b_ib^\prime_i} }\\
 &=[R_{b_iw}(v^w_j-v^w_i+g^w\Delta t)]^{\land}
-\end{align*}\tag{5}</script><p>这里使用的是右乘扰动，省略了部分极限的常规步骤，分子仅仅摘取了与求导相关的。</p>
-<p>③ 对 $i$ 时刻<strong>速度</strong>的雅可比</p>
+\end{align*}\tag{5}</script><p>③ 对 $i$ 时刻<strong>速度</strong>的雅可比</p>
 <script type="math/tex; mode=display">
 \frac{\partial r_v}{\partial\delta v_i^w}=-R_{b_iw}\tag{6}</script><p>④ 对 $i$ 时刻<strong>加速度 bais</strong>的雅可比 ,注意 bias 量只和预积分 $\beta$ 有关：  </p>
 <script type="math/tex; mode=display">
 \frac{\partial r_v}{\partial\delta b_i^a}
 =-\frac{\partial \beta_{b_ib_j} }{\partial\delta b_i^a}
-=-J^{\beta}_{b^a_i}\tag{7}</script><h2 id="r-p-对各状态量的雅可比"><a href="#r-p-对各状态量的雅可比" class="headerlink" title="$r_p$ 对各状态量的雅可比"></a>$r_p$ 对各状态量的雅可比</h2><p>① 对 $i$ 时刻<strong>旋转</strong>的雅可比</p>
+=-J^{\beta}_{b^a_i}\tag{7}</script><h2 id="r-q-对各状态量的雅可比"><a href="#r-q-对各状态量的雅可比" class="headerlink" title="$r_q$ 对各状态量的雅可比"></a>$r_q$ 对各状态量的雅可比</h2><p>① 对 $i$ 时刻<strong>旋转</strong>的雅可比</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 \frac{\partial r_q}{\partial \delta\theta_{b_ib^\prime_i} }
@@ -457,7 +474,7 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://lukeyalvin.top/posts/b68d674.html" title="四、预积分残差的雅克比求取">https://lukeyalvin.top/posts/b68d674.html</a>
+    <a href="https://lukeyalvin.top/posts/b68d674.html" title="五、预积分残差的雅克比求取">https://lukeyalvin.top/posts/b68d674.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -497,12 +514,12 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/285413d6.html" rel="prev" title="三、预积分模型以及误差递推方程的推导">
-      <i class="fa fa-chevron-left"></i> 三、预积分模型以及误差递推方程的推导
+    <a href="/posts/aaff1b40.html" rel="prev" title="四、IMU误差状态传递方程的推导">
+      <i class="fa fa-chevron-left"></i> 四、IMU误差状态传递方程的推导
     </a></div>
       <div class="post-nav-item">
-    <a href="/posts/c041a7d0.html" rel="next" title="五、VIO视觉残差的构建以及雅可比的求取">
-      五、VIO视觉残差的构建以及雅可比的求取 <i class="fa fa-chevron-right"></i>
+    <a href="/posts/c041a7d0.html" rel="next" title="六、VIO视觉残差的构建以及雅可比的求取">
+      六、VIO视觉残差的构建以及雅可比的求取 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -562,7 +579,7 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A2%84%E7%A7%AF%E5%88%86%E6%AE%8B%E5%B7%AE%E7%9A%84%E9%9B%85%E5%85%8B%E6%AF%94%E6%B1%82%E5%8F%96"><span class="nav-text">预积分残差的雅克比求取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#r-v-%E5%AF%B9%E5%90%84%E7%8A%B6%E6%80%81%E9%87%8F%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">$r_v$ 对各状态量的雅可比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#r-p-%E5%AF%B9%E5%90%84%E7%8A%B6%E6%80%81%E9%87%8F%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">$r_p$ 对各状态量的雅可比</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BA%A6%E5%AE%9A"><span class="nav-text">约定</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A2%84%E7%A7%AF%E5%88%86%E6%AE%8B%E5%B7%AE%E7%9A%84%E9%9B%85%E5%85%8B%E6%AF%94%E6%B1%82%E5%8F%96"><span class="nav-text">预积分残差的雅克比求取</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#r-v-%E5%AF%B9%E5%90%84%E7%8A%B6%E6%80%81%E9%87%8F%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">$r_v$ 对各状态量的雅可比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#r-q-%E5%AF%B9%E5%90%84%E7%8A%B6%E6%80%81%E9%87%8F%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">$r_q$ 对各状态量的雅可比</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -578,7 +595,7 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -591,7 +608,7 @@ J_{k+1}=\mathbf{F}J_k\tag{3}</script><h2 id="r-v-对各状态量的雅可比"><a
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -904,12 +921,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">461k</span>
+    <span title="站点总字数">460k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:59</span>
+    <span title="站点阅读时长">6:58</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>

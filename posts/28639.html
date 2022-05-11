@@ -23,19 +23,19 @@
     var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="本课程专注于视觉 +IMU 融合定位的基础理论和实现，作为视觉SLAM 的进阶课程在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。">
+  <meta name="description" content="本节主要通过引言部分，提出问什么引入VIO以及它的作用是什么，其次介绍VIO的基本概念，并为了后续内容的展开，回顾了一些基本的数学基础。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一、VIO概述以及三维刚体运动知识点回顾">
 <meta property="og:url" content="https://lukeyalvin.top/posts/28639.html">
 <meta property="og:site_name" content="Lukey Alvin">
-<meta property="og:description" content="本课程专注于视觉 +IMU 融合定位的基础理论和实现，作为视觉SLAM 的进阶课程在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。">
+<meta property="og:description" content="本节主要通过引言部分，提出问什么引入VIO以及它的作用是什么，其次介绍VIO的基本概念，并为了后续内容的展开，回顾了一些基本的数学基础。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150139375.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420150543613.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151628700.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/1-VIO概述以及三维刚体运动知识点回顾/image-20220420151708384.png">
 <meta property="article:published_time" content="2022-04-25T09:17:10.447Z">
-<meta property="article:modified_time" content="2022-05-10T09:24:46.091Z">
+<meta property="article:modified_time" content="2022-05-11T06:20:51.422Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="刚体运动">
@@ -232,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-10 17:24:46" itemprop="dateModified" datetime="2022-05-10T17:24:46+08:00">2022-05-10</time>
+                <time title="修改时间：2022-05-11 14:20:51" itemprop="dateModified" datetime="2022-05-11T14:20:51+08:00">2022-05-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -271,7 +271,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>6.4k</span>
+              <span>7.1k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -292,18 +292,19 @@
       
         <blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
-            <p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：IMU 的工作原理和噪声方程；视觉与 IMU 紧耦合的基础理论；从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）；相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
+            <p>本节主要通过引言部分，提出问什么引入VIO以及它的作用是什么，其次介绍VIO的基本概念，并为了后续内容的展开，回顾了一些基本的数学基础。</p>
 
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p>本课程专注于<strong>视觉 +IMU 融合定位</strong>的基础理论和实现，作为视觉SLAM 的进阶课程<br>在本课程中，你将学习到的重点内容有：</p>
-<ul>
-<li>IMU 的工作原理和噪声方程</li>
-<li>视觉与 IMU 紧耦合的基础理论</li>
-<li>从零开始实现 VIO 紧耦合优化器（仅基于 Eigen）</li>
-</ul>
-<p>相比视觉 SLAM 基础课程，本次课程更加注重 IMU 融合的理论推导与实现。</p>
+<h1 id="引言：Why-VIO"><a href="#引言：Why-VIO" class="headerlink" title="引言：Why VIO ?"></a>引言：Why VIO ?</h1><h2 id="VO-的缺陷"><a href="#VO-的缺陷" class="headerlink" title="VO 的缺陷"></a>VO 的缺陷</h2><p>结合之前所学，我们首先考虑纯视觉的SLAM，即VO；</p>
+<p>首先是<strong>单目视觉SLAM:</strong> 它的优点就是便宜，简单易用，但是缺点也很明显，就是单目没有深度信息，主要存在三个方面的缺陷：①初度不确定性；②需要初始化；③存在尺度漂移；基于这些问题，这里不做详细的展开；</p>
+<p>为了解决单目视觉存在的问题，我们开始使用<strong>双目相机和 RGBD 相机</strong>，因为它们可以测量深度，这样的话就不存在初始化和尺度上的问题了，但是双目相机的标定很复杂，且视差计算深度比较消耗资源，而RGBD对环境的要求也比较苛刻、测量距离也很有限，其标定也比较复杂。</p>
+<p>但是由于传感器主要是相机，因此，<strong>纯视觉</strong>存在一些共性的弊端：比如在<strong>光照变化较大时，纹理特征缺失、快速运动导致模糊的情况下无法使用</strong>等缺陷；其中快速运动导致无法使用，主要是因为快速运动可能会导致跟丢，由于纯视觉不做任何处理，大部分都是基于第一帧作为世界坐标系而建立的，而不是相对于地球水平面 (世界坐标系) 的位姿，后者却是导航中真正需要的位姿，换言之，<strong>视觉方法估计的位姿不能和重力方向对齐</strong>。这可能会出现车在地上开，运动轨迹天上飞的现象。</p>
+<h2 id="VIO-的优点"><a href="#VIO-的优点" class="headerlink" title="VIO 的优点"></a>VIO 的优点</h2><p>VIO 就是一种非常优美的解决方式，因为 IMU 可以提供物理世界的尺度，短时间内也能提供比较准确的<strong>位姿估计</strong>，还能<strong>估计出惯性坐标系</strong>。这种互补的性质，让 VIO 在近几年得到了极大的关注。VIO能够解决这些问题的基础是它的初始化，VIO 初始化会把视觉 SLAM 所缺的东西全部都先估计出来，包括<strong>尺度信息，重力向量，位姿速度</strong>。</p>
+<p>通过将 IMU 估计的位姿序列和相机估计的位姿序列对齐可以<strong>估计出相机轨迹的真实尺度</strong>，而且 IMU 可以很好地预测出图像帧的位姿以及上一时刻特征点在下帧图像的位置，<strong>提高特征跟踪算法匹配速度和应对快速旋转的算法鲁棒性</strong>，最后 IMU 中加速度计提供的重力向量可以<strong>将估计的位置转为实际导航需要的世界坐标系中</strong>。</p>
+<p>另外还需要通过视觉 SLAM 帮助 IMU 去搞定陀螺仪和加速度计的初始 bias。如果这些东西一开始估计的很差，那整个系统的准确性会急剧下降。基于滤波的很可能很快就发散得很远了，基于非线性优化的可能经常会陷入局部最优解。</p>
+<p>综合以上，融合 IMU 和视觉信息的 VINS 算法可以很大程度地提高单目 SLAM 算法性能，是一种低成本高性能的导航方案，在机器人、AR/VR 领域得到了很大的关注。</p>
 <h1 id="Ⅰ-VIO-概述"><a href="#Ⅰ-VIO-概述" class="headerlink" title="Ⅰ.VIO 概述"></a>Ⅰ.VIO 概述</h1><h2 id="A-IMU与视觉里程"><a href="#A-IMU与视觉里程" class="headerlink" title="A.IMU与视觉里程"></a>A.IMU与视觉里程</h2><p>IMU（Inertial Measurement Unit），惯性测量单元，用于测量物体三轴姿态角(或角速率)以及加速度的装置。一般情况下，一个IMU内会装有三轴的陀螺仪和三个方向的加速度计，分别用来测量物体在三维空间中的角速度和加速度，并以此解算出物体的姿态。为了提高可靠性，还可以为每个轴配备更多的传感器。一般而言IMU要安装在被测物体的重心上。</p>
 <ul>
 <li>典型 6 轴 IMU 本身由一个陀螺仪和一个加速度计组成，分别测量自身的角速度和加速度，并以较高频率（≥ 100Hz）返回。</li>
@@ -434,7 +435,7 @@ R\leftarrow R\ exp(\phi^{\land})\tag{11}</script><p>其中$exp$为$\mathfrak{so}
 \frac{\partial(Rp)}{\partial \varphi}
 &=\underset{\varphi\rightarrow0}{lim}\frac{exp(\varphi^{\land})\cdot exp(\phi^{\land})p-exp(\phi^{\land})p}{\varphi}\\
 &\approx \underset{\varphi\rightarrow0}{lim}\frac{(I+\varphi^{\land})\cdot exp(\phi^{\land})p-exp(\phi^{\land})p}{\varphi} \ \ \ 一阶泰勒展开\\
-&=\underset{\varphi\rightarrow0}{lim}\frac{\varphi^{\land}Rp}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\and}a\\
+&=\underset{\varphi\rightarrow0}{lim}\frac{\varphi^{\land}Rp}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\land}a\\
 &=\underset{\varphi\rightarrow0}{lim}\frac{-(Rp)^{\land}\varphi}{\varphi}\\
 &=-(Rp)^{\land}
 \end{align*}\tag{12}</script><ul>
@@ -445,7 +446,7 @@ R\leftarrow R\ exp(\phi^{\land})\tag{11}</script><p>其中$exp$为$\mathfrak{so}
 \frac{\partial(Rp)}{\partial \varphi}
 &=\underset{\varphi\rightarrow0}{lim}\frac{ exp(\phi^{\land})\cdot exp(\varphi^{\land})p-exp(\phi^{\land})p}{\varphi}\\
 &\approx \underset{\varphi\rightarrow0}{lim}\frac{ exp(\phi^{\land})\cdot(I+\varphi^{\land})p-exp(\phi^{\land})p}{\varphi} \ \ \ 一阶泰勒展开\\
-&=\underset{\varphi\rightarrow0}{lim}\frac{R\varphi^{\land}p}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\and}a\\
+&=\underset{\varphi\rightarrow0}{lim}\frac{R\varphi^{\land}p}{\varphi} \ \ \ 根据 a^{\land}b=-b^{\land}a\\
 &=\underset{\varphi\rightarrow0}{lim}\frac{-Rp^{\land}\varphi}{\varphi}\\
 &=-Rp^{\land}
 \end{align*}\tag{13}</script><ul>
@@ -558,8 +559,8 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
       <i class="fa fa-chevron-left"></i> aloam_velodyney源代码深度解析
     </a></div>
       <div class="post-nav-item">
-    <a href="/posts/19228.html" rel="next" title="二、IMU运动学模型以及误差模型">
-      二、IMU运动学模型以及误差模型 <i class="fa fa-chevron-right"></i>
+    <a href="/posts/19228.html" rel="next" title="二、IMU工作原理、误差及其标定">
+      二、IMU工作原理、误差及其标定 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -619,7 +620,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-VIO-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.VIO 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-IMU%E4%B8%8E%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B"><span class="nav-text">A.IMU与视觉里程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-VIO"><span class="nav-text">B.VIO</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%9F%A5%E8%AF%86%E7%82%B9%E5%9B%9E%E9%A1%BE"><span class="nav-text">Ⅱ.知识点回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8"><span class="nav-text">A.三维刚体运动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E5%9B%9B%E5%85%83%E6%95%B0"><span class="nav-text">B.四元数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E6%9D%8E%E4%BB%A3%E6%95%B0"><span class="nav-text">C.李代数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#D-%E6%89%B0%E5%8A%A8%E6%A8%A1%E5%9E%8B%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">D.扰动模型的雅可比</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E8%A8%80%EF%BC%9AWhy-VIO"><span class="nav-text">引言：Why VIO ?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VO-%E7%9A%84%E7%BC%BA%E9%99%B7"><span class="nav-text">VO 的缺陷</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VIO-%E7%9A%84%E4%BC%98%E7%82%B9"><span class="nav-text">VIO 的优点</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-VIO-%E6%A6%82%E8%BF%B0"><span class="nav-text">Ⅰ.VIO 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-IMU%E4%B8%8E%E8%A7%86%E8%A7%89%E9%87%8C%E7%A8%8B"><span class="nav-text">A.IMU与视觉里程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-VIO"><span class="nav-text">B.VIO</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-%E7%9F%A5%E8%AF%86%E7%82%B9%E5%9B%9E%E9%A1%BE"><span class="nav-text">Ⅱ.知识点回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-%E4%B8%89%E7%BB%B4%E5%88%9A%E4%BD%93%E8%BF%90%E5%8A%A8"><span class="nav-text">A.三维刚体运动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#B-%E5%9B%9B%E5%85%83%E6%95%B0"><span class="nav-text">B.四元数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E6%9D%8E%E4%BB%A3%E6%95%B0"><span class="nav-text">C.李代数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#D-%E6%89%B0%E5%8A%A8%E6%A8%A1%E5%9E%8B%E7%9A%84%E9%9B%85%E5%8F%AF%E6%AF%94"><span class="nav-text">D.扰动模型的雅可比</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -635,7 +636,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -648,7 +649,7 @@ R^T\exp(\phi^{\land})R=\exp((R^T\phi)^{\land})\tag{19}</script><p>有关 $SE(3)$
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -961,12 +962,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">461k</span>
+    <span title="站点总字数">460k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">6:59</span>
+    <span title="站点阅读时长">6:58</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
