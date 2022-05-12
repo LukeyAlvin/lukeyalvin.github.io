@@ -24,8 +24,424 @@ p(x,y)=p(x)p(y)\tag{3}</script><h2 id="条件概率"><a href="#条件概率" cla
 <script type="math/tex; mode=display">
 p(x)=\int^s_r p(x|y)p(y)dy\tag{4}</script><p>特别地，当 $x$ 和 $y$ 相互独立的时候：</p>
 <script type="math/tex; mode=display">
-p(x|y)=p(x)\tag{5}</script><h2 id="边缘概率"><a href="#边缘概率" class="headerlink" title="边缘概率"></a>边缘概率</h2><p><strong>边缘概率</strong>是某个事件发生的概率。边缘概率是这样得到的：在联合概率中，把最终结果中不需要的那些事件合并成其事件的全概率而消失（对离散随机变量用求和得全概率，对连续随机变量用积分得全概率）。这称为边缘化（marginalization）。</p>
+p(x|y)=p(x)\tag{5}</script><h2 id="贝叶斯公式"><a href="#贝叶斯公式" class="headerlink" title="贝叶斯公式"></a>贝叶斯公式</h2><p>联合概率分解成条件概率和边缘概率的乘积，即</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x|y)p(y)=p(y|x)p(x)\tag{6}</script><p>重新整理，即可得贝叶斯公式</p>
+<script type="math/tex; mode=display">
+p(x|y)=\frac{p(y|x)p(x)}{p(y)}\tag{7}</script><h2 id="贝叶斯推断"><a href="#贝叶斯推断" class="headerlink" title="贝叶斯推断"></a>贝叶斯推断</h2><p>贝叶斯推断可以理解为贝叶斯公式的运用，它是指，如果已知<strong>先验</strong>概率密度函数 $p(x)$，以及<strong>传感器模型</strong> $p(y|x)$，那么就可以根据贝叶斯公式推断出<strong>后验</strong>概率密度。</p>
+<script type="math/tex; mode=display">
+p(x|y)=\frac{p(y|x)p(x)}{\int p(y|x)p(x)dx}\tag{8}</script><p>实际中，贝叶斯推断有时也叫贝叶斯估计。</p>
+<h2 id="高斯概率密度函数"><a href="#高斯概率密度函数" class="headerlink" title="高斯概率密度函数"></a>高斯概率密度函数</h2><p><strong>一维情况下，</strong>高斯概率密度函数表示：</p>
+<script type="math/tex; mode=display">
+p(x|\mu,\sigma^2)=\frac{1}{\sqrt{2\pi\sigma^2} }\exp(-\frac{1}{2}\frac{(x-\mu)^2}{\sigma^2})\tag{9}</script><p>其中 $\mu$ 为均值， $\sigma$ 为方差。</p>
+<p><strong>多维情况下，</strong>高斯概率密度函数表示为：</p>
+<script type="math/tex; mode=display">
+p(x|\mu,\Sigma)=\frac{1}{\sqrt{(2\pi)^N\det\Sigma} }\exp\left(
+-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)
+\right)\tag{10}</script><p>其中 $\mu$ 为均值， $\Sigma$ 为方差。</p>
+<p>一般把高斯分布写成 $x\sim\mathcal{N}(\mu,\Sigma)$。</p>
+<h2 id="联合高斯概率密度函数"><a href="#联合高斯概率密度函数" class="headerlink" title="联合高斯概率密度函数"></a>联合高斯概率密度函数</h2><p>若有高斯分布：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p(x)&=\mathcal{N}(\mu_x,\Sigma_{xx})\\
+p(x)&=\mathcal{N}(\mu_y,\Sigma_{yy})
+\end{align*}\tag{11}</script><p>则它们的联合概率密度函数可以表示为:</p>
+<script type="math/tex; mode=display">
+p(x,y)=\mathcal{N}
+\left(
+\begin{bmatrix}\mu_x\\\mu_y\end{bmatrix},
+\begin{bmatrix}\Sigma_{xx}&\Sigma_{xy}\\\Sigma_{yx}&\Sigma_{yy}\end{bmatrix}
+\right)\tag{12}</script><p>由于联合概率满足下式:</p>
+<script type="math/tex; mode=display">
+p(x,y)=p(x|y)p(y)\tag{13}</script><p>该式在高斯分布的前提下可以重新分解。</p>
+<h1 id="高斯分布和协方差矩阵"><a href="#高斯分布和协方差矩阵" class="headerlink" title="高斯分布和协方差矩阵"></a>高斯分布和协方差矩阵</h1><h2 id="高斯分布"><a href="#高斯分布" class="headerlink" title="高斯分布"></a>高斯分布</h2><p>由公式 $(10)$可知，零均值的多元高斯分布有如下概率形式：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p(x)=&\frac{1}{\sqrt{(2\pi)^N\det\Sigma} }\exp\left(
+-\frac{1}{2}x^T\Sigma^{-1}x
+\right)\\
+=&\frac{1}{Z }\exp\left(
+-\frac{1}{2}x^T\Sigma^{-1}x
+\right)
+\end{align*}
+\tag{14}</script><p>其中 $\Sigma$ 是<strong>协方差矩阵</strong>，协方差矩阵的逆记作 $Λ = \Sigma^{-1}$ ，也称之为<strong>信息矩阵</strong>。</p>
+<p>比如变量 $x$ 为三维的变量时，协方差矩阵为:</p>
+<script type="math/tex; mode=display">
+\Sigma=\begin{bmatrix}
+\Sigma_{11}&\Sigma_{12}&\Sigma_{13}\\
+\Sigma_{21}&\Sigma_{22}&\Sigma_{23}\\
+\Sigma_{31}&\Sigma_{32}&\Sigma_{33}
+\end{bmatrix}\tag{15}</script><p>根据协方差的定义，其中 $Σ_{ij} = E(x_ix_j ) $为对应元素求期望。</p>
+<p>关于协方差矩阵的一些案例介绍，可以查看，<a href="https://lukeyalvin.top/posts/8369.html#%E5%8D%8F%E6%96%B9%E5%B7%AE%E7%9F%A9%E9%98%B5">协方差矩阵</a></p>
+<h2 id="协方差矩阵与信息矩阵"><a href="#协方差矩阵与信息矩阵" class="headerlink" title="协方差矩阵与信息矩阵"></a>协方差矩阵与信息矩阵</h2><h3 id="案例1"><a href="#案例1" class="headerlink" title="案例1"></a>案例1</h3><p>设 $x_2$ 为室外的温度，$x_1 , x_3$ 分别为房间 $1$ 和房间 $3$ 的室内温度:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+x_2&=v_2\\
+x_1&=w_1x_2+v_1\\
+x_3&=w_3x_2+v_3\\
+\end{align*}\tag{16}</script><p>其中，$w_i$ 为正的常数值，$v_i$ 相互独立，且各自服从协方差矩阵为 $\sigma_i^2$ 的高斯分布。</p>
+<p><img src="/images/SLAM中的概率基础/image-20220512153417672.png" alt="image-20220512153417672" style="zoom:25%;" /></p>
+<p>从上述关系，根据协方差公式的计算方式，我们可以写出 $x$ 的协方差矩阵，先从对角元素开始计算：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Sigma_{11}=E(x_1x_1)&=E(({\color{red}w_1}{\color{green}v_2}+{\color{red}v_1})({\color{red}w_1}{\color{green}v_2}+{\color{red}v_1}))\\
+&={\color{red}w_1^2}E({\color{green}v_2^2})+2{\color{red}w_1}E({\color{red}v_1}{\color{green}v_2})+E({\color{red}v_1^2})\\
+&={\color{red}w_1^2}{\color{green}\sigma_2^2}+{\color{red}\sigma_1^2}
+\end{align*}\tag{17}</script><p>同理有 $\Sigma_{22}={\color{green}\sigma_2^2},\Sigma_{33}={\color{blue}w_3^2}{\color{green}\sigma_2^2}+{\color{blue}\sigma_3^2}$ ，对于协方差矩阵的非对角元素：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Sigma_{12}&=E(x_1x_2)=E(({\color{red}w_1}{\color{green}v_2}+{\color{red}v_1} ){\color{green}v_2})={\color{red}w_1}{\color{green}\sigma_2^2}\\
+\Sigma_{13}&=E(({\color{red}w_1}{\color{green}v_2}+{\color{red}v_1} )({\color{blue}w_3}{\color{green}v_2}+{\color{blue}v_3} ))={\color{red}w_1}{\color{blue}w_3}{\color{green}\sigma_2^2}
+\end{align*}\tag{18}</script><p>以此类推，可以得到整个<strong>协方差矩阵</strong>：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\Sigma=\begin{bmatrix}
+{\color{red}w_1^2}{\color{green}\sigma_2^2}+{\color{red}\sigma_1^2}&{\color{red}w_1}{\color{green}\sigma_2^2}&{\color{red}w_1}{\color{blue}w_3}{\color{green}\sigma_2^2}\\
+{\color{red}w_1}{\color{green}\sigma_2^2}&{\color{green}\sigma_2^2}&{\color{blue}w_3}{\color{green}\sigma_2^2}\\{\color{red}w_1}{\color{blue}w_3}{\color{green}\sigma_2^2}&{\color{blue}w_3}{\color{green}\sigma_2^2}&{\color{blue}w_3^2}{\color{green}\sigma_2^2}+{\color{blue}\sigma_3^2}
+\end{bmatrix}
+\end{align*}\tag{19}</script><p>通过计算<strong>联合高斯分布</strong>从而得到协方差矩阵的逆：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+p(x_1,x_2,x_3)&=p(x_2)p(x_1|x_2)p(x_3|x_2)\\
+&={\color{green}\frac{1}{Z_2}\exp(-\frac{x^2_2}{2\sigma_2^2})}
+{\color{red}\frac{1}{Z_1}\exp(-\frac{(x_1-w_1x_2)^2}{2\sigma_1^2})}
+{\color{blue}\frac{1}{Z_3}\exp(-\frac{(x_3-w_3x_2)^2}{2\sigma_3^2})}\\
+&=\frac{1}{Z}\exp(
+-x_2^2[{\color{green}\frac{1}{2\sigma_2^2} }
++{\color{red}\frac{w_1^2}{2\sigma_1^2} }
+-{\color{blue}\frac{w_3^2}{2\sigma_3^2} }]
+-x_1^2{\color{red}\frac{1}{2\sigma_1^2} }
++2x_1x_2{\color{red}\frac{w_1}{2\sigma_1^2} }
+-x_3^2{\color{blue}\frac{1}{2\sigma_3^2} }
++2x_3x_2{\color{blue}\frac{w_3}{2\sigma_3^2} })\\
+&=\frac{1}{Z}\exp(-\frac{1}{2}
+\begin{bmatrix}x_1&x_2&x_3\end{bmatrix}
+\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }&{\color{red}\frac{w_1}{\sigma_1^2} }&0\\
+{\color{red}\frac{w_1}{\sigma_1^2} }&{\color{red}\frac{w_1^2}{\sigma_1^2} }+{\color{green}\frac{1}{\sigma_2^2} }+{\color{blue}\frac{w_3^2}{\sigma_3^2} }&
+{\color{blue}-\frac{w_3}{\sigma_3^2} }\\
+0&{\color{blue}-\frac{w_3}{\sigma_3^2} }&{\color{blue}-\frac{1}{\sigma_3^2} }
+\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\\x_3\end{bmatrix}
+)
+\end{align*}\tag{20}</script><p>由此得到协方差矩阵的逆，即<strong>信息矩阵</strong>：</p>
+<script type="math/tex; mode=display">
+Λ =\Sigma^{-1} =\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }&{\color{red}\frac{w_1}{\sigma_1^2} }&0\\
+{\color{red}\frac{w_1}{\sigma_1^2} }&{\color{red}\frac{w_1^2}{\sigma_1^2} }+{\color{green}\frac{1}{\sigma_2^2} }+{\color{blue}\frac{w_3^2}{\sigma_3^2} }&
+{\color{blue}-\frac{w_3}{\sigma_3^2} }\\
+0&{\color{blue}-\frac{w_3}{\sigma_3^2} }&{\color{blue}-\frac{1}{\sigma_3^2} }
+\end{bmatrix}\tag{21}</script><p><strong>总结：</strong></p>
+<font color="#660066">协方差矩阵中，非对角元素 $\Sigma_{ij}>0，i\ne j$ 表示两个变量之间是**正相关**；非对角元素 $\Sigma_{ij}=0，i\ne j$ 表示两个变量之间是**相互独立**；</font><br />
+
+<font color="#660066">信息矩阵中，非对角元素 $Λ_{ij}<0，i\ne j$ 甚至于  $Λ_{ij}=0，i\ne j$ ，比如 $Λ_{12} < 0$   表示在变量 $x_3$ 发生的条件下，元素 $x_1$ 和 $x_2$ **正相关**。  </font><br />
+
+### 案例2
+
+类似与案例一，定义 $x_1,x_2,x_3$ 关系如下：
+$$
+x_2=w_1x_1+w_3x_3+v_2\tag{22}
+$$
+比如特征三角化，两个相机 pose 得到特征三维坐标。
+
+<img src="/images/SLAM中的概率基础/image-20220512164657043.png" alt="image-20220512164657043" style="zoom:25%;" />
+
+同理，根据协方差矩阵的定义，可以得到协方差矩阵：
+$$
+\Sigma=\begin{bmatrix}
+{\color{red}\sigma_1^2}&{\color{red}w_1} {\color{red}\sigma_1^2}&0\\
+{\color{red}w_1} {\color{red}\sigma_1^2}
+&{\color{green}\sigma_2^2}+{\color{red}w_1} {\color{red}\sigma_1^2}+{\color{blue}w_3}  {\color{blue}\sigma_3^2}
+&{\color{blue}w_3}  {\color{blue}\sigma_3^2}\\
+0&{\color{blue}w_3}  {\color{blue}\sigma_3^2}&{\color{blue}\sigma_3^2}
+\end{bmatrix}\tag{23}
+$$
+**协方差矩阵中非对角元素为 0 表示变量之 间没有相关性。**这是否意味着信息矩阵中也会为 0 呢？
+
+同样的方法求得协方差矩阵的逆，即**信息矩阵**：
+$$
+Λ =\Sigma^{-1} =\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }
++{\color{green}\frac{w_1^2}{\sigma_2^2} }&{\color{green}-\frac{w_1}{\sigma_2^2} }&{\color{green}\frac{w_1w_3}{\sigma_2^2} }\\
+{\color{green}-\frac{w_1}{\sigma_2^2} }&{\color{green}\frac{1}{\sigma_2^2} }&{\color{green}-\frac{w_3}{\sigma_2^2} }\\
+{\color{green}\frac{w_1w_3}{\sigma_2^2} }&{\color{green}-\frac{w_3}{\sigma_2^2} }&
+{\color{BLUE}\frac{1}{\sigma_3^2} }+{\color{green}\frac{w_3^2}{\sigma_2^2} }
+\end{bmatrix}\tag{24}
+$$
+**总结：**
+
+<font color="#660066">虽然 $x_1$ 和 $x_3$ **不相关**，但是不说明他们的信息矩阵对应元素 $Λ_{13}$
+为 0；恰恰信息矩阵中 $Λ_{13} > 0$, 表示的是在变量 $x_2$ 发生的条件下，变 量$x_1$ 和 $x_3$ 成**负相关**。对应上面的例子即  $x_2$ 为常数，**如果 $x_1$  大，则 $x_3$ 小**。</font><br />
+
+**样例的意义: 非常有助于我们了解 SLAM 的信息矩阵 H 的组成。**
+
+### 去除案例1中变量
+
+如果我们移除变量，信息矩阵或协方差矩阵如何变化呢?
+
+比如对于案例一来说，去除变量$x_3$，那么它的信息矩阵或协方差矩阵如何变化呢?
+
+<img src="/images/SLAM中的概率基础/image-20220512170647991.png" alt="image-20220512170647991" style="zoom:25%;" />
+
+利用协方差的计算公式可知，$x_1 , x_2$ 计算协方差时跟 $x_3$ ，并无关系，所以:
+$$
+\begin{align*}
+\Sigma=\begin{bmatrix}
+{\color{red}w_1^2}{\color{green}\sigma_2^2}+{\color{red}\sigma_1^2}&{\color{red}w_1}{\color{green}\sigma_2^2}&
+\xcancel{ {\color{red}w_1}{\color{blue}w_3}{\color{green}\sigma_2^2} }\\
+{\color{red}w_1}{\color{green}\sigma_2^2}&{\color{green}\sigma_2^2}&
+\xcancel{ {\color{blue}w_3}{\color{green}\sigma_2^2} }\\
+\xcancel{ {\color{red}w_1}{\color{blue}w_3}{\color{green}\sigma_2^2} }&
+\xcancel{ {\color{blue}w_3}{\color{green}\sigma_2^2} }&
+\xcancel{ {\color{blue}w_3^2}{\color{green}\sigma_2^2}+{\color{blue}\sigma_3^2} }
+\end{bmatrix}
+\end{align*}\tag{25}
+$$
+就能得到去除 x 3 后的协方差矩阵：
+$$
+\begin{align*}
+\Sigma=\begin{bmatrix}
+{\color{red}w_1^2}{\color{green}\sigma_2^2}+{\color{red}\sigma_1^2}&{\color{red}w_1}{\color{green}\sigma_2^2}\\
+{\color{red}w_1}{\color{green}\sigma_2^2}&{\color{green}\sigma_2^2}\\
+\end{bmatrix}
+\end{align*}\tag{26}
+$$
+同样，我们只需要把信息矩阵公式 (16) 中 x 3 对应的部分 (蓝色) 去掉 就可以:
+$$
+Λ =\Sigma^{-1} =\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }&{\color{red}\frac{w_1}{\sigma_1^2} }&\xcancel{0}\\
+{\color{red}\frac{w_1}{\sigma_1^2} }&
+{\color{red}\frac{w_1^2}{\sigma_1^2} }+{\color{green}\frac{1}{\sigma_2^2}+\xcancel{ {\color{blue}\frac{w_3^2}{\sigma_3^2} } } }&
+\xcancel{ {\color{blue}-\frac{w_3}{\sigma_3^2} } }\\
+\xcancel{0}&
+\xcancel{ {\color{blue}-\frac{w_3}{\sigma_3^2} } }&
+\xcancel{ {\color{blue}-\frac{1}{\sigma_3^2} } }
+\end{bmatrix}\tag{27}
+$$
+从而得到：
+$$
+Λ =\Sigma^{-1} =\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }&{\color{red}\frac{w_1}{\sigma_1^2} }\\
+{\color{red}\frac{w_1}{\sigma_1^2} }&
+{\color{red}\frac{w_1^2}{\sigma_1^2} }+{\color{green}\frac{1}{\sigma_2^2} }\\
+\end{bmatrix}\tag{28}
+$$
+是不是非常简单？但是问题在于：**实际操作过程中并不会有这种颜色标记。**
+
+这时，需要引入 marginalization **(边缘化)** 和 Schur’s complement **(舒尔补)**来解决这个问题。
+
+# 舒尔补及其应用
+
+## 舒尔补的概念
+
+给定任意矩阵块 $M$，如下所示：
+$$
+M=\begin{bmatrix}A&B\\C&D\end{bmatrix}\tag{29}
+$$
+如果，矩阵块 $D$ 是可逆的，则 $A − BD^{−1} C$称之为 $D$ 关于 $M$ 的舒尔补。
+
+如果，矩阵块 $A$ 是可逆的，则 $D − CA^{−1} B$ 称之为 $A$ 关于 $M$ 的舒尔补。
+
+## 舒尔补的来由
+
+将 $M$ 矩阵变成上三角或者下三角形过程中，都会遇到舒尔补：
+$$
+\begin{align*}
+\begin{bmatrix}
+I&0\\-CA^{-1}&I
+\end{bmatrix}
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}=
+\begin{bmatrix}
+A&B\\0&\Delta_A
+\end{bmatrix}\\
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}
+\begin{bmatrix}
+I&-A^{-1}B\\0&I
+\end{bmatrix}=
+\begin{bmatrix}
+A&0\\C&\Delta_A
+\end{bmatrix}
+\end{align*}\tag{30}
+$$
+其中：$∆_A = D − CA^{−1} B$。联合起来，将 $M$ 变形成对角形：
+$$
+\begin{bmatrix}
+I&0\\-CA^{-1}&I
+\end{bmatrix}
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}
+\begin{bmatrix}
+I&-A^{-1}B\\0&I
+\end{bmatrix}=
+\begin{bmatrix}
+A&0\\0&\Delta_A
+\end{bmatrix}\tag{31}
+$$
+反过来，我们又能从对角形恢复成矩阵 $M$：
+$$
+\begin{bmatrix}
+I&0\\CA^{-1}&I
+\end{bmatrix}
+\begin{bmatrix}
+A&0\\0&\Delta_A
+\end{bmatrix}
+\begin{bmatrix}
+I&A^{-1}B\\0&I
+\end{bmatrix}=
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}
+\tag{32}
+$$
+
+## 舒尔补分解的好处
+
+**快速求解矩阵 M 的逆**。由于矩阵 $M$ 可以写成：
+$$
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}=
+\begin{bmatrix}
+I&0\\CA^{-1}&I
+\end{bmatrix}
+\begin{bmatrix}
+A&0\\0&\Delta_A
+\end{bmatrix}
+\begin{bmatrix}
+I&A^{-1}B\\0&I
+\end{bmatrix}
+\tag{33}
+$$
+由此可得到矩阵 $M$ 的逆：
+$$
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}^{-1}=
+\begin{bmatrix}
+I&-A^{-1}B\\0&I
+\end{bmatrix}
+\begin{bmatrix}
+A^{-1}&0\\0&\Delta_A^{-1}
+\end{bmatrix}
+\begin{bmatrix}
+I&0\\-CA^{-1}&I
+\end{bmatrix}
+\tag{34}
+$$
+我们发现，原本复杂的求逆矩阵的过程变得更加容易了。
+
+## 舒尔补应用于多元高斯分布
+
+假设多元变量 $x$ 服从高斯分布，且由两部分组成：$x=\begin{bmatrix}a\\b\end{bmatrix}$，变量之间的协方差矩阵为：
+$$
+K=\begin{bmatrix}Cov(a,a)&Cov(a,b)\\Cov(b,a)&Cov(b,b)\end{bmatrix}=\begin{bmatrix}A&C^T\\C&D\end{bmatrix}\tag{35}
+$$
+依据公式 $(6)$ ，变量 $x$ 的概率分布为：
+$$
+P(a,b)=p(b|a)p(a)∝\exp
+\left(
+-\frac{1}{2}
+\begin{bmatrix}a\\b\end{bmatrix}^T
+\begin{bmatrix}A&C^T\\C&D\end{bmatrix}^{-1}
+\begin{bmatrix}a\\b\end{bmatrix}
+\right)\tag{36}
+$$
+利用舒尔补进行分解指数部分：
+$$
+\begin{align*}
+&∝\exp\left(-\frac{1}{2}\begin{bmatrix}a\\b\end{bmatrix}^T\begin{bmatrix}A&C^T\\C&D\end{bmatrix}^{-1}\begin{bmatrix}a\\b\end{bmatrix}\right)\\
+&∝\exp\left(-\frac{1}{2}\begin{bmatrix}a\\b\end{bmatrix}^T\begin{bmatrix}
+I&-A^{-1}C^T\\0&I\end{bmatrix}\begin{bmatrix}A^{-1}&0\\0&\Delta_A^{-1}\end{bmatrix}\begin{bmatrix}I&0\\-CA^{-1}&I\end{bmatrix}\begin{bmatrix}a\\b\end{bmatrix}\right)\\
+&∝\exp\left(-\frac{1}{2}\begin{bmatrix}a^T&(b-CA^{-1}a)^T\end{bmatrix}\begin{bmatrix}A^{-1}&0\\0&\Delta_A^{-1}\end{bmatrix}\begin{bmatrix}a\\b-CA^{-1}a\end{bmatrix}\right)\\
+&∝\exp\left(-\frac{1}{2}(a^TA^{-1}a)+(b-CA^{-1}a)^T)\Delta_A^{-1}(b-CA^{-1}a)\right)\\
+&∝\exp\left(-\frac{1}{2}(a^TA^{-1}a)\right)\exp\left(-\frac{1}{2}(b-CA^{-1}a)^T)\Delta_A^{-1}(b-CA^{-1}a)\right)\\
+&∝p(a)p(b|a)
+\end{align*}\tag{37}
+$$
+类似与公式 $(6)$ 的贝叶斯公式，我们将联合概率分解成条件概率和边缘概率的乘积。对于高斯分布而言，我们可以从多元高斯分布 $P(a,b)$ 中分解得到边际概率 $p(a)$ 和 条件概率 $p(b|a)$。
+
+###  $P(a), P(b|a)$ 的协方差矩阵
+
+$P(a)$ 的启示:
+$$
+P(a)∝\exp
+\left(
+-\frac{1}{2}a^TA^{-1}a
+\right)\sim\mathcal{N}(0,A)\tag{38}
+$$
+<font color="#660066">**启示：边际概率的协方差就是从联合分布中取对应的矩阵块就行了。**</font>
+
+<p>$P(b|a)$ 的启示:</p>
+<script type="math/tex; mode=display">
+P(b|a)∝\exp
+\left(
+-\frac{1}{2}(b-CA^{-1}a)^T\Delta_A^{-1}(b-CA^{-1}a)\tag{39}
+\right)</script><font color="#660066">**启示：$P(b|a)\sim \mathcal{N} (CA^{−1} a,\Delta_A )$。协方差变为 $a$ 对应的舒尔补，均值也变了。**</font>
+
+<h3 id="P-a-P-b-a-的信息矩阵"><a href="#P-a-P-b-a-的信息矩阵" class="headerlink" title="$P(a), P(b|a)$ 的信息矩阵"></a>$P(a), P(b|a)$ 的信息矩阵</h3><p><strong>为什么要讨论 $P (a), P (b|a)$ 的信息矩阵？</strong><br>因为基于优化的 SLAM 问题中，我们往往直接操作的是<strong>信息矩阵</strong>，而不是协方差矩阵。所以，有必要知道边际概率，条件概率的信息矩阵是何形式。</p>
+<p>假设已知信息矩阵：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}^{-1}=
+\begin{bmatrix}
+Λ_{aa}&Λ_{ab}\\Λ_{ba}&Λ_{bb}
+\end{bmatrix}\tag{40}</script><p>另外，由公式 $(34)$ 可知，协方差矩阵各块和信息矩阵之间有：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+A&B\\C&D
+\end{bmatrix}^{-1}=
+\begin{bmatrix}
+A^{-1}+A^{-1}C^T\Delta_A^{-1}CA^{-1}
+&-A^{-1}C^T\Delta_A^{-1}\\
+-\Delta_A^{-1}CA^{-1}&\Delta_A^{-1}
+\end{bmatrix}
+\triangleq
+\begin{bmatrix}
+Λ_{aa}&Λ_{ab}\\Λ_{ba}&Λ_{bb}
+\end{bmatrix}\tag{41}</script><p>其中：$∆_A^{-1} = [D − CA^{−1} B]^{-1}$。</p>
+<p>由条件概率 $P (b|a)$ 的协方差为 $∆_A$ 以及公式 $(41)$，易得其<strong>信息矩阵</strong>为：</p>
+<script type="math/tex; mode=display">
+∆_A^{-1}=Λ_{bb}\tag{42}</script><p>由边际概率 $P (a)$ 的协方差为 $A$ 以及公式$(41)$，易得其<strong>信息矩阵</strong>为：</p>
+<script type="math/tex; mode=display">
+A^{-1}=Λ_{aa}-Λ_{ab}Λ_{bb}^{-1}Λ_{ba}\tag{43}</script><h2 id="回顾样例"><a href="#回顾样例" class="headerlink" title="回顾样例"></a>回顾样例</h2><p>回顾 “<strong>去除案例1中变量</strong>” 中去除变量 $x_3$ 的操作</p>
+<p><img src="/images/SLAM中的概率基础/image-20220512213456958.png" alt="image-20220512213456958" style="zoom: 33%;" /></p>
+<p>从联合分布 $P (x_1 , x_2 , x_3 )$中 marg 掉变量 $x_3$ ，即 $P (x_1 , x_2 )$ 对应的信息矩阵可以用 公式 $(43)$ 得到。</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+K^{-1}_2&=Λ_{aa}-Λ_{ab}Λ_{bb}^{-1}Λ_{ba}\\
+&=Λ_{aa}-\begin{bmatrix}0\\-\frac{w_3}{\sigma^2_3}\end{bmatrix}\sigma^2_3
+\begin{bmatrix}0&-\frac{w_3}{\sigma^2_3}\end{bmatrix}\\
+&=Λ_{aa}-\begin{bmatrix}0&0\\0&\frac{w_3}{\sigma^2_3}\end{bmatrix}\\
+&=\begin{bmatrix}
+{\color{red}\frac{1}{\sigma_1^2} }&{\color{red}\frac{w_1}{\sigma_1^2} }\\
+{\color{red}\frac{w_1}{\sigma_1^2} }&
+{\color{red}\frac{w_1^2}{\sigma_1^2} }+{\color{green}\frac{1}{\sigma_2^2} }\\
+\end{bmatrix}
+\end{align*}\tag{44}</script><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>边际概率对于协方差矩阵的操作是很容易的，但不好操作信息矩阵。 条件概率恰好相反，对于信息矩阵容易操作，不好操作协方差矩阵。</strong> 表格总结如下:</p>
+<script type="math/tex; mode=display">
+P(a,b)=\mathcal{N}\left(
+\begin{bmatrix}\mu_a\\\mu_b\end{bmatrix},
+\begin{bmatrix}\Sigma_{aa}&\Sigma_{ab}\\\Sigma_{ba}&\Sigma_{bb}\end{bmatrix}
+\right)=
+\mathcal{N}^{-1}
+\left(
+\begin{bmatrix}\eta_a\\\eta_b\end{bmatrix},
+\begin{bmatrix}Λ_{aa}&Λ_{ab}\\Λ_{ba}&Λ_{bb}\end{bmatrix}
+\right)
+\tag{45}</script><p><img src="/images/SLAM中的概率基础/image-20220512215118251.png" alt="image-20220512215118251"></p>
 ]]></content>
+      <categories>
+        <category>数学基础</category>
+      </categories>
+      <tags>
+        <tag>概率基础</tag>
+      </tags>
   </entry>
   <entry>
     <title>六、VIO视觉残差的构建以及雅可比的求取</title>
@@ -4388,6 +4804,7 @@ f(x)&=k_1+k_2(x-x_0)\\
 f(x)=f(x_0)+\frac{\partial f}{\partial x_0}(x-x_0)</script>]]></content>
       <categories>
         <category>SLAM十四讲</category>
+        <category>数学基础</category>
       </categories>
       <tags>
         <tag>后端优化</tag>
