@@ -30,12 +30,18 @@
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="随着 VSLAM 系统不断往新环境探索，就会有新的相机姿态以及看到新的环境特征，最小二乘残差就会越来越多，信息矩阵越来越大，计算量将不断增加。为了保持优化变量的个数在一定范围内，需要使用滑动窗口算法动态增加或移除优化变量。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513195856537.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513203817364.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513210526896.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513213728826.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513212137697.png">
 <meta property="article:published_time" content="2022-05-13T06:57:20.000Z">
-<meta property="article:modified_time" content="2022-05-13T09:20:41.971Z">
+<meta property="article:modified_time" content="2022-05-13T14:03:42.028Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="滑动窗口算法">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513195856537.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/a39e0cda.html">
 
@@ -221,7 +227,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-05-13 14:57:20 / 修改时间：17:20:41" itemprop="dateCreated datePublished" datetime="2022-05-13T14:57:20+08:00">2022-05-13</time>
+              <time title="创建时间：2022-05-13 14:57:20 / 修改时间：22:03:42" itemprop="dateCreated datePublished" datetime="2022-05-13T14:57:20+08:00">2022-05-13</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,14 +266,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>121</span>
+              <span>4.6k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
+              <span>4 分钟</span>
             </span>
 
         </div>
@@ -286,7 +292,87 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
-<p>在学习滑动窗口算法之前，</p>
+<p>在学习滑动窗口算法之前，推荐读者先阅读，<a href="https://lukeyalvin.top/posts/2613d057.html">SLAM中的概率基础</a>以及<a href="https://lukeyalvin.top/posts/48933.html#more">VSLAM中的非线性优化</a>，这两篇博客奠定了本文的基础，有助于对本文的理解。</p>
+<h1 id="引例"><a href="#引例" class="headerlink" title="引例"></a>引例</h1><p>我们知道，SLAM中的优化问题，就是优化一个最小二乘的问题，这里我们首先介绍一个引例。</p>
+<p>如下图所示，存在这么一个图模型，对于图模型大家肯定不是很陌生，了解过g2o的都应该很清楚，图中圆圈表示顶点，是待优化的变量，而顶点之间的边，表示的顶点之间构建的残差。</p>
+<p><img src="/images/滑动窗口算法/image-20220513195856537.png" alt="image-20220513195856537" style="zoom:50%;" /></p>
+<blockquote>
+<p>引自：Matthew R Walter, Ryan M Eustice, and John J Leonard. “Exactly sparse extended information filters for feature-based SLAM”. </p>
+</blockquote>
+<p>对于这样一个系统，我们首先构建出最小二乘，如下：</p>
+<script type="math/tex; mode=display">
+\xi^*=\underset{\xi}{\arg\min}\frac{1}{2}\sum_i\parallel r_i \parallel^2_{\Sigma_i}\tag{1}</script><p>其中，$\xi=[\xi_1,\xi_2,\xi_3,\xi_4,\xi_5,\xi_6]^T$，$r=[r_{12},r_{13},r_{14},r_{15},r_{56}]$</p>
+<p>根据文章<a href="https://lukeyalvin.top/posts/48933.html#more">VSLAM中的非线性优化</a>中提到的，SLAM优化问题，最终运动观测方程优化的部分是<strong>马氏距离</strong>，残差项即为<strong>马氏距离</strong>:</p>
+<script type="math/tex; mode=display">
+\parallel r_i \parallel^2_{\Sigma_i}=r^T\Sigma^{-1}r\tag{2}</script><p>其中 $\Sigma$ 表示残差的<strong>协方差矩阵</strong>， $\Sigma^{-1}$ 表示残差的<strong>信息矩阵</strong>，因此，此处相当于一种<strong>加权的</strong>最小二乘问题。</p>
+<p>应用高斯牛顿法，可以求解上述最小二乘问题的<strong>正规方程</strong>：</p>
+<script type="math/tex; mode=display">
+J^T\Sigma^{-1}J\ \delta\xi = -J^T\Sigma^{-1}\ r\tag{3}</script><p>其中海塞矩阵 $H=J^T\Sigma^{-1}J$，矩阵 $g= -J^T\Sigma^{-1}\ r$，雅可比矩阵为：</p>
+<script type="math/tex; mode=display">
+J=\frac{\partial r}{\partial \xi}=\begin{bmatrix}
+\frac{\partial r_{12} }{\partial \xi}\\\frac{\partial r_{13} }{\partial \xi}\\
+\frac{\partial r_{14} }{\partial \xi}\\\frac{\partial r_{15} }{\partial \xi}\\
+\frac{\partial r_{56} }{\partial \xi}
+\end{bmatrix}=\begin{bmatrix}J_1\\J_2\\J_3\\J_4\\J_5\\J_6 \end{bmatrix}\tag{4}</script><p>其中，$\xi=[\xi_1,\xi_2,\xi_3,\xi_4,\xi_5,\xi_6]^T$，$r=[r_{12},r_{13},r_{14},r_{15},r_{56}]$</p>
+<p>矩阵乘法公式 $(3)$ 可以写成连加：</p>
+<script type="math/tex; mode=display">
+\sum^{5}_{i=1}J^T_i\Sigma^{-1}_i J_i\ \delta\xi=-\sum^{5}_{i=1}J^T_i\Sigma^{-1}_i\ r\tag{5}</script><p>由于每个残差只和某几个状态量有关，因此，雅克比矩阵求导时，无关项的雅克比为 0。比如</p>
+<script type="math/tex; mode=display">
+J_2=\frac{\partial r_{13} }{\partial \xi}=
+\begin{bmatrix}
+\frac{\partial r_{13} }{\partial \xi_1}&0&
+\frac{\partial r_{13} }{\partial \xi_3}&0&0&0
+\end{bmatrix}\tag{6}</script><p>对应的新的信息矩阵：</p>
+<script type="math/tex; mode=display">
+Λ_2=J^T_2\Sigma^{-1}_2J_2=\begin{bmatrix}
+(\frac{\partial r_{13} }{\partial \xi_1})^T\Sigma^{-1}_2\frac{\partial r_{13} }{\partial \xi_1}&0&(\frac{\partial r_{13} }{\partial \xi_1})^T\Sigma^{-1}_2\frac{\partial r_{13} }{\partial \xi_3}&0&0&0\\0&0&0&0&0&0\\
+(\frac{\partial r_{13} }{\partial \xi_3})^T\Sigma^{-1}_2\frac{\partial r_{13} }{\partial \xi_1}&0&(\frac{\partial r_{13} }{\partial \xi_3})^T\Sigma^{-1}_2\frac{\partial r_{13} }{\partial \xi_3}&0&0&0\\
+0&0&0&0&0&0\\0&0&0&0&0&0
+\end{bmatrix}\tag{7}</script><p>同理，可以计算 $Λ_1 , Λ_3 , Λ_4 , Λ_5 $，并且也是稀疏的。</p>
+<p><strong>将五个残差的信息矩阵加起来</strong>，得到样例最终的<strong>信息矩阵</strong> $Λ$，可视化如下：</p>
+<p><img src="/images/滑动窗口算法/image-20220513203817364.png" alt="image-20220513203817364" style="zoom: 33%;" /></p>
+<p>关于稀疏矩阵。我们知道，可以用舒尔消元法或者称之为边缘化，来使之变得稠密，减少计算量。</p>
+<h1 id="基于边际概率的滑动窗口算法"><a href="#基于边际概率的滑动窗口算法" class="headerlink" title="基于边际概率的滑动窗口算法"></a>基于边际概率的滑动窗口算法</h1><h2 id="什么是滑动窗口算法？"><a href="#什么是滑动窗口算法？" class="headerlink" title="什么是滑动窗口算法？"></a>什么是滑动窗口算法？</h2><p><strong>什么是滑动窗口算法</strong></p>
+<p>在引例的条件下，我们知道，一般情况下，SLAM问题构建的残差的信息矩阵是一个稀疏矩阵，在此基础上，我们讨论SLAM中的滑动窗口算法。</p>
+<p>所谓的滑动窗口算法，并没有明确的定义，我做了一个动图，其展示的过程就是滑动窗口算法：</p>
+<p>图</p>
+<p><strong>为什么使用滑动窗口算法？</strong></p>
+<p>那么，使用它有什么好处呢？在文章开篇的概述中已经提及，这里再做强调：</p>
+<ul>
+<li>随着 VSLAM 系统不断往新环境探索，就会有新的相机姿态以及看到新的环境特征，最小二乘残差就会越来越多，信息矩阵越来越大，计算量将不断增加。</li>
+<li>为了保持优化变量的个数在一定范围内，需要使用滑动窗口算法动态<strong>增加或移除优化变量</strong>。</li>
+</ul>
+<p>其实它的作用也是动图中展示的，我们优化的变量就是红色框中的部分，外部的变量不断增加进来，一些历史的变量做清除。</p>
+<p><strong>滑动窗口中的关键问题是什么？</strong></p>
+<p>但是我们需要考虑的关键就是，如何增加或者移除？直接移除吗？比如引例中的变量 $\xi_1$如果直接把顶点连同边一起移除，那么所有的其他变量之间的边可就都没了，边就是误差项，误差都没了，如何优化？这是下面我们需要介绍的重要内容。</p>
+<p><strong>滑动窗口算法大致流程</strong></p>
+<p>① 增加新的变量进入最小二乘系统优化</p>
+<p>② 如果变量数目达到了一定的维度，则移除老的变量。</p>
+<p>③ SLAM 系统不断循环前面两步</p>
+<h2 id="基于边际概率的滑动窗口算法-1"><a href="#基于边际概率的滑动窗口算法-1" class="headerlink" title="基于边际概率的滑动窗口算法"></a>基于边际概率的滑动窗口算法</h2><p>关于这里，有必要回顾文章<a href="https://lukeyalvin.top/posts/2613d057.html">SLAM中的概率基础</a>中的案例，会对此有更加深刻的理解。</p>
+<p>直接丢弃变量和对应的测量值，会损失信息。因此，我们需要选择一种“优雅的”方式丢掉历史信息，正确的做法是使用<strong>边际概率</strong>，将丢弃变量所携带的信息传递给剩余变量。意思就是，历史变量虽然被移除了，但是它的“影响力”还在。</p>
+<p>还是用引例，我们将引例中的历史变量 $\xi_1$ 丢掉，应该如何操作呢？</p>
+<blockquote>
+<p>引自：Matthew R Walter, Ryan M Eustice, and John J Leonard. “Exactly sparse extended information filters for feature-based SLAM”. </p>
+</blockquote>
+<p><img src="/images/滑动窗口算法/image-20220513210526896.png" alt="image-20220513210526896"></p>
+<p>很明显，去除历史变量 $\xi_1$ 之后，其他出现了互相之间的关联，这就是说历史变量 $\xi_1$ 虽然被去除了，但是它把自己的信息传递给其他变量了，虽然自己凉了，但是完成了火炬的传递。</p>
+<p><strong>结论：</strong><span style="color:red;"><strong>marginalization 会使得信息矩阵变稠密！原先条件独立的变量，可能变得相关。</strong></span> 另外，marg的这一特征也给我们启示，就是在SLAM运动观测模型中，marg特征点的时候，我们要<strong>marg那些不被其他帧观测到的特征点</strong>。因为他们不会显著的使得 H 变得稠密。对于那些被其他帧观测到的特征点，要么就别设置为marg，要么就宁愿丢弃，这就是okvis和dso中用到的一些策略。</p>
+<hr>
+<p>那么，如果在移除变量 $\xi_1$ 的同时，加入新的变量 $\xi_7$，整个信息矩阵又如何变化呢？</p>
+<p>如下图所示，在 $t \in [0, k]$s 时刻, 系统中状态量为 $\xi_i , i \in [1, 6]$。</p>
+<p>在第 $k $ 时刻，最小二乘优化完以后，marg 掉变量 $\xi_1$  。被 marg 的状态量记为 $x_m$ , 剩余的变量 $ξ_i , i \in [2, 5]$ 记为 $x_r $，marg 发生以后， $x_m$ 所有的变量以及对应的测量将被丢弃。同时，这部分信息通过 marg 操作传递给了保留变量 $x_r$ 。</p>
+<p>第 $k^′$ 时刻，加入新的观测和状态量  $\xi_7$，新的变量  $\xi_7$ 跟老的变量  $\xi_2$ 之间存在观测信息，能构建残差 $r_{27}$ 。然后开始新一轮最小二乘优化。</p>
+<p><img src="/images/滑动窗口算法/image-20220513213728826.png" alt="image-20220513213728826"></p>
+<p>新残差加上之前 <strong>marg 留下的信息</strong>，构建新的最小二乘系统，对应的信息矩阵的变化如下图所示：</p>
+<p><img src="/images/滑动窗口算法/image-20220513212137697.png" alt="image-20220513212137697" style="zoom:40%;" /></p>
+<p>注意：  $\xi_2$  自身的信息矩阵由两部分组成，一部分是原来的$Λ^{\prime}$  中的老信息，另一部分是新生成的 $Λ_6$中的新信息，这会使得系统存在<strong>潜在风险</strong>。</p>
+<p>新老信息融合的问题在于<strong>旧的求解雅克比矩阵的变量线性化点和和新的求解雅克比矩阵的变量线性化点不同，可能会导致信息矩阵的零空间发生变化，使得不客观的变量变得可观，从而引入错误信息</strong>。对于零空间的介绍在后文中。</p>
+<hr>
+<p><span style="color:red;"><strong>marg 留下的信息到底是啥？</strong></span></p>
+<p>记被 marg 的状态量记为 $x_m$ ，剩下的状态记为 $x_r$</p>
+<h2 id="信息矩阵的零空间变化"><a href="#信息矩阵的零空间变化" class="headerlink" title="信息矩阵的零空间变化"></a>信息矩阵的零空间变化</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/heyijia0327/article/details/52822104">https://blog.csdn.net/heyijia0327/article/details/52822104</a></p>
+<p>在刘毅(稀疏毅)，王京，晓佳等人讨论下，对这张图作出了如下解释：四张能量图中，第一张是说明能量函数E E<em>E</em>由两个同样的非线性函数E 1 E_1<em>E</em>1和E 2 E_2<em>E</em>2组成，我们令函数E = 0 E=0<em>E</em>=0，这时方程的解为x y = 1 xy=1<em>x**y</em>=1，对应图中深蓝色的一条曲线。第二张能量函数图中的E 1 ′ E&#x27;_1<em>E</em>1′对应函数E 1 E_1<em>E</em>1在点(0.5,1.4)处的二阶泰勒展开，第三张能量函数图中的E 2 ′ E&#x27;_2<em>E</em>2′对应函数E 2 E_2<em>E</em>2在点(1.2,0.5)处的二阶泰勒展开。注意这两个近似的能量函数E 1 ′ E&#x27;_1<em>E</em>1′和E 2 ′ E&#x27;_2<em>E</em>2′是在不同的线性点附近对原函数展开得到的。最后一张图就是把这个近似得到的能量函数合并起来，对整个系统E E<em>E</em>的二阶近似。从第四个能量函数图中，我们发现一个大问题，能量函数为0的解由以前的一条曲线变成了一个点，不确定性的东西变得确定了，专业的术语叫不可观的状态变量变得可观了，说明我们人为的引入了错误的信息。回到marg过程，上面这个例子告诉我们，marg时，被marg的那些变量的雅克比已经不更新了，而此时留在滑动窗口里的其他变量的雅克比要用和marg时一样的线性点，就是FEJ去算，不要用新的线性点了。有了这些基础以后，大家可以再去看看王京，张腾大神们在知乎上关于FEJ更理论的表述，<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/52869487/noti-answers?group_id=784455517954142208">链接请戳</a>。</p>
 
     </div>
 
@@ -424,6 +510,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BC%95%E4%BE%8B"><span class="nav-text">引例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%BE%B9%E9%99%85%E6%A6%82%E7%8E%87%E7%9A%84%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%AE%97%E6%B3%95"><span class="nav-text">基于边际概率的滑动窗口算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%AE%97%E6%B3%95%EF%BC%9F"><span class="nav-text">什么是滑动窗口算法？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%BE%B9%E9%99%85%E6%A6%82%E7%8E%87%E7%9A%84%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E7%AE%97%E6%B3%95-1"><span class="nav-text">基于边际概率的滑动窗口算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%A1%E6%81%AF%E7%9F%A9%E9%98%B5%E7%9A%84%E9%9B%B6%E7%A9%BA%E9%97%B4%E5%8F%98%E5%8C%96"><span class="nav-text">信息矩阵的零空间变化</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -765,12 +852,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">476k</span>
+    <span title="站点总字数">481k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:13</span>
+    <span title="站点阅读时长">7:17</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
