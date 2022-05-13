@@ -25,20 +25,26 @@
 
   <meta name="description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SLAM中的非线性优化">
+<meta property="og:title" content="VSLAM中的非线性优化">
 <meta property="og:url" content="https://lukeyalvin.top/posts/48933.html">
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="由于噪声的存在，运动方程和观测方程的等式必定不是精确成立的。即使我们有着高精度的相机，运动方程和观测方程也只能近似的成立。所以，与其假设数据必须符合方程，不如来讨论，如何在有噪声的数据中进行准确的状态估计。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513154553510.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220405145736323.png">
-<meta property="article:published_time" content="2022-04-04T06:49:56.115Z">
-<meta property="article:modified_time" content="2022-05-02T13:30:49.542Z">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513160409346.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513161314472.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513161435601.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513161821872.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513165129947.png">
+<meta property="article:published_time" content="2022-05-13T06:57:20.000Z">
+<meta property="article:modified_time" content="2022-05-13T09:16:08.307Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
-<meta property="article:tag" content="后端优化">
 <meta property="article:tag" content="最小二乘法">
+<meta property="article:tag" content="后端优化">
 <meta property="article:tag" content="BA与图优化">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220405145736323.png">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/SLAM中的非线性优化数学推导/image-20220513154553510.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/48933.html">
 
@@ -53,7 +59,7 @@
   };
 </script>
 
-  <title>SLAM中的非线性优化 | Lukey Alvin</title>
+  <title>VSLAM中的非线性优化 | Lukey Alvin</title>
   
 
 
@@ -213,7 +219,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          SLAM中的非线性优化
+          VSLAM中的非线性优化
         </h1>
 
         <div class="post-meta">
@@ -222,16 +228,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-04-04 14:49:56" itemprop="dateCreated datePublished" datetime="2022-04-04T14:49:56+08:00">2022-04-04</time>
+              <time title="创建时间：2022-05-13 14:57:20 / 修改时间：17:16:08" itemprop="dateCreated datePublished" datetime="2022-05-13T14:57:20+08:00">2022-05-13</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-02 21:30:49" itemprop="dateModified" datetime="2022-05-02T21:30:49+08:00">2022-05-02</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -269,14 +269,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>7.6k</span>
+              <span>12k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
+              <span>10 分钟</span>
             </span>
 
         </div>
@@ -300,60 +300,60 @@
 \begin{align*}
 x_k&=f(x_{k-1},u_{k})+w_{k}\\
 z_{k,j}&=h(y_j,x_k)+v_{k,j}
-\end{align*}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$</p>
+\end{align*}\tag{1}</script><p>其中$w_{k}$为过程噪声(Process Noise)，$v_k$为测量噪声(Measurement Noise)，暂且认为它们符合高斯分布，即$p_{(w)}\sim N(0,Q)，p_{(v)}\sim N(0,R)$，其中$0$表示期望，$Q,R$代表协方差矩阵，且$Q=E[ww^T],R=[vv^T]$</p>
 <p>对应视觉$SLAM$，这里的 $x_k $乃是相机的位姿，$u_k$ 是运动传感器的读数（有时也叫输入），$y_j$代表的是相机在$x_k $处观察到的路标，并且观察到$y_j$后，产生了一个观测数据 $z_{k,j}$。整个方程里面，求解相机的位姿$x_k $就是一个定位的问题，而求解路标$y_j$就是一个建图的过程，但是由于噪声$w_{k}，v_{k,j}$的影响，我们得到的传感器数据$u_k$ 和$z_{k,j}$肯定不是完全准确的，因此需要使用这两组不太准确的数据，寻找一个相对最优的相机位姿$x_k $以及路标$y_j$。这个过程就是SLAM中的非线性优化问题。</p>
 <h2 id="需要优化什么？"><a href="#需要优化什么？" class="headerlink" title="需要优化什么？"></a>需要优化什么？</h2><p>我们把所有带估计的数据放在一个集合：</p>
 <script type="math/tex; mode=display">
-x=\left\{x_1,....,x_N,y_1,...y_M\}\right.</script><p>那么，我们的问题就变成求已知输入数据 $u$ 和观测数据 $z$ 的条件下，计算状态 $x$ 的条件概率分布：</p>
+x=\left\{x_1,....,x_N,y_1,...y_M\}\right.\tag{2}</script><p>那么，我们的问题就变成求已知输入数据 $u$ 和观测数据 $z$ 的条件下，计算状态 $x$ 的条件概率分布：</p>
 <script type="math/tex; mode=display">
-P(x|z,u)</script><hr>
+P(x|z,u)\tag{3}</script><hr>
 <p>但是多数情况下，我们只有相机观察到的一帧帧的图片$z_{k,j}$，即只考虑观测方程带来的数据时，没有运动传感器$u_k$ ，这个概率分布就变成$P(x|z)$，利用贝叶斯法则：</p>
 <script type="math/tex; mode=display">
-P(x|z)=\frac{P(z|x)P(x)}{P(z)}∝P (z|x) P (x) .</script><p>$\frac{P(z|x)P(x)}{P(z)}$称为后验估计，$P (z|x)$ 称为似然，另一部分$ P (x)$ 称为先验。</p>
+P(x|z)=\frac{P(z|x)P(x)}{P(z)}∝P (z|x) P (x) .\tag{4}</script><p>$\frac{P(z|x)P(x)}{P(z)}$称为<strong>后验估计</strong>，$P (z|x)$ 称为<strong>似然</strong>，另一部分$ P (x)$ 称为<strong>先验</strong>。</p>
 <p>直接求后验分布是困难的，但是求一个状态最优估计，使得在该状态下，后验概率最大化（Maximize a Posterior，MAP），则是可行的：</p>
 <script type="math/tex; mode=display">
-x^∗_{MAP} = arg max P (x|z) = arg max P (z|x)P (x).</script><p>但是当我们不知道机器人位姿大概在什么地方，此时就没有了先验,那么，可以求解$x $的最大似然估计（Maximize Likelihood Estimation, MLE）：</p>
+x^∗_{MAP} = \arg \max P (x|z) = \arg \max P (z|x)P (x).\tag{5}</script><p>但是当我们不知道机器人位姿大概在什么地方，此时就没有了先验,那么，可以求解$x $的最大似然估计（Maximize Likelihood Estimation, MLE）：</p>
 <script type="math/tex; mode=display">
-x^∗_{MLE} = arg max P (z|x)</script><p>最大似然估计的含义就是：相机在什么样的状态下（这里指集合$x$即为相机位姿$x_{k}$以及路标$y_{j}$），最可能产生当前观测到的数据$z_{k,j}$。</p>
+x^∗_{MLE} = \arg \max P (z|x)\tag{6}</script><p>最大似然估计的含义就是：相机在什么样的状态下（这里指集合$x$即为相机位姿$x_{k}$以及路标$y_{j}$），最可能产生当前观测到的数据$z_{k,j}$。</p>
 <p><strong>所以我们需要优化的内容就是：求解最优的$x_k , y_j$，使得观测方程带来的最小误差，此时就是求$x$（或者是说$x_k , y_j$）的最大似然然估计。</strong></p>
 <h2 id="最小二乘问题"><a href="#最小二乘问题" class="headerlink" title="最小二乘问题"></a>最小二乘问题</h2><p>只考虑观测方程：</p>
 <script type="math/tex; mode=display">
-z_{k,j}=h(y_j,x_k)+v_{k,j}</script><p>由于我们假设了噪声项 $v_k ∼ N (0, Q)$，所以观测数据的条件概率为：</p>
+z_{k,j}=h(y_j,x_k)+v_{k,j}\tag{7}</script><p>由于我们假设了噪声项 $v_k ∼ N (0, Q)$，所以观测数据的条件概率为：</p>
 <script type="math/tex; mode=display">
-P (z_{j,k} |x_k , y_j ) = N (h(y_j , x_k ), Q) .</script><p>我们的目标就是最大化$x_k , y_j$，使得该状态下最可能产生当前观测到的数据$z_{k,j}$。</p>
-<p>考虑一个任意的高维高斯分布 $x ∼ N (µ, Σ)$，它的概率密度函数展开形式为:</p>
+P (z_{j,k} |x_k , y_j ) = N (h(y_j , x_k ), Q) .\tag{8}</script><p>我们的目标就是最大化$x_k , y_j$，使得该状态下最可能产生当前观测到的数据$z_{k,j}$。</p>
+<p>考虑一个任意的高维高斯分布 $x ∼ N (\mu, \Sigma)$，它的概率密度函数展开形式为:</p>
 <script type="math/tex; mode=display">
 \begin{align*}
-p(x)=\frac{1}{\sqrt{(2\pi)^N det(Σ)} }exp(−(x−\mu)Σ^{-1} (x−\mu))
-\end{align*}</script><p>取负对数:</p>
+p(x)=\frac{1}{\sqrt{(2\pi)^N det(\Sigma)} }exp(−(x−\mu)\Sigma^{-1} (x−\mu))
+\end{align*}\tag{9}</script><p>取负对数:</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 -ln(p(x))=\frac{1}{2}ln((2\pi)^N det(Σ))+\frac{1}{2}(x−\mu)^TΣ^{-1} (x−\mu)
-\end{align*}</script><p>对原分布求最大化相当于对负对数求最小化。在最小化上式的 $x$ 时，第一项与 $x $无关，可以略去于是，只要最小化右侧的二次型项。带入SLAM观测模型：</p>
+\end{align*}\tag{10}</script><p>对原分布求最大化相当于对负对数求最小化。在最小化上式的 $x$ 时，第一项与 $x $无关，可以略去于是，只要最小化右侧的二次型项。带入 SLAM <strong>观测模型</strong>：</p>
 <script type="math/tex; mode=display">
-x^*=argmin((z_{k,j}-h(x_k,y_j))^TQ^{-1}_{k,j}(z_{k,j}-h(x_k,y_j)))</script><p>定义：</p>
+x^*=\arg\min\left((z_{k,j}-h(x_k,y_j))^TQ^{-1}_{k,j}(z_{k,j}-h(x_k,y_j))\right)\tag{11}</script><p>定义：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 e_{v,k}&=x_k-f(x_{k-1},u_k)\\
 e_{u,j,k}&=z_{k,j}-h(x_k,y_j)
-\end{align*}</script><p>考虑运动与观测方程结合来看，我们求解的就是总的误差的平方和：</p>
+\end{align*}\tag{12}</script><p>考虑运动与观测方程结合来看，我们求解的就是总的<strong>误差的平方和</strong>：</p>
 <script type="math/tex; mode=display">
-J(x)=\sum_ke^T_{v,k}R^{-1}e_{v,k}+\sum_k\sum_je^T_{y,k,j}Q^{-1}e_{y,k,j}</script><p>这就得到了一个总体意义下的最小二乘问题（Least Square Problem）。我们明白它的最优解等价于状态的最大似然估计。直观来讲，由于噪声的存在，当我们把估计的轨迹与地图代入 SLAM 的运动、观测方程中时，它们并不会完美的成立。这时候怎么办呢？我们把状态的估计值进行微调，使得整体的误差下降一些。当然这个下降也有限度，它一般会到达一个极小值。这就是一个典型非线性优化的过程。</p>
+J(x)=\sum_ke^T_{v,k}R^{-1}e_{v,k}+\sum_k\sum_je^T_{y,k,j}Q^{-1}e_{y,k,j}\tag{13}</script><p>这就得到了一个总体意义下的<strong>最小二乘问题</strong>（Least Square Problem）。我们明白它的最优解等价于状态的最大似然估计。直观来讲，由于噪声的存在，当我们把估计的轨迹与地图代入 SLAM 的运动、观测方程中时，它们并不会完美的成立。这时候怎么办呢？我们把状态的估计值进行微调，使得整体的误差下降一些。当然这个下降也有限度，它一般会到达一个极小值。这就是一个典型非线性优化的过程。</p>
 <h2 id="非线性函数线性化"><a href="#非线性函数线性化" class="headerlink" title="非线性函数线性化"></a>非线性函数线性化</h2><p>在非线性优化的过程中，由于高斯分布经过非线性映射后不会再符合高斯分布，因此，一般我们对非线性进行线性化，这里用到泰勒级数：</p>
 <p>泰勒级数展开式：对于函数$f(x)$在任意一点$x_0$处展开</p>
 <script type="math/tex; mode=display">
-f(x)=f(x_0)+\frac{f^\prime(x_0)}{1!}(x-x_0)+\frac{f^{\prime \prime}(x_0)}{2!}(x-x_0)^2+...+\frac{f^{(n)}(x_0)}{1!}(x-x_0)^{n}</script><p>一般当$x-x_0\rightarrow0$时，则$(x-x_0)^{n}\rightarrow0,n\geq 2$，只取一阶泰勒：</p>
+f(x)=f(x_0)+\frac{f^\prime(x_0)}{1!}(x-x_0)+\frac{f^{\prime \prime}(x_0)}{2!}(x-x_0)^2+...+\frac{f^{(n)}(x_0)}{1!}(x-x_0)^{n}\tag{14}</script><p>一般当$x-x_0\rightarrow0$时，则$(x-x_0)^{n}\rightarrow0,n\geq 2$，只取一阶泰勒：</p>
 <script type="math/tex; mode=display">
-f(x)=f(x_0)+f^\prime(x_0)(x-x_0)</script><p>如果对于二维以上的，我们的一阶泰勒展开如下：</p>
+f(x)=f(x_0)+f^\prime(x_0)(x-x_0)\tag{15}</script><p>如果对于二维以上的，我们的一阶泰勒展开如下：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
 f(x，y)&=f(x_0)+\frac{\partial f}{\partial x}|_{x=x_0}(x-x_0)\\
 &=f(x_0)+J(x)(x-x_0)
-\end{align*}</script><p>这里的雅克比矩阵代表的就是$f(x)$对于$x$的偏导数。</p>
+\end{align*}\tag{16}</script><p>这里的雅克比矩阵代表的就是$f(x)$对于$x$的偏导数。</p>
 <h1 id="求解非线性最小二乘"><a href="#求解非线性最小二乘" class="headerlink" title="求解非线性最小二乘"></a>求解非线性最小二乘</h1><p>对于上文，我们知道通过把最大似然估计问题转化为最小化其负对数的问题，其实就是求解一个非线性函数的最小值的问题，我们暂且考虑一个问题，我们有一个非线性的函数$f(x)$，如何求解它的最小值？</p>
 <p>这就是一个简单的最小二乘问题：</p>
 <script type="math/tex; mode=display">
-\underset{x}{min}\frac{1}{2}\parallel f(x) \parallel^2</script><p>这里自变量 $x\in \mathbb R^n$ ，$f $是任意一个非线性函数，我们设它有 $m $维：$f (x) \in \mathbb R^m$ 。</p>
+\underset{x}{min}\frac{1}{2}\parallel f(x) \parallel^2\tag{17}</script><p>这里自变量 $x\in \mathbb R^n$ ，$f $是任意一个非线性函数，我们设它有 $m $维：$f (x) \in \mathbb R^m$ 。</p>
 <p>一般求解就是类似于二元函数求极值，对$x$求导，使得$\frac{df}{dx}=0$，即可得到$f(x)$的极值，但是也不是绝对的，我们知道这个点可能是极大值、极小值也可能是鞍点，因此需要比较所有使得$\frac{df}{dx}=0$的自变量对应的函数值$f(x)$.</p>
 <p>但是在SLAM中，$f(x)$将是一个复杂的非线性方程，所以一般我们使用迭代的方法，从一个初始值出发，不断地更新当前的优化变量，使目标函数下降，具体步骤如下：</p>
 <ul>
@@ -368,33 +368,33 @@ f(x，y)&=f(x_0)+\frac{\partial f}{\partial x}|_{x=x_0}(x-x_0)\\
 <h2 id="一阶和二阶梯度法"><a href="#一阶和二阶梯度法" class="headerlink" title="一阶和二阶梯度法"></a>一阶和二阶梯度法</h2><p>我们之前介绍过非线性的线性化方法，我们可以将一个非线性函数在某个点附件进行泰勒展开。</p>
 <p>比如：对于增量方程在$x$附近进行泰勒展开：</p>
 <script type="math/tex; mode=display">
-\parallel f(x+\Delta x)\parallel^2_2\approx\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x</script><p>这里$J$是 $\parallel f(x)\parallel^2$ 关于$ x $的导数（雅可比矩阵），而$ H $则是二阶导数（海塞（Hessian）矩阵）。保留一阶二阶分别就对应了一阶梯度法和二阶梯度法。</p>
+\parallel f(x+\Delta x)\parallel^2_2\approx\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x\tag{18}</script><p>这里$J$是 $\parallel f(x)\parallel^2$ 关于$ x $的导数（雅可比矩阵），而$ H $则是二阶导数（海塞（Hessian）矩阵）。保留一阶二阶分别就对应了一阶梯度法和二阶梯度法。</p>
 <h3 id="一阶梯度法"><a href="#一阶梯度法" class="headerlink" title="一阶梯度法"></a>一阶梯度法</h3><script type="math/tex; mode=display">
-\Delta x^*=argmin\parallel f(x)\parallel^2_2+J(x)\Delta x</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
+\Delta x^*=\arg\min\parallel f(x)\parallel^2_2+J(x)\Delta x\tag{19}</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
 <script type="math/tex; mode=display">
-\Delta x^*=-J^T(x)</script><p>当然，我们还需要该方向上取一个步长$ λ$，求得最快的下降方式。这种方法被称为<strong>最速下降法</strong>。但是它本身也有缺点：最速下降法过于贪心，容易走出锯齿路线，反而增加了迭代次数。</p>
+\Delta x^*=-J^T(x)\tag{20}</script><p>当然，我们还需要该方向上取一个步长$\lambda$，求得最快的下降方式。这种方法被称为<strong>最速下降法</strong>。但是它本身也有缺点：最速下降法过于贪心，容易走出锯齿路线，反而增加了迭代次数。</p>
 <h3 id="二阶梯度-牛顿法"><a href="#二阶梯度-牛顿法" class="headerlink" title="二阶梯度(牛顿法)"></a>二阶梯度(牛顿法)</h3><script type="math/tex; mode=display">
-\Delta x^*=argmin\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
+\Delta x^*=\arg\min\parallel f(x)\parallel^2_2+J(x)\Delta x +\frac{1}{2}\Delta x^TH\Delta x\tag{21}</script><p>对右边等式关于$\Delta x$求导，并令它为0：</p>
 <script type="math/tex; mode=display">
-H\Delta x=-J^T.</script><p>但是牛顿法需要计算目标函数的 $H $矩阵，这在问题规模较大时非常困难，我们通常倾向于避免$ H $的计算。</p>
+H\Delta x=-J^T.\tag{22}</script><p>但是牛顿法需要计算目标函数的 $H $矩阵，这在问题规模较大时非常困难，我们通常倾向于避免$ H $的计算。</p>
 <h2 id="Gauss-Newton"><a href="#Gauss-Newton" class="headerlink" title="Gauss-Newton"></a>Gauss-Newton</h2><p>Gauss Newton 是最优化算法里面最简单的方法之一。它的思想是$f(x)$而不是$f(x)^2$在$x$处进行一阶泰勒展开：</p>
 <script type="math/tex; mode=display">
-f(x+\Delta x)\approx f(x)+J(x)\Delta x</script><p>这里$ J (x)$ 为$ f (x) $关于$ x$ 的导数，实际上是一个$ m × n$ 的矩阵，也是一个雅可比矩阵。</p>
+f(x+\Delta x)\approx f(x)+J(x)\Delta x\tag{23}</script><p>这里$ J (x)$ 为$ f (x) $关于$ x$ 的导数，实际上是一个$ m × n$ 的矩阵，也是一个雅可比矩阵。</p>
 <p>当前的目标是为了寻找下降矢量 $\Delta x$，使得$ f(x+\Delta x)$达到最小。为了求 $\Delta x$，我们需要解一个线性的最小二乘问题：</p>
 <script type="math/tex; mode=display">
-\Delta x^*=argmin\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2</script><p>对上式平方项进行展开：</p>
+\Delta x^*=\arg\min\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2\tag{24}</script><p>对上式平方项进行展开：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
-\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2&=\frac{1}{2}(f(x)+J(x)\Delta x)^T(f(x)+J(x)\Delta x)\\
-&=\frac{1}{2}(\parallel f(x)\parallel^2_2+2f(x)^TJ(x)\Delta x+\Delta x^TJ(x)^TJ(x)\Delta x)\\
-
-\end{align*}</script><p>求上式关于 $\Delta x$ 的导数，并令其为零：</p>
+\frac{1}{2}\parallel f(x)+J(x)\Delta x \parallel^2&=\frac{1}{2}
+\left(f(x)+J(x)\Delta x)^T(f(x)+J(x)\Delta x\right)\\
+&=\frac{1}{2}\left(\parallel f(x)\parallel^2_2+2f(x)^TJ(x)\Delta x+\Delta x^TJ(x)^TJ(x)\Delta x\right)\\
+\end{align*}\tag{25}</script><p>求上式关于 $\Delta x$ 的导数，并令其为零：</p>
 <script type="math/tex; mode=display">
-2J(x)^Tf(x)+2J(x)^TJ(x)\Delta x=0</script><p>化简：</p>
+2J(x)^Tf(x)+2J(x)^TJ(x)\Delta x=0\tag{26}</script><p>化简：</p>
 <script type="math/tex; mode=display">
-J(x)^TJ(x)\Delta x=-J(x)^Tf(x)</script><p>要求解的变量是  $\Delta x$，因此这是一个线性方程组，我们称它为增量方程，也可以称为<strong>高斯牛顿方程 (Gauss Newton equations)</strong> 或者<strong>正规方程 (Normal equations)</strong>。我们把左边的系数定义为 $H$，右边定义为 $g$，那么上式变为：</p>
+J(x)^TJ(x)\Delta x=-J(x)^Tf(x)\tag{27}</script><p>要求解的变量是  $\Delta x$，因此这是一个线性方程组，我们称它为增量方程，也可以称为<strong>高斯牛顿方程 (Gauss Newton equations)</strong> 或者<strong>正规方程 (Normal equations)</strong>。我们把左边的系数定义为 $H$，右边定义为 $g$，那么上式变为：</p>
 <script type="math/tex; mode=display">
-H \Delta x=g</script><p>对比牛顿法可见，Gauss-Newton 用$J(x)^TJ(x)$作为牛顿法中二阶 Hessian 矩阵的近似，从而省略了计算 $H $的过程。求解增量方程是整个优化问题的核心所在。</p>
+H \Delta x=g\tag{28}</script><p>对比牛顿法可见，Gauss-Newton 用$J(x)^TJ(x)$作为牛顿法中二阶 Hessian 矩阵的近似，从而省略了计算 $H $的过程。求解增量方程是整个优化问题的核心所在。</p>
 <p>Gauss Newton 求解步骤：</p>
 <ul>
 <li>给定初始值$x_0$</li>
@@ -404,39 +404,61 @@ H \Delta x=g</script><p>对比牛顿法可见，Gauss-Newton 用$J(x)^TJ(x)$作�
 </ul>
 <p>整个步骤中，增量方程的求解占据着主要地位。原则上，它要求我们所用的近似 $H$ 矩阵是可逆的（而且是正定的），但实际数据中计算得到的 $J(x)^TJ(x)$却只有半正定性。也就是说，在使用 Gauss Newton 方法时，可能出现$J(x)^TJ(x)$为<strong>奇异矩阵</strong>或者<strong>病态 (ill-condition)</strong> 的情况，此时增量的稳定性较差，导致算法不收敛。</p>
 <p>更严重的是，就算我们假设$ H $非奇异也非病态，如果我们求出来的步长$ ∆x $太大，也会导致我们采用的局部近似不够准确，这样一来我们甚至都无法保证它的迭代收敛，哪怕是让目标函数变得更大都是有可能的。</p>
-<h2 id="Levenberg-Marquadt"><a href="#Levenberg-Marquadt" class="headerlink" title="Levenberg-Marquadt"></a>Levenberg-Marquadt</h2><h1 id="BA求解"><a href="#BA求解" class="headerlink" title="BA求解"></a>BA求解</h1><h2 id="投影模型"><a href="#投影模型" class="headerlink" title="投影模型"></a>投影模型</h2><p>从一个世界坐标系中的点 p 出发，把相机的内外参数和畸变都考虑进来，最后投影成像素坐标，一共需要如下几个步骤：</p>
+<h2 id="Levenberg-Marquadt"><a href="#Levenberg-Marquadt" class="headerlink" title="Levenberg-Marquadt"></a>Levenberg-Marquadt</h2><p>由于 Gauss-Newton 方法中采用的近似二阶泰勒展开<strong>只能在展开点附近有较好的近似效果</strong>，所以我们很自然地想到应该给 $\Delta x$ 添加一个信赖区域（$Trust\ Region$），不能让它太大而使得近似不准确。非线性优化种有一系列这类方法，这类方法也被称之为信赖区域方法 $ (Trust\ Region\ Method)$。<strong>在信赖区域里边，我们认为近似是有效的；出了这个区域，近似可能会出问题。</strong> </p>
+<p>那么如何确定这个信赖区域的范围呢？一个比较好的方法是<strong>根据我们的近似模型跟实际函数之间的差异来确定这个范围</strong>：如果差异小，我们就让范围尽可能大；如果差异大，我们就缩小这个近似范围。因此，考虑使用 $(29)$ 来判断泰勒近似是否够好。</p>
+<script type="math/tex; mode=display">
+\rho=\frac{f(x+\Delta x)-f(x)}{J(x)\Delta x }\tag{29}</script><p>$\rho$ 的分子是<strong>实际函数下降</strong>的值，分母是<strong>近似模型下降</strong>的值。如果 $\rho$ 接近于 1，则近似是好的。如果 $\rho$  太小，说明实际减小的值远少于近似减小的值，则认为近似比较差，需要缩小近似范围。反之，如果 $\rho$  比较大，则说明实际下降的比预计的更大，我们可以放大近似范围。</p>
+<p><img src="/images/SLAM中的非线性优化数学推导/image-20220513154553510.png" alt="image-20220513154553510" style="zoom:50%;" /></p>
+<p>我们用 Lagrange 乘子将$(6.24)$ 转化为一个无约束优化问题：</p>
+<script type="math/tex; mode=display">
+\underset{\Delta x_K}{\min}\frac{1}{2}
+\parallel f(x_k)+J(x_k)\Delta x_k
+\parallel^2
+=\frac{\lambda}{2}\parallel D\Delta x \parallel^2\tag{30}</script><p>类似于 Gauss-Newton 中的做法，把它展开后，我们发现该方法最终也是计算增量的线性方程：</p>
+<script type="math/tex; mode=display">
+(H+\lambda D^TD)\Delta x=g\tag{31}</script><p>可以看到，增量方程相比于 Gauss-Newton，多了一项 $\lambda D^T D$。如果考虑它的简化形 式，即 $D = I$，那么相当于求解：</p>
+<script type="math/tex; mode=display">
+(H+\lambda I)\Delta x=g\tag{32}</script><p>我们看到，当参数 $λ$ 比较小时，$H $占主要地位，这说明二次近似模型在该范围内是比 较好的，L-M 方法更接近于 G-N 法。另一方面，当 $λ$ 比较大时，$λI $占据主要地位，L-M 更接近于一阶梯度下降法（即最速下降），这说明附近的二次近似不够好。L-M 的求解方 式，可在一定程度上避免线性方程组的系数矩阵的非奇异和病态问题，提供更稳定更准确 的增量 $∆x$。</p>
+<h1 id="BA求解"><a href="#BA求解" class="headerlink" title="BA求解"></a>BA求解</h1><p>通过前文。我们知道SLAM 中的优化问题什么，而且我们知道优化的数学工具最小二乘法，那么如何进行优化，就是我们下面讨论的主要问题。</p>
+<h2 id="投影模型"><a href="#投影模型" class="headerlink" title="投影模型"></a>投影模型</h2><p>从一个世界坐标系中的点 $p$ 出发，把相机的内外参数和畸变都考虑进来，最后投影成像素坐标，一共需要如下几个步骤：</p>
 <ol>
 <li>首先，把世界坐标转换到相机坐标，这里将用到相机外参数$ (R, t)$：</li>
 </ol>
 <script type="math/tex; mode=display">
-P^\prime=Rp+t=[X^\prime,Y^\prime,Z^\prime]^T</script><ol>
+P^\prime=Rp+t=[X^\prime,Y^\prime,Z^\prime]^T\tag{33}</script><ol>
 <li>然后，将 $P^\prime$ 投至归一化平面，得到归一化坐标：</li>
 </ol>
 <script type="math/tex; mode=display">
-P_c=[u_c,v_c,1]^T=[\frac{X^\prime}{Z^\prime},\frac{Y^\prime}{Z^\prime},1]^T</script><ol>
+P_c=[u_c,v_c,1]^T=[\frac{X^\prime}{Z^\prime},\frac{Y^\prime}{Z^\prime},1]^T\tag{34}</script><ol>
 <li>对归一化坐标去畸变，得到去畸变后的坐标。这里暂时只考虑径向畸变：</li>
 </ol>
 <script type="math/tex; mode=display">
+\begin{align*}
 u_c^\prime=u_c(1+k_1r_c^2+k_2r_c^4)\\
-v_c^\prime=v_c(1+k_1r_c^2+k_2r_c^4)\</script><ol>
+v_c^\prime=v_c(1+k_1r_c^2+k_2r_c^4)\\
+\end{align*}
+\tag{35}</script><ol>
 <li>最后，根据内参模型，计算像素坐标：</li>
 </ol>
 <script type="math/tex; mode=display">
+\begin{align*}
 u_s=f_xu_c^\prime+c_x\\
-v_s=f_yv_c^\prime+c_y</script><p>对于观测方程：</p>
+v_s=f_yv_c^\prime+c_y
+\end{align*}
+\tag{36}</script><p>对于观测方程：</p>
 <script type="math/tex; mode=display">
-z_{k,j}=h(y_j,x_k)+v_{k,j}</script><p>这里的 $x$ 指代此时相机的位姿，即外参 $R, t$，它对应的李代数为 $ξ$。路标 $y$ 即这里的三维点 $p$，而观测数据则是像素坐标$z = [u_s , v_s ]^T $。</p>
+z_{k,j}=h(y_j,x_k)+v_{k,j}\tag{37}</script><p>这里的 $x$ 指代此时相机的位姿，即外参 $R, t$，它对应的李代数为 $ξ$。路标 $y$ 即这里的三维点 $p$，而观测数据则是像素坐标$z = [u_s , v_s ]^T $。</p>
 <p><img src="/images/SLAM中的非线性优化数学推导/image-20220405145736323.png" alt="image-20220405145736323"></p>
 <p>以最小二乘的角度来考虑，那么可以列写关于此次观测的误差：</p>
 <script type="math/tex; mode=display">
-e=z-h(ξ,p)</script><p>设 $z_{ij}$为在位姿 $ξ_i $处观察路标 $p_j $产生的数据，那么整体的损失函数（Cost Function）为：</p>
+e=z-h(\xi,p)\tag{38}</script><p>设 $z_{ij}$为在位姿 $\xi_i $处观察路标 $p_j $产生的数据，那么整体的损失函数（Cost Function）为：</p>
 <script type="math/tex; mode=display">
-\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}\parallel^2=\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel z_{ij}-h(ξ_i,p_j) \parallel^2</script><p>对这个最小二乘进行求解，相当于对位姿和路标同时作了调整，也就是所谓的$BA$。</p>
+\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}\parallel^2=\frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel z_{ij}-h(ξ_i,p_j) \parallel^2\tag{39}</script><p>对这个最小二乘进行求解，相当于对位姿和路标同时作了调整，也就是所谓的$BA$。</p>
 <h2 id="BA求解-1"><a href="#BA求解-1" class="headerlink" title="BA求解"></a>BA求解</h2><p>在整体 $BA$目标函数上，我们必须把自变量定义成所有待优化的变量：</p>
 <script type="math/tex; mode=display">
-x=[\xi_1,...,\xi_m,p_1,...,p_n]^T</script><p>相应的，增量方程中的$ ∆x $则是对整体自变量的增量。在这个意义下，当我们给自变量一个增量时，目标函数变为：</p>
+x=[\xi_1,...,\xi_m,p_1,...,p_n]^T\tag{40}</script><p>相应的，增量方程中的$ ∆x $则是对整体自变量的增量。在这个意义下，当我们给自变量一个增量时，目标函数变为：</p>
 <script type="math/tex; mode=display">
-\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}+F_{ij}\Delta\xi_i+E_{ij}\Delta p_i \parallel^2</script><p>其中$ F_{ij} $表示整个代价函数在当前状态下对<strong>相机姿态</strong>的偏导数，而 $E_{ij}$ 表示该函数对<strong>路标点位置</strong>的偏导。</p>
+\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e_{ij}+F_{ij}\Delta\xi_i+E_{ij}\Delta p_i \parallel^2\tag{41}</script><p>其中$ F_{ij} $表示整个代价函数在当前状态下对<strong>相机姿态</strong>的偏导数，而 $E_{ij}$ 表示该函数对<strong>路标点位置</strong>的偏导。</p>
 <p><strong>观测相机方程关于相机位姿的导数矩阵：</strong></p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -448,34 +470,101 @@ F&=-
 0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
 &-f_y-\frac{f_yY^{′2}}{Z^{′2}}&\frac{f_yX^′Y^′}{Z^{′}}&\frac{f_yX^′}{Z^{′}}
 \end{bmatrix}\\
-\end{align*}</script><p><strong>观测相机方程关于特征点的导数矩阵</strong></p>
+\end{align*}\tag{42}</script><p><strong>观测相机方程关于特征点的导数矩阵</strong></p>
 <script type="math/tex; mode=display">
 E=\begin{bmatrix}
 \frac{f_x}{Z^′}&0&-\frac{f_xX^′}{Z^{′2}}\\
 0&\frac{f_y}{Z^′}&-\frac{f_yY^′}{Z^{′2}}
-\end{bmatrix}R</script><p>关于$E,F$雅可比矩阵的具体求导过程，可以查阅：<a href="https://lukeyalvin.top/posts/20908.html">ch7_求解PnP并使用BA优化</a></p>
+\end{bmatrix}R\tag{43}</script><p>关于$E,F$雅可比矩阵的具体求导过程，可以查阅：<a href="https://lukeyalvin.top/posts/20908.html">ch7_求解PnP并使用BA优化</a></p>
 <p>现在，把相机位姿变量放在一起：</p>
 <script type="math/tex; mode=display">
-x_c=[\xi_1,\xi_2,...,\xi_1]\in\mathbb{R}^{6m}</script><p>并把空间点的变量也放在一起：</p>
+x_c=[\xi_1,\xi_2,...,\xi_m]\in\mathbb{R}^{6m}\tag{44}</script><p>并把空间点的变量也放在一起：</p>
 <script type="math/tex; mode=display">
-x_p=[p_1,p_2,...,p_n]^T\in \mathbb{R}^{3n}</script><p>目标函数变为：</p>
+x_p=[p_1,p_2,...,p_n]^T\in \mathbb{R}^{3n}\tag{45}</script><p>目标函数变为：</p>
 <script type="math/tex; mode=display">
-\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e+F\Delta x_c+E_\Delta x_p \parallel^2</script><p>需要注意的是，该式从一个由<strong>很多个小型二次项之和</strong>，变成了一个更整体的样子。这里的雅可比矩阵 $E $和$ F$ 必须是整体目标函数对整体变量的导数，它将是一个很大块的矩阵，而里头每个小分块，需要由每个误差项的导数 $F_{ij} $和 $E_{ij}$ “拼凑”起来。然后，无论我们使用 $G-N$ 还是$ L-M $方法，最后都将面对增量线性方程：</p>
+\frac{1}{2}\parallel f(x+\Delta x)\parallel^2\approx \frac{1}{2}\sum^m_{i=1}\sum^n_{j=1}\parallel e+F\Delta x_c+E_\Delta x_p \parallel^2\tag{46}</script><p>需要注意的是，该式从一个由<strong>很多个小型二次项之和</strong>，变成了一个更整体的样子。这里的雅可比矩阵 $E $和$ F$ 必须是整体目标函数对整体变量的导数，它将是一个很大块的矩阵，而里头每个小分块，需要由每个误差项的导数 $F_{ij} $和 $E_{ij}$ “拼凑”起来。然后，无论我们使用 $G-N$ 还是$ L-M $方法，最后都将面对增量线性方程：</p>
 <script type="math/tex; mode=display">
-H\Delta x = g</script><p>如果是高斯牛顿，$H$ 取$J^TJ$；列文伯格是 $J^T J + λI $的形式</p>
+H\Delta x = g\tag{47}</script><p>如果是高斯牛顿，$H$ 取$J^TJ$；列文伯格是 $J^T J + λI $的形式</p>
 <p>由于我们把变量归类成了位姿和空间点两种，所以雅可比矩阵可以分块为：</p>
 <script type="math/tex; mode=display">
 J=
 \begin{bmatrix}
 F & E
-\end{bmatrix}</script><p>其中$F$是$2 × 6$的矩阵，$E$是$2 × 3$的矩阵.</p>
+\end{bmatrix}\tag{48}</script><p>其中$F$是$2 × 6$的矩阵，$E$是$2 × 3$的矩阵.</p>
 <p>以 G-N 为例，则 H 矩阵为：</p>
 <script type="math/tex; mode=display">
 H=J^TJ=
 \begin{bmatrix}
 F^TF & F^TE\\
 E^TF & E^TE
-\end{bmatrix}</script><p>在SLAM中我们会考虑H矩阵的稀疏性，进而加速BA的求解。</p>
+\end{bmatrix}\tag{49}</script><p>在SLAM中我们会考虑H矩阵的稀疏性，进而加速BA的求解。</p>
+<h2 id="稀疏性和边缘化"><a href="#稀疏性和边缘化" class="headerlink" title="稀疏性和边缘化"></a>稀疏性和边缘化</h2><p>在视觉 SLAM 中，一个图像就会提出数百个特征点，大大增加了这个线性方程的规模。如果直接对 H 求逆来计算增量方程，由于矩阵求逆是复杂度为 $O(n^3 )$ 的操作，这是非常消耗计算资源的。幸运地是，这里的 H 矩阵是有一定的特殊结构的。利用这个特殊结构，我们可以加速求解过程。</p>
+<p>21 世纪视觉 SLAM 的一个重要进展是认识到了矩阵 H 的稀疏结构，并发现该结构可以自然、显式地用图优化来表示 。</p>
+<p>举例：假设一个场景内有 $2$ 个相机位姿 $(C_1 , C_2 )$ 和 $6$ 个路标 $(P_1 , P_2 , P_3 , P_4 , P_5 , P_6 )$。这些相机和点云所对应的变量为 $ξ_i , i = 1, 2$ 以及 $p_j , j = 1, . . . , 6$。相机 $C_1$ 观测到路标 $P_1 , P_2 , P_3 , P_4$ ，相机 $C_2$ 观测到了路标 $P_3 , P_4 , P_5 , P_6$ 。</p>
+<p>如图所示：相机和路标以圆形节点表示。如果 $i$ 相机能够观测到 $j$ 点云，我们就在它们对应的节点连上一条边。</p>
+<p><img src="/images/SLAM中的非线性优化数学推导/image-20220513160409346.png" alt="image-20220513160409346" style="zoom: 50%;" /></p>
+<p>可以推出该场景下的 BA 目标函数应该是：</p>
+<script type="math/tex; mode=display">
+\frac{1}{2}\left(
+\parallel e_{11} \parallel^2+\parallel e_{12} \parallel^2+\parallel e_{13} \parallel^2+
+\parallel e_{14} \parallel^2+\parallel e_{23} \parallel^2+\parallel e_{24} \parallel^2+
+\parallel e_{25} \parallel^2+\parallel e_{26} \parallel^2
+\right)\tag{50}</script><p>这里的 $e_{ij}$ 使用之前定义过的代价函数，即式 $(39)$。以 $e_{11}$ 为例，它描述了在 $C_1$ 看到了 $P_1$ 这件事，与其他的相机位姿和路标无关。令 $J_{11}$  为  $e_{11}$  所对应的雅可比矩阵，不难看出  $e_{11}$  对相机变量 $\xi_2$ 和路标点 $p_2 , . . . , p_6$ 的偏导都为 0。我们把所有变量以 $x = (ξ_1 , ξ_2 , p_1 , . . . , p_6 )^T$ 的顺序摆放，则有：</p>
+<script type="math/tex; mode=display">
+J_{11}=\frac{\partial e_{11} }{\partial x}
+=\left(
+\frac{\partial e_{11} }{\partial \xi_1},0,\frac{\partial e_{11} }{\partial p_1}
+,0,0,0,0,0
+\right)\tag{51}</script><p><img src="/images/SLAM中的非线性优化数学推导/image-20220513161314472.png" alt="image-20220513161314472" style="zoom:50%;" /></p>
+<p>类似地，可以推导出如下图案：</p>
+<p><img src="/images/SLAM中的非线性优化数学推导/image-20220513161435601.png" alt="image-20220513161435601"></p>
+<p>现在考虑更一般的情况，假如我们有 $m$ 个相机位姿，$n $ 个路标点。由于通常路标数量 远远会比相机多，于是有 $n ≫ m$。由上面推理可知，实际当中的 H 矩阵会像下图所示的那样。它的左上角块显得非常小，而右下角的对角块占据了大量地方。除此之外，非 对角部分则分布着散乱的观测数据。由于它的形状很像箭头，又称为<strong>箭头形（Arrow-like） 矩阵</strong>。同时它又很像一把镐子，所以也叫<strong>镐形矩阵</strong>。</p>
+<p><img src="/images/SLAM中的非线性优化数学推导/image-20220513161821872.png" alt="image-20220513161821872" style="zoom:50%;" /></p>
+<p>于是，对应的线性方程组也可以由 $H∆x = g $ 变为如下形式：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+B&E\\E^T&C
+\end{bmatrix}
+\begin{bmatrix}
+\Delta x_c\\\Delta x_p
+\end{bmatrix}=
+\begin{bmatrix}
+v\\w
+\end{bmatrix}\tag{52}</script><p>其中 $B$ 是对角块矩阵，每个对角块的维度和相机参数的维度相同，对角块的个数是相机变量的个数。由于路标数量会远远大于相机变量个数，所以 $C$ 往往也远大于 $B$。三 维空间中每个路标点为三维，于是 $C$ 矩阵为对角块矩阵，每个块为 $3 \times 3$ 维矩阵。</p>
+<p>考虑到对角块矩阵求逆的难度远小于对一般矩阵的求逆难度，我们对线性方程组进行高斯消元，目标是消去右上角的非对角部分 $E$，得：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+I&-EC^{-1}\\0&I
+\end{bmatrix}
+\begin{bmatrix}
+B&E\\E^T&C
+\end{bmatrix}
+\begin{bmatrix}
+\Delta x_c\\\Delta x_p
+\end{bmatrix}=
+\begin{bmatrix}
+I&-EC^{-1}\\0&I
+\end{bmatrix}
+\begin{bmatrix}
+v\\w
+\end{bmatrix}\tag{53}</script><p>整理得：</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix}
+B-EC^{-1}E^T&0\\E^T&C
+\end{bmatrix}
+\begin{bmatrix}
+\Delta x_c\\\Delta x_p
+\end{bmatrix}=
+\begin{bmatrix}
+v-EC^{-1}w\\w
+\end{bmatrix}\tag{54}</script><p>经过消元之后，第一行方程组变成和 $∆x_p$ 无关的项。单独把它拿出来，得到关于位姿部分的增量方程：</p>
+<script type="math/tex; mode=display">
+[B-EC^{-1}E^T]\Delta x_c=v-EC^{-1}w\tag{55}</script><p>这个线性方程组的维度和 $B$ 矩阵一样。我们的做法是先求解这个方程，然后把解得 的 $∆x_c$ 代入到原方程，然后求解 $∆x_p$ 。</p>
+<script type="math/tex; mode=display">
+\Delta x_p=C^{-1}(w-E^T\Delta x_c)\tag{56}</script><p>这个过程称为 <strong>Marginalization</strong>，或者 <strong>Schur 消元 (Schur Elimination)</strong>。</p>
+<p>我们记 式 $(55)$ 中的 $\Delta x_c$的系数为 $S=B-EC^{-1}E^T$ ，我们看一下它的稀疏性：</p>
+<p><img src="/images/SLAM中的非线性优化数学推导/image-20220513165129947.png" alt="image-20220513165129947" style="zoom:50%;" /></p>
+<p>$S$ 矩阵的非对角线上的非零矩阵块，表示了该处对应的两个相机变量之间存在着共同观测的路标点，有时候称为<strong>共视（Co-visibility）</strong>。反之，如果该块为零，则表示这两个相机没有共同观测。如上图所示的稀疏矩阵，左上角前 $4 \times 4$ 个矩阵块可以表示对应的相 机变量 $C_1 , C_2 , C_3 , C_4$ 之间有共同观测。</p>
 
     </div>
 
@@ -511,7 +600,7 @@ E^TF & E^TE
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://lukeyalvin.top/posts/48933.html" title="SLAM中的非线性优化">https://lukeyalvin.top/posts/48933.html</a>
+    <a href="https://lukeyalvin.top/posts/48933.html" title="VSLAM中的非线性优化">https://lukeyalvin.top/posts/48933.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -541,8 +630,8 @@ E^TF & E^TE
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/" rel="tag"> <i class="fa fa-tag"></i> 后端优化</a>
               <a href="/tags/%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95/" rel="tag"> <i class="fa fa-tag"></i> 最小二乘法</a>
+              <a href="/tags/%E5%90%8E%E7%AB%AF%E4%BC%98%E5%8C%96/" rel="tag"> <i class="fa fa-tag"></i> 后端优化</a>
               <a href="/tags/BA%E4%B8%8E%E5%9B%BE%E4%BC%98%E5%8C%96/" rel="tag"> <i class="fa fa-tag"></i> BA与图优化</a>
           </div>
 
@@ -552,12 +641,12 @@ E^TF & E^TE
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/posts/60703.html" rel="prev" title="卡尔曼滤波的数学推导">
-      <i class="fa fa-chevron-left"></i> 卡尔曼滤波的数学推导
+    <a href="/posts/2613d057.html" rel="prev" title="SLAM中的概率基础">
+      <i class="fa fa-chevron-left"></i> SLAM中的概率基础
     </a></div>
       <div class="post-nav-item">
-    <a href="/posts/44179.html" rel="next" title="线性最小二乘">
-      线性最小二乘 <i class="fa fa-chevron-right"></i>
+    <a href="/posts/a39e0cda.html" rel="next" title="滑动窗口算法">
+      滑动窗口算法 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -617,7 +706,7 @@ E^TF & E^TE
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%90%E5%87%BA"><span class="nav-text">提出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B"><span class="nav-text">模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E4%BC%98%E5%8C%96%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">需要优化什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E9%97%AE%E9%A2%98"><span class="nav-text">最小二乘问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E7%BA%BF%E6%80%A7%E5%8C%96"><span class="nav-text">非线性函数线性化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98"><span class="nav-text">求解非线性最小二乘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E5%92%8C%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶和二阶梯度法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶梯度法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6-%E7%89%9B%E9%A1%BF%E6%B3%95"><span class="nav-text">二阶梯度(牛顿法)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gauss-Newton"><span class="nav-text">Gauss-Newton</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Levenberg-Marquadt"><span class="nav-text">Levenberg-Marquadt</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3"><span class="nav-text">BA求解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-text">投影模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3-1"><span class="nav-text">BA求解</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8F%90%E5%87%BA"><span class="nav-text">提出</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B"><span class="nav-text">模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E4%BC%98%E5%8C%96%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">需要优化什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E9%97%AE%E9%A2%98"><span class="nav-text">最小二乘问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%E7%BA%BF%E6%80%A7%E5%8C%96"><span class="nav-text">非线性函数线性化</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B1%82%E8%A7%A3%E9%9D%9E%E7%BA%BF%E6%80%A7%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98"><span class="nav-text">求解非线性最小二乘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E5%92%8C%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶和二阶梯度法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E9%98%B6%E6%A2%AF%E5%BA%A6%E6%B3%95"><span class="nav-text">一阶梯度法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E9%98%B6%E6%A2%AF%E5%BA%A6-%E7%89%9B%E9%A1%BF%E6%B3%95"><span class="nav-text">二阶梯度(牛顿法)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gauss-Newton"><span class="nav-text">Gauss-Newton</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Levenberg-Marquadt"><span class="nav-text">Levenberg-Marquadt</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3"><span class="nav-text">BA求解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8A%95%E5%BD%B1%E6%A8%A1%E5%9E%8B"><span class="nav-text">投影模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BA%E6%B1%82%E8%A7%A3-1"><span class="nav-text">BA求解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%80%E7%96%8F%E6%80%A7%E5%92%8C%E8%BE%B9%E7%BC%98%E5%8C%96"><span class="nav-text">稀疏性和边缘化</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -633,7 +722,7 @@ E^TF & E^TE
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">62</span>
+          <span class="site-state-item-count">63</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -646,7 +735,7 @@ E^TF & E^TE
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">56</span>
+        <span class="site-state-item-count">57</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -959,12 +1048,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">465k</span>
+    <span title="站点总字数">476k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:02</span>
+    <span title="站点阅读时长">7:13</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
