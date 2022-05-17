@@ -25,18 +25,20 @@
 
   <meta name="description" content="随着 VSLAM 系统不断往新环境探索，就会有新的相机姿态以及看到新的环境特征，最小二乘残差就会越来越多，信息矩阵越来越大，计算量将不断增加。为了保持优化变量的个数在一定范围内，需要使用滑动窗口算法动态增加或移除优化变量。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="滑动窗口算法">
+<meta property="og:title" content="七、滑动窗口算法">
 <meta property="og:url" content="https://lukeyalvin.top/posts/a39e0cda.html">
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="随着 VSLAM 系统不断往新环境探索，就会有新的相机姿态以及看到新的环境特征，最小二乘残差就会越来越多，信息矩阵越来越大，计算量将不断增加。为了保持优化变量的个数在一定范围内，需要使用滑动窗口算法动态增加或移除优化变量。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513195856537.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513203817364.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/cell-16526620480511.gif">
 <meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513210526896.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513213728826.png">
 <meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220513212137697.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/滑动窗口算法/image-20220514165208897-16526621209192.png">
 <meta property="article:published_time" content="2022-05-13T06:57:20.000Z">
-<meta property="article:modified_time" content="2022-05-13T14:03:42.028Z">
+<meta property="article:modified_time" content="2022-05-16T00:49:11.039Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="滑动窗口算法">
@@ -56,7 +58,7 @@
   };
 </script>
 
-  <title>滑动窗口算法 | Lukey Alvin</title>
+  <title>七、滑动窗口算法 | Lukey Alvin</title>
   
 
 
@@ -216,7 +218,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          滑动窗口算法
+          七、滑动窗口算法
         </h1>
 
         <div class="post-meta">
@@ -225,10 +227,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-05-13 14:57:20 / 修改时间：22:03:42" itemprop="dateCreated datePublished" datetime="2022-05-13T14:57:20+08:00">2022-05-13</time>
+              <time title="创建时间：2022-05-13 14:57:20" itemprop="dateCreated datePublished" datetime="2022-05-13T14:57:20+08:00">2022-05-13</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-05-16 08:49:11" itemprop="dateModified" datetime="2022-05-16T08:49:11+08:00">2022-05-16</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -266,14 +274,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>4.6k</span>
+              <span>6.4k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
+              <span>6 分钟</span>
             </span>
 
         </div>
@@ -335,8 +343,8 @@ J_2=\frac{\partial r_{13} }{\partial \xi}=
 <h1 id="基于边际概率的滑动窗口算法"><a href="#基于边际概率的滑动窗口算法" class="headerlink" title="基于边际概率的滑动窗口算法"></a>基于边际概率的滑动窗口算法</h1><h2 id="什么是滑动窗口算法？"><a href="#什么是滑动窗口算法？" class="headerlink" title="什么是滑动窗口算法？"></a>什么是滑动窗口算法？</h2><p><strong>什么是滑动窗口算法</strong></p>
 <p>在引例的条件下，我们知道，一般情况下，SLAM问题构建的残差的信息矩阵是一个稀疏矩阵，在此基础上，我们讨论SLAM中的滑动窗口算法。</p>
 <p>所谓的滑动窗口算法，并没有明确的定义，我做了一个动图，其展示的过程就是滑动窗口算法：</p>
-<p>图</p>
-<p><strong>为什么使用滑动窗口算法？</strong></p>
+<p><img src="/images/滑动窗口算法/cell-16526620480511.gif" alt="cell"></p>
+<p>**为什么使用滑动窗口算法？</p>
 <p>那么，使用它有什么好处呢？在文章开篇的概述中已经提及，这里再做强调：</p>
 <ul>
 <li>随着 VSLAM 系统不断往新环境探索，就会有新的相机姿态以及看到新的环境特征，最小二乘残差就会越来越多，信息矩阵越来越大，计算量将不断增加。</li>
@@ -370,9 +378,56 @@ J_2=\frac{\partial r_{13} }{\partial \xi}=
 <p>新老信息融合的问题在于<strong>旧的求解雅克比矩阵的变量线性化点和和新的求解雅克比矩阵的变量线性化点不同，可能会导致信息矩阵的零空间发生变化，使得不客观的变量变得可观，从而引入错误信息</strong>。对于零空间的介绍在后文中。</p>
 <hr>
 <p><span style="color:red;"><strong>marg 留下的信息到底是啥？</strong></span></p>
-<p>记被 marg 的状态量记为 $x_m$ ，剩下的状态记为 $x_r$</p>
-<h2 id="信息矩阵的零空间变化"><a href="#信息矩阵的零空间变化" class="headerlink" title="信息矩阵的零空间变化"></a>信息矩阵的零空间变化</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/heyijia0327/article/details/52822104">https://blog.csdn.net/heyijia0327/article/details/52822104</a></p>
-<p>在刘毅(稀疏毅)，王京，晓佳等人讨论下，对这张图作出了如下解释：四张能量图中，第一张是说明能量函数E E<em>E</em>由两个同样的非线性函数E 1 E_1<em>E</em>1和E 2 E_2<em>E</em>2组成，我们令函数E = 0 E=0<em>E</em>=0，这时方程的解为x y = 1 xy=1<em>x**y</em>=1，对应图中深蓝色的一条曲线。第二张能量函数图中的E 1 ′ E&#x27;_1<em>E</em>1′对应函数E 1 E_1<em>E</em>1在点(0.5,1.4)处的二阶泰勒展开，第三张能量函数图中的E 2 ′ E&#x27;_2<em>E</em>2′对应函数E 2 E_2<em>E</em>2在点(1.2,0.5)处的二阶泰勒展开。注意这两个近似的能量函数E 1 ′ E&#x27;_1<em>E</em>1′和E 2 ′ E&#x27;_2<em>E</em>2′是在不同的线性点附近对原函数展开得到的。最后一张图就是把这个近似得到的能量函数合并起来，对整个系统E E<em>E</em>的二阶近似。从第四个能量函数图中，我们发现一个大问题，能量函数为0的解由以前的一条曲线变成了一个点，不确定性的东西变得确定了，专业的术语叫不可观的状态变量变得可观了，说明我们人为的引入了错误的信息。回到marg过程，上面这个例子告诉我们，marg时，被marg的那些变量的雅克比已经不更新了，而此时留在滑动窗口里的其他变量的雅克比要用和marg时一样的线性点，就是FEJ去算，不要用新的线性点了。有了这些基础以后，大家可以再去看看王京，张腾大神们在知乎上关于FEJ更理论的表述，<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/52869487/noti-answers?group_id=784455517954142208">链接请戳</a>。</p>
+<p>marg 发生后，留下的到底是什么信息？  </p>
+<p>marg 前，变量 $x_m$ （指将要被 marg 的变量，$\xi_i,i=1$）以及对应测量 $\mathcal{S}_m$ （指的是与 $\xi_1$ 构成的边 $r_{1j},j\in[2,5]$）构建的最小二乘信息矩阵为（使用高斯牛顿）：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+b_m(k)&=
+\begin{bmatrix}b_{mm}(k)\\b_{mr}(k)\end{bmatrix}
+=-\sum_{(i,j)\in\mathcal{S}_m}J^T_{ij}(k)\Sigma^{-1}_{ij}r_{ij}\\
+Λ_m(k)&=
+\begin{bmatrix}Λ_{mm}(k)&Λ_{mr}(k)\\Λ_{rm}(k)&Λ_{rr}(k)\end{bmatrix}
+=\sum_{(i,j)\in\mathcal{S}_m}J^T_{ij}(k)\Sigma^{-1}_{ij}J_{ij}(k)
+\end{align*}\tag{8}</script><p>然后marg掉  $\xi_1$ ，即丢掉变418133364量  $x_m$ ， 而 $x_m$ 的测量信息，传递给了变量  $x_r$ （指的是 marg 剩余后的变量 $\xi_i,i\in[2,5]$）:  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+b_p(k)&=b_{mr}(k)-Λ_{rm}(k)Λ^{-1}_{mm}(k)b_{mm}(k)\\
+Λ_p(k)&=Λ_{rr}(k)-Λ_{rm}(k)Λ^{-1}_{mm}(k)Λ_{mm}(k)
+\end{align*}\tag{9}</script><p>下标 p 表示 prior. 即这些信息将构建一个关于 $x_r$ 的先验信息。</p>
+<p>由：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+Λ_p(k)\delta x&=b_p(k)\\
+J^T_{p}(k)\Sigma^{-1}J_{p}(k)\ \delta x&= -J^T_{p}(k)\Sigma^{-1}r_p(k)
+\end{align*}\tag{10}</script><p>因此，我们可以从 $b_p(k),Λ_p(k)$反解出一个残差 $r_p(k)$ 和对应的雅可比矩阵 $J_{p}(k)$ ，需要注意的是<strong>，随着变量 $x_r(k)$ 的后续不断优化变化，残差 $r_p(k)$ 或者 $b_p(k)$ 也跟着变换，但是雅可比 $J_{p}(k)$ 则固定不变了。</strong></p>
+<p>在 $k^′$ 时刻，新残差 $r_{27}$ 和先验信息  $b_p(k),Λ_p(k)$ 以及残差 $r_{56}$ 构建新的最小二乘问题 :</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+b_m(k^′)&=\Pi^Tb_p(k)
+-\sum_{(i,j)\in\mathcal{S}_a(k^′)}J^T_{ij}(k^′)\Sigma^{-1}_{ij}r_{ij}(k^′)\\
+Λ_m(k^′)&=\Pi^TΛ_p(k) \Pi
++\sum_{(i,j)\in\mathcal{S}_a(k^′)}J^T_{ij}(k^′)\Sigma^{-1}_{ij}J_{ij}(k^′)
+\end{align*}\tag{11}</script><p>其中，$\Pi=[I_{dim\ x_r}\ \ 0]$用来将矩阵的维度进行扩张。 $\mathcal{S}_a$ 用来表示除被marg 掉的测量以外的其他测量，包括原本的与marg 变量无关的  $r_{56}$，以及新加入的变量 $r_{27}$。  </p>
+<p><strong>出现的问题</strong></p>
+<p>由于  $ξ_2$  的信息由两部分组成：</p>
+<ul>
+<li><p>一部分是marg 前的先验信息  $Λ_p(k)$ ，在marg 后，由于被 marg 的变量以及对应的测量已被丢弃，因此之前的雅可比不会被更新了，因此公式 $(11)$ 的等号右侧第一部分的线性化点是<strong>不变的</strong>；</p>
+</li>
+<li><p>另一部分信息就是新的边 $r_{27}$ ，其雅克比会随着 $ξ_2$  的迭代更新而不断在最新的线性化点处计算，因此公式 $(11)$ 的等号右侧第二部分的线性化点是<strong>不断变化的</strong>；</p>
+</li>
+<li><strong>旧的求解雅克比矩阵的变量线性化点和和新的求解雅克比矩阵的变量线性化点不同，它们在相加的时候，可能会导致信息矩阵的零空间发生变化，使得不客观的变量变得可观，从而引入错误信息</strong>。</li>
+</ul>
+<h2 id="信息矩阵的零空间变化"><a href="#信息矩阵的零空间变化" class="headerlink" title="信息矩阵的零空间变化"></a>信息矩阵的零空间变化</h2><p>滑动窗口算法优化的时候，信息矩阵如公式 $(11)$ 变成了两部分，且这两部分计算雅克比时的<strong>线性化点不同</strong>。这可能会导致信息矩阵的零空间发生变化，从而在求解时引入错误信息。  </p>
+<p>这里引用贺博的博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/heyijia0327/article/details/52822104?spm=1001.2014.3001.5501">SLAM中的marginalization 和 Schur complement</a></p>
+<p><img src="/images/滑动窗口算法/image-20220514165208897-16526621209192.png" alt="image-20220514165208897" style="zoom: 33%;" /></p>
+<p>在刘毅(稀疏毅)，王京，晓佳等人讨论下，对这张图作出了如下解释：</p>
+<p>四张能量图中，第一张是说明能量函数 $E$ 由两个同样的非线性函数 $E_1$和 $E_2$组成，我们令函数 $E=0$，这时方程的解为 $x y = 1$ ，对应图中深蓝色的一条曲线。</p>
+<p>第二张能量函数图中的 $E_1^′$对应函数  $E_1$ 在点 $(0.5,1.4)$ 处的二阶泰勒展开;</p>
+<p>第三张能量函数图中的 $E_2^′$ 对应函数在  $E_2$ 点 $(1.2,0.5)$ 处的二阶泰勒展开。注意这两个近似的能量函数 $E_1^′$ 和 $E_2^′$是在不同的线性点附近对原函数展开得到的。</p>
+<p>最后一张图就是把这个近似得到的能量函数合并起来，对整个系统 $E$ 的二阶近似。</p>
+<p>从第四个能量函数图中，我们发现一个大问题，能量函数为 $0$ 的解由以前的一条曲线变成了一个点，<strong>不确定性的东西变得确定了</strong>，专业的术语叫<strong>不可观的状态变量变得可观了</strong>，说明我们人为的引入了错误的信息。回到marg过程，上面这个例子告诉我们，marg 时，被 marg 的那些变量的雅克比已经不更新了，而此时留在滑动窗口里的其他变量的雅克比要用和 marg 时一样的线性点，就是 $FEJ,(first\ estimate\ jocabian)$ 算法，不要用新的线性点了。</p>
+<hr>
+<p><strong>FEJ 算法：</strong>$FEJ,(first\ estimate\ jocabian)$ ,不同残差对同一个状态求雅克比时，线性化点必须一致。这样就能避免零空间退化而使得不可观变量变得可观。  比如: 引例中计算 $r_{27}$ 对 $ξ_2$ 的雅克比时， $ξ_2$ 的线性话点必须和 $r_{12}$对其求导时一致。  </p>
 
     </div>
 
@@ -408,7 +463,7 @@ J_2=\frac{\partial r_{13} }{\partial \xi}=
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://lukeyalvin.top/posts/a39e0cda.html" title="滑动窗口算法">https://lukeyalvin.top/posts/a39e0cda.html</a>
+    <a href="https://lukeyalvin.top/posts/a39e0cda.html" title="七、滑动窗口算法">https://lukeyalvin.top/posts/a39e0cda.html</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -852,12 +907,12 @@ if(canvas.getContext){
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">481k</span>
+    <span title="站点总字数">483k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">7:17</span>
+    <span title="站点阅读时长">7:19</span>
 </div>
 <div>
 <span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
