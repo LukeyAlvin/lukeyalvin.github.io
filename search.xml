@@ -393,9 +393,9 @@
 \mathbf{R}^c_b(\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}-I_{3\times3})
 \\
 -\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
-\mathbf{R}^{b}_{c}\left(\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\and}
+\mathbf{R}^{b}_{c}\left(\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
 +\left(\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
-\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\and}
+\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
 +\left\{
 \mathbf{R}^c_b
 \left[
@@ -578,9 +578,9 @@
 \right]-\mathbf{p}^{b}_{c}
 \right\} \right\}^{\land}\\
 =&-\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
-\mathbf{R}^{b}_{c}\left(\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\and}
+\mathbf{R}^{b}_{c}\left(\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
 +\left(\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
-\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\and}
+\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
 +\left\{
 \mathbf{R}^c_b
 \left[
