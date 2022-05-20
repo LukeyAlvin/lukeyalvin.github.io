@@ -30,13 +30,15 @@
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。本节介绍整体框架。">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lukeyalvin.top/images/VINS-Mono-1-总体框架/image-20220520195226204.png">
 <meta property="article:published_time" content="2022-05-20T09:17:11.000Z">
-<meta property="article:modified_time" content="2022-05-20T10:05:09.072Z">
+<meta property="article:modified_time" content="2022-05-20T11:54:05.563Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="VINS">
 <meta property="article:tag" content="文献阅读">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/VINS-Mono-1-总体框架/image-20220520195226204.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/3cf7a3c1.html">
 
@@ -222,7 +224,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-05-20 17:17:11 / 修改时间：18:05:09" itemprop="dateCreated datePublished" datetime="2022-05-20T17:17:11+08:00">2022-05-20</time>
+              <time title="创建时间：2022-05-20 17:17:11 / 修改时间：19:54:05" itemprop="dateCreated datePublished" datetime="2022-05-20T17:17:11+08:00">2022-05-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -291,6 +293,7 @@
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
+<p><img src="/images/VINS-Mono-1-总体框架/image-20220520195226204.png" alt="image-20220520195226204"></p>
 <p>VINS 的功能模块如图所示，可以分为五个部分：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化；代码中主要开启了四个线程，分别是：前端图像跟踪、后端非线性优化（其中初始化和 IMU 预积分在这个线程中）、闭环检测、闭环优化。  </p>
 <h2 id="1-预处理"><a href="#1-预处理" class="headerlink" title="1. 预处理"></a>1. 预处理</h2><p>预处理主要指的是视觉前端里的图像处理以及IMU 测量量的处理。</p>
 <p><strong>图像：</strong>提取图像 Harris 角点， 利用<strong>金字塔光流</strong>跟踪相邻帧，利用<strong>基础矩阵模型的RANSAC算法</strong>进行异常点剔除  ，最后将跟踪到的特征点 push 到图像队列中，并通知后端进行处理。  </p>

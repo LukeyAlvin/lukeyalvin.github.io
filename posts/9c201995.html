@@ -30,15 +30,15 @@
 <meta property="og:site_name" content="Lukey Alvin">
 <meta property="og:description" content="VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。本节介绍IMU预积分公式推导。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="d:/source/images/VINS-Mono_2-IMU预积分公式推导/image-20220517213931819.png">
+<meta property="og:image" content="https://lukeyalvin.top/images/VINS-Mono-2-IMU预积分公式推导/image-20220520195515606.png">
 <meta property="article:published_time" content="2022-05-20T09:17:31.000Z">
-<meta property="article:modified_time" content="2022-05-20T10:05:18.684Z">
+<meta property="article:modified_time" content="2022-05-20T11:55:25.003Z">
 <meta property="article:author" content="爱喝烫水的阿水哥">
 <meta property="article:tag" content="VIO">
 <meta property="article:tag" content="VINS">
 <meta property="article:tag" content="文献阅读">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="d:/source/images/VINS-Mono_2-IMU预积分公式推导/image-20220517213931819.png">
+<meta name="twitter:image" content="https://lukeyalvin.top/images/VINS-Mono-2-IMU预积分公式推导/image-20220520195515606.png">
 
 <link rel="canonical" href="https://lukeyalvin.top/posts/9c201995.html">
 
@@ -224,7 +224,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-05-20 17:17:31 / 修改时间：18:05:18" itemprop="dateCreated datePublished" datetime="2022-05-20T17:17:31+08:00">2022-05-20</time>
+              <time title="创建时间：2022-05-20 17:17:31 / 修改时间：19:55:25" itemprop="dateCreated datePublished" datetime="2022-05-20T17:17:31+08:00">2022-05-20</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -303,7 +303,7 @@
 \hat{w}_t&=w_t+b_{w_t}+n_w
 \end{align*}\tag{1}</script><p>我们假设加速度和陀螺仪测量中的<strong>附加噪声</strong>是高斯噪声，$n_a\sim\mathcal{N}(0,\sigma^2_a),n_w\sim\mathcal{N}(0,\sigma^2_w)$。加速度偏差和陀螺仪偏差被建模为<strong>随机游走</strong>，其导数为高斯，$n_{b_a}\sim\mathcal{N}(0, \sigma^2_{b_a}),n_{b_w}\sim\mathcal{N}(0, \sigma^2_{b_w})$：</p>
 <script type="math/tex; mode=display">
-\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}\tag{2}</script><h2 id="Ⅰ-当前时刻-PVQ"><a href="#Ⅰ-当前时刻-PVQ" class="headerlink" title="Ⅰ.  当前时刻 PVQ"></a>Ⅰ.  当前时刻 PVQ</h2><h3 id="A-连续形式"><a href="#A-连续形式" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p><img src="D:\source\images\VINS-Mono_2-IMU预积分公式推导\image-20220517213931819.png" alt="image-20220517213931819" style="zoom:50%;" /></p>
+\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}\tag{2}</script><h2 id="Ⅰ-当前时刻-PVQ"><a href="#Ⅰ-当前时刻-PVQ" class="headerlink" title="Ⅰ.  当前时刻 PVQ"></a>Ⅰ.  当前时刻 PVQ</h2><h3 id="A-连续形式"><a href="#A-连续形式" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p><img src="/images/VINS-Mono-2-IMU预积分公式推导/image-20220520195515606.png" alt="image-20220520195515606" style="zoom: 50%;" /></p>
 <p>将第 $k$ 帧和第 $k+1$ 帧之间的所有 IMU 进行积分，可得第 $k+1$ 帧的位置、速度和旋转<br>（ PVQ）,作为视觉估计的初始值，这里的旋转采用的四元数。  </p>
 <script type="math/tex; mode=display">
 \begin{align*}

@@ -53,12 +53,12 @@
 \pi^{-1}_c
 \left(\begin{bmatrix}\hat{u}^{c_i}_l\\\hat{v}^{c_i}_l \end{bmatrix}
 \right)\tag{6}</script><p>由于视觉残差的自由度为 $2$，我们将残差向量投影到切平面上。  $\mathbf{b}_1$ 和 $\mathbf{b}_2$  是两个任意选择的<strong>正交基</strong>，它们跨越 $\hat{\overline{\mathcal{P} } }^{c_j}_l$ 的切平面，如图所示。在 $(2)$ 中使用的方差 $\mathbf{P}^{c_j}_l$ 也从像素坐标传播到单位球体上.</p>
-<p><img src="D:\source\images\VINS-Mono_5-后端非线性优化_视觉约束\image-20220517164958082.png" alt="image-20220517164958082" style="zoom: 40%;" /></p>
+<p><img src="/images/VINS-Mono-5-后端非线性优化-视觉约束/image-20220520195143150.png" alt="image-20220520195143150" style="zoom:50%;" /></p>
 <blockquote>
 <p>单位球面上的视觉残差图。 $\hat{\overline{\mathcal{P} } }^{c_j}_l$ 是在第 $j$ 帧中观察第 $l$ 个特征的单位向量。$\mathcal{P}^{c_j}_l$  是通过将其在第 $i$ 帧中的第一个观察值转换为第 $j$ 帧来预测的单位球体上的特征测量。残差定义在  $\hat{\overline{\mathcal{P} } }^{c_j}_l$  的切平面上</p>
 </blockquote>
 <p>这里给出公式 $(5)$ 的推导：</p>
-<p><img src="D:\source\images\VINS-Mono_5-后端非线性优化_视觉约束\image-20220520145326457.png" alt="image-20220520145326457"></p>
+<p><img src="/images/VINS-Mono-5-后端非线性优化-视觉约束/image-20220520195055396.png" alt="image-20220520195055396"></p>
 <p>设特征 $l$ 点 在第 $i$ 帧被观测到的像素坐标系下的坐标为： $\mathcal{P}_{uv_i}$ ，在世界坐标系下的坐标为：$\mathcal{P}^w_l$，则根据变换矩阵可得：</p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -912,7 +912,7 @@ g_{14}&=\frac{\delta t}{2}g_{34}\\
 \hat{w}_t&=w_t+b_{w_t}+n_w
 \end{align*}\tag{1}</script><p>我们假设加速度和陀螺仪测量中的<strong>附加噪声</strong>是高斯噪声，$n_a\sim\mathcal{N}(0,\sigma^2_a),n_w\sim\mathcal{N}(0,\sigma^2_w)$。加速度偏差和陀螺仪偏差被建模为<strong>随机游走</strong>，其导数为高斯，$n_{b_a}\sim\mathcal{N}(0, \sigma^2_{b_a}),n_{b_w}\sim\mathcal{N}(0, \sigma^2_{b_w})$：</p>
 <script type="math/tex; mode=display">
-\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}\tag{2}</script><h2 id="Ⅰ-当前时刻-PVQ"><a href="#Ⅰ-当前时刻-PVQ" class="headerlink" title="Ⅰ.  当前时刻 PVQ"></a>Ⅰ.  当前时刻 PVQ</h2><h3 id="A-连续形式"><a href="#A-连续形式" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p><img src="D:\source\images\VINS-Mono_2-IMU预积分公式推导\image-20220517213931819.png" alt="image-20220517213931819" style="zoom:50%;" /></p>
+\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}\tag{2}</script><h2 id="Ⅰ-当前时刻-PVQ"><a href="#Ⅰ-当前时刻-PVQ" class="headerlink" title="Ⅰ.  当前时刻 PVQ"></a>Ⅰ.  当前时刻 PVQ</h2><h3 id="A-连续形式"><a href="#A-连续形式" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p><img src="/images/VINS-Mono-2-IMU预积分公式推导/image-20220520195515606.png" alt="image-20220520195515606" style="zoom: 50%;" /></p>
 <p>将第 $k$ 帧和第 $k+1$ 帧之间的所有 IMU 进行积分，可得第 $k+1$ 帧的位置、速度和旋转<br>（ PVQ）,作为视觉估计的初始值，这里的旋转采用的四元数。  </p>
 <script type="math/tex; mode=display">
 \begin{align*}
@@ -1092,6 +1092,7 @@ z_a&s_a&-x_a&y_a\\
             <i class="fa fa-quote-right"></i>
           </blockquote>
 <span id="more"></span>
+<p><img src="/images/VINS-Mono-1-总体框架/image-20220520195226204.png" alt="image-20220520195226204"></p>
 <p>VINS 的功能模块如图所示，可以分为五个部分：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化；代码中主要开启了四个线程，分别是：前端图像跟踪、后端非线性优化（其中初始化和 IMU 预积分在这个线程中）、闭环检测、闭环优化。  </p>
 <h2 id="1-预处理"><a href="#1-预处理" class="headerlink" title="1. 预处理"></a>1. 预处理</h2><p>预处理主要指的是视觉前端里的图像处理以及IMU 测量量的处理。</p>
 <p><strong>图像：</strong>提取图像 Harris 角点， 利用<strong>金字塔光流</strong>跟踪相邻帧，利用<strong>基础矩阵模型的RANSAC算法</strong>进行异常点剔除  ，最后将跟踪到的特征点 push 到图像队列中，并通知后端进行处理。  </p>
