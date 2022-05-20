@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/ROBOT_TXT.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/ROBOT_TXT.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="baidu-site-verification" content="OtyfBVYAGW">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.lug.ustc.edu.cn/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"lukeyalvin.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":false,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。本节介绍后端非线性优化中的IMU约束。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VINS-Mono_4-后端非线性优化_IMU约束">
+<meta property="og:url" content="https://lukeyalvin.top/posts/70ecd932.html">
+<meta property="og:site_name" content="Lukey Alvin">
+<meta property="og:description" content="VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。本节介绍后端非线性优化中的IMU约束。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-05-20T09:18:00.000Z">
+<meta property="article:modified_time" content="2022-05-20T10:08:49.921Z">
+<meta property="article:author" content="爱喝烫水的阿水哥">
+<meta property="article:tag" content="VIO">
+<meta property="article:tag" content="VINS">
+<meta property="article:tag" content="文献阅读">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://lukeyalvin.top/posts/70ecd932.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>VINS-Mono_4-后端非线性优化_IMU约束 | Lukey Alvin</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Lukey Alvin" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Lukey Alvin</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一份耕耘,一份收获</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://lukeyalvin.top/posts/70ecd932.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/R-C.jpeg">
+      <meta itemprop="name" content="爱喝烫水的阿水哥">
+      <meta itemprop="description" content="东北大学控制工程研究生">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lukey Alvin">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VINS-Mono_4-后端非线性优化_IMU约束
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-20 17:18:00 / 修改时间：18:08:49" itemprop="dateCreated datePublished" datetime="2022-05-20T17:18:00+08:00">2022-05-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/VINS/" itemprop="url" rel="index"><span itemprop="name">VINS</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" itemprop="url" rel="index"><span itemprop="name">文献阅读</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/posts/70ecd932.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/posts/70ecd932.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍后端非线性优化中的IMU约束。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-状态向量与目标函数"><a href="#Ⅰ-状态向量与目标函数" class="headerlink" title="Ⅰ.  状态向量与目标函数"></a>Ⅰ.  状态向量与目标函数</h1><p>状态向量共包括滑动窗口内的 $n+1$ 个所有 IMU 状态$\mathbf{x}_k,k\in[0,n]$（包括位置、朝向、速度、加速度计 $bias$ 和陀螺仪 $bias$）、 Camera 到 IMU 的外参 $\mathbf{x}^b_c$、 $m+1$ 个 3D 点的逆深度$\lambda_l,l\in[0,m]$：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{X}&=[\mathbf{x}_0,\mathbf{x}_1,···,\mathbf{x}_n,\mathbf{x}^b_c,\lambda_0,\lambda_1,···,\lambda_m]\\
+\mathbf{x}_k&=[\mathbf{p}^w_{b_k},\mathbf{v}^w_{b_k},\mathbf{q}^w_{b_k},\mathbf{b}_a,\mathbf{b}_g],k\in[0,n]\\
+\mathbf{x}^b_c&=[\mathbf{p}^b_c,\mathbf{q}^b_c]
+\end{align*}\tag{1}</script><p> $n$ 是关键帧的总数，$m$ 是滑动窗口中的特征总数。 $λ_l$ 是第 $l$ 个特征与其第一次观察的逆深度。</p>
+<p>使用 BA 公式，我们最小化所有测量残差的先验和马氏距离之和，以获得<strong>最大后验估计</strong>为：</p>
+<script type="math/tex; mode=display">
+\underset{\mathcal{X} }{\min}
+\left\{
+\underbrace
+{\parallel \mathbf{r}_p-\mathbf{H}_p\mathcal{X} \parallel^2}_{边缘化的先验信息}
++\underbrace
+{\sum_{k\in\mathcal{B} }\parallel\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})  \parallel^2_{\mathbf{P}^{b_k}_{b_{k+1} } } }_{IMU 测量残差}
++\underbrace
+{\sum_{(l,j)\in\mathcal{C} }\rho(\parallel\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) \parallel^2_{\mathbf{P}^{c_j}_l })}_{视觉的重投影残
+差}
+\right\}\tag{2}</script><p>其中 $\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})$ 和 $\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) $ 分别是 IMU 和视觉测量的残差。 $\mathcal{B}$ 是所有 IMU 测量值的集合，$\mathcal{C}$  是在当前滑动窗口中至少观察到两次的特征集合。 $\{\mathbf{r}_p, \mathbf{H}_p\}$ 是来自边缘化的先验信息。 三种残差都是用马氏距离表示。</p>
+<h1 id="Ⅱ-IMU-约束"><a href="#Ⅱ-IMU-约束" class="headerlink" title="Ⅱ. IMU 约束"></a>Ⅱ. IMU 约束</h1><h2 id="残差"><a href="#残差" class="headerlink" title="残差"></a>残差</h2><p>两帧之间的 PVQ 和 $bias$ 的变化量的差  :</p>
+<script type="math/tex; mode=display">
+\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})=
+\begin{bmatrix}
+\delta {\alpha}^{b_k}_{b_{k+1} }\\
+\delta {\theta}^{b_k}_{b_{k+1} }\\
+\delta {\beta}^{b_k}_{b_{k+1} }\\
+\delta {b}_{a}\\\delta {b}_{g}
+\end{bmatrix}=
+\begin{align*}
+\begin{bmatrix}
+\mathbf{R}^{b_k}_w(\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}+
+\frac{1}{2}g^w\Delta t_k^2-\mathbf{v}^w_{b_k}\Delta t_k)-\hat{\alpha}^{b_k}_{b_{k+1} }\\
+2[{\mathbf{q}^w_{b_k}}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz}\\
+\mathbf{R}^{b_k}_w(\mathbf{v}^w_{b_{k+1} }-\mathbf{v}^w_{b_k}+g^w\Delta t_k)-\hat{\beta}^{b_k}_{b_{k+1} }\\
+\mathbf{b}_{ab_{k+1} }-\mathbf{b}_{ab_k}\\
+\mathbf{b}_{wb_{k+1} }-\mathbf{b}_{wb_k}\\
+\end{bmatrix}
+\end{align*}\tag{3}</script><p>其中各增量关于 bias 的 Jacobian 可从公式 $(4)$ 的 大 Jacobian 中的相应位置获得。 上面与其中各增量关于 $bias$ 的 Jacobian 可从公式 $(4)$ 的大 Jacobian 中的相应位置获得。</p>
+<script type="math/tex; mode=display">
+{\mathbf{J}_{k+1} }^{15\times15}=\mathbf{F}\mathbf{J}_{k}\tag{4}</script><h2 id="优化变量"><a href="#优化变量" class="headerlink" title="优化变量"></a>优化变量</h2><p>待优化变量主要为两个时刻的 PVQ 以及 $bais$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+k时刻&： [\mathbf{p}^w_{b_k},\mathbf{q}^w_{b_k}],[\mathbf{v}^w_{b_k},\mathbf{b}_{a_k},\mathbf{b}_{w_k}]\\
+k+1时刻&：[\mathbf{p}^w_{b_{k+1} },\mathbf{q}^w_{b_{k+1} }],[\mathbf{v}^w_{b_{k+1}  },\mathbf{b}_{a_{k+1} },\mathbf{b}_{w_{k+1} }]\\
+\end{align*}</script><h2 id="Jacobian"><a href="#Jacobian" class="headerlink" title="Jacobian"></a>Jacobian</h2><p>计算 Jacobian 时，残差对应的求偏导对象为上面的优化变量，但是计算时采用扰动方式计算，即扰动为 ：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+k时刻&： [\delta\mathbf{p}^w_{b_k},\delta\theta^w_{b_k}],[\delta\mathbf{v}^w_{b_k},\delta\mathbf{b}_{a_k},\delta\mathbf{b}_{w_k}]\\
+k+1时刻&：[\delta\mathbf{p}^w_{b_{k+1} },\delta\theta^w_{b_{k+1} }],[\delta\mathbf{v}^w_{b_{k+1}  },\delta\mathbf{b}_{a_{k+1} },\delta\mathbf{b}_{w_{k+1} }]\\
+\end{align*}</script><script type="math/tex; mode=display">
+\mathbf{J}[0]^{15\times7}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{q}^w_{b_k} }]
+=\begin{bmatrix}
+-\mathbf{R}^{b_k}_w&
+\left[\mathbf{R}^{b_k}_w\left(\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}-\mathbf{v}^w_{b_k}\Delta t_k+
+\frac{1}{2}g^w\Delta t_k^2\right) \right]^{\land}\\
+0&-\mathcal{R}
+\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}
+\left[\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}\\
+0&\left[\mathbf{R}^{b_k}_w(\mathbf{v}^w_{b_{k+1} }-\mathbf{v}^w_{b_k}+g^w\Delta t_k)\right]^{\land}\\
+0&0\\
+0&0\\
+\end{bmatrix}\tag{J0}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[0]$</strong></li>
+</ul>
+<p>定义：$\mathbf{J}[0]_{[i,j]}$ 表示矩阵 $\mathbf{J}[0]$ 的 第 $i$  行 第 $j$ 列；</p>
+<p>首先是 $\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_k} }$，显然，由公式 $(3)$，对于 $\mathbf{r}_{\mathcal{B} } $ 而言，只有 $\delta {\alpha}^{b_k}_{b_{k+1} }$ 对 $\mathbf{p}^w_{b_k}$ 求偏导才有值，其他为0，这就组成 $(J0)$ 里矩阵的第一列；</p>
+<p>对于矩阵的 $\mathbf{J}[0]_{[2,1]}$ 和  $\mathbf{J}[0]_{[2,3]}$，可以使用旋转矩阵的左乘扰动模型来求：</p>
+<p>这里为了书写方便，令 $\mathcal{P}^w=\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}+<br>\frac{1}{2}g^w\Delta t_k^2-\mathbf{v}^w_{b_k}\Delta t_k$</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\alpha}^{b_k}_{b_{k+1} } }{\partial \mathbf{p}^w_{b_k} }
+&=\frac{\partial 
+\left[\mathbf{R}^{b_k}_w\mathcal{P}^w-\hat{\alpha}^{b_k}_{b_{k+1} }\right]}{\partial \mathbf{p}^w_{b_k} }\\
+&=\underset{\varphi\rightarrow0}{\lim}
+\frac{(\mathbf{R}^{b_k}_w\exp(\varphi^{\land}))^{-1}\mathcal{P}^w }{\delta\varphi}\\
+&\approx\underset{\varphi\rightarrow0}{\lim}
+\frac{(I-\varphi^{\land})\exp(\phi^{\land})\mathcal{P}^w-\exp(\phi^{\land})\mathcal{P} }{\delta\varphi}\\
+&=\underset{\varphi\rightarrow0}{\lim}
+-\frac{\varphi^{\land}\mathbf{R}^{b_k}_w\mathcal{P}^w }{\delta\varphi}\\
+&=\underset{\varphi\rightarrow0}{\lim}
+\frac{[\mathbf{R}^{b_k}_w\mathcal{P}^w]^{\land}\varphi }{\delta\varphi}\\
+&=[\mathbf{R}^{b_k}_w\mathcal{P}^w]^{\land}
+\end{align*}\tag{J0-1}</script><p>因此，对于$\mathbf{J}[0]_{[2,1]}$ 和  $\mathbf{J}[0]_{[2,3]}$，他们仅仅是 $\mathcal{P}^w$ 不同，推导过程都是一样的。</p>
+<p>关键是对于$\mathbf{J}[0]_{[2,2]}$  的推导，是比较关键的，对应的雅可比为 $\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }$：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }
+&=\frac{\partial 2[{\mathbf{q}^w_{b_k}}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial \mathbf{q}^w_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\left(\mathbf{q}_{b_k}^w\otimes
+\begin{bmatrix}1\\\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix} \right)^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+-\left(\mathbf{q}_{b_k}^w\otimes
+\begin{bmatrix}1\\0\end{bmatrix} \right)^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\begin{bmatrix}1\\-\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix}
+\otimes{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+-\begin{bmatrix}1\\0 \end{bmatrix}\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\left(
+\begin{bmatrix}1\\-\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix}
+-\begin{bmatrix}1\\0 \end{bmatrix}
+\right)
+\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\begin{bmatrix}0\\-\delta\theta^{w}_{b_k} \end{bmatrix}
+\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]
+\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]
+\otimes\begin{bmatrix}0\\-\delta\theta^{w}_{b_k} \end{bmatrix}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=-\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+\end{align*}\tag{J0-2}</script><p>对于四元数的左右乘，在第二节的$\mathrm{(IA-3)}$ 提到过，这里再次作展示：</p>
+<p>我们设四元数 $\mathbf{q}=[x,y,z,s]$为 $\mathbf{q}=[w,s]$，则：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}_a)&=\Omega(w)+sI_{4\times4}
+=\begin{bmatrix}-w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}\\
+\mathcal{L}(\mathbf{q}_a)&=\Psi(w)+sI_{4\times4}
+=\begin{bmatrix}w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}
+\end{align*}\tag{5}</script><p>则有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}^{-1})=\Omega(-w)+sI_{4\times4}
+&=\begin{bmatrix}w^{\land}&-w\\w^T&0\end{bmatrix}+sI_{4\times4}\\
+\mathcal{L}(\mathbf{q}^{-1})=\Omega(-w)+sI_{4\times4}
+&=\begin{bmatrix}-w^{\land}&-w\\w^T&0\end{bmatrix}+sI_{4\times4}\\
+\end{align*}
+\tag{6}</script><p> 如果我们只取左上角的 $3\times3$ 虚部部分，则有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}^{-1})=sI_{3\times3}+w^{\land}=\mathcal{L}(\mathbf{q})_{3\times3}\\
+\mathcal{L}(\mathbf{q}^{-1})=sI_{3\times3}-w^{\land}=\mathcal{R}(\mathbf{q})_{3\times3}
+\end{align*}
+\tag{7}</script><p>故而 $\mathrm{(J0-2)}$ 可以整理如下：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }
+&=-\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+&=-\mathcal{R}
+\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}
+\left[\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}
+\end{align*}\tag{J0-3}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[1]^{15\times9}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{v}^w_{b_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{a_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{w_k} }]
+=\begin{bmatrix}
+-\mathbf{R}^{b_k}_w\Delta t&-\mathbf{J}^{\alpha}_{b_a}&-\mathbf{J}^{\alpha}_{b_w}\\
+0&0&-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes\hat{\gamma}^{b_k}_{b_{k+1} }
+\right]_{3\times3}\mathbf{J}^{\gamma}_{b_w}\\
+-\mathbf{R}^{b_k}_w&-\mathbf{J}^{\beta}_{b_a}&-\mathbf{J}^{\beta}_{b_w}\\
+0&-\mathbf{I}&0\\
+0&0&-\mathbf{I}
+\end{bmatrix}\tag{J1}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[1]$</strong></li>
+</ul>
+<p>首先第一列的求导都是直接可以看出来的，这里不做推导。</p>
+<p>论文中， $\alpha^{b_k}_{b_{k+1} },\beta^{b_k}_{b_{k+1} },\gamma^{b_k}_{b_{k+1} }$  关于偏差的一阶近似可以写成：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha^{b_k}_{b_{k+1} }&\approx \hat{\alpha}^{b_k}_{b_{k+1} }+\mathbf{J}^{\alpha}_{b_a}\delta b_{a_k}+\mathbf{J}^{\alpha}_{b_w}\delta b_{w_k}
+\\
+\beta^{b_k}_{b_{k+1} }&\approx \hat{\beta}^{b_k}_{b_{k+1} }+\mathbf{J}^{\beta}_{b_a}\delta b_{a_k}+\mathbf{J}^{\beta}_{b_w}\delta b_{w_k}
+\\
+\gamma^{b_k}_{b_{k+1} }&\approx \hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+\end{align*}\tag{8}</script><p>其中 $\mathbf{J}^{\alpha}_{b_a}$ 和 是 $\mathbf{J}^{\alpha}_{b_{k+1} }$ 中的子块矩阵，其位置对应于 $\frac{\delta\alpha^{b_k}_{b_{k+1} } }{\delta b_{a_k} }$ 。 $\mathbf{J}^{\alpha}_{b_w}、\mathbf{J}^{\beta}_{b_a}、\mathbf{J}^{\beta}_{b_w}、\mathbf{J}^{\gamma}_{b_w}$ 也使用相同的含义。当偏差的估计发生轻微变化时，我们使用 $(8)$ 来近似地校正预积分结果，而不是重新传播。</p>
+<p>这里主要对 $\mathbf{J[1]}_{[2,3]}$ 进行推导，对应的雅可比为 $\frac{\partial \delta\theta^{b_k}_{b_{k+1}} }{\partial\mathbf{q}^{w}_{k+1} }$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta\theta^{b_k}_{b_{k+1}} }{\partial b_{w_k} }
+&=\frac{\partial 2[{\mathbf{q}^{b_k}_w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial b_{w_k} }\\
+&=2\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\left[
+\hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+\right]}^{-1}-
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\left[
+\hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\0 \end{bmatrix}
+\right]}^{-1}
+}{\delta b_{w_k}}\\
+&=2\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\begin{bmatrix}0\\-\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+}\otimes{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1}
+}{\delta b_{w_k}}\\
+&=\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\begin{bmatrix}0\\-\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+}\otimes{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1}
+}{\delta b_{w_k}}\\
+&=\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]\otimes
+\mathcal{R}\left[{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1} \right]\otimes
+{\begin{bmatrix}0\\-\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix} }
+}{\delta b_{w_k}}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]
+\mathcal{R}\left[{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1} \right]\mathbf{J}^{\gamma}_{b_w}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}\left[\hat{\gamma}^{b_k}_{b_{k+1} } \right]_{3\times3}
+\mathbf{J}^{\gamma}_{b_w}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes\hat{\gamma}^{b_k}_{b_{k+1} }
+\right]_{3\times3}\mathbf{J}^{\gamma}_{b_w}
+\end{align*}\tag{J1-1}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[2]^{15\times7}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{q}^w_{b_{k+1} } }]
+=\begin{bmatrix}
+\mathbf{R}^{b_k}_w&0\\
+0&\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}\\
+0&0\\
+0&0\\
+0&0\\
+\end{bmatrix}\tag{J2}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[2]$</strong></li>
+</ul>
+<p>主要是对 $\mathbf{J}[2]_{[2,2]}$ 进行推导，即 $\frac{\partial \delta\theta^{b_k}_{b_{k+1}} } {\partial \mathbf{q}^w_{b_{k+1} } }$：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta\theta^{b_k}_{b_{k+1}} } {\partial \mathbf{q}^w_{b_{k+1} } }
+&=\frac{\partial 2[{\mathbf{q}^{b_k}_w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial \mathbf{q}^w_{b_{k+1} } }\\
+&=2\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{\delta\theta^w_{b_{k+1} } }{2}\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+-{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}1\\0\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}0\\\delta\theta^w_{b_{k+1} }\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\mathcal{L}[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }]
+\mathcal{R}[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} ]
+\begin{bmatrix}0\\\delta\theta^w_{b_{k+1} }\end{bmatrix}
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\right]
+\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\right]_{3\times3}
+\mathcal{L}\left[(\hat{\gamma}^{b_k}_{b_{k+1} }) \right]_{3\times3}\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}
+\end{align*}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[3]^{15\times9}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{v}^w_{b_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{a_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{w_{k+1} } }]
+=\begin{bmatrix}
+0&0&0\\
+0&0&0\\
+\mathbf{R}^{b_k}_w&0&0\\
+0&\mathbf{I}&0\\
+0&0&\mathbf{I}\\
+\end{bmatrix}\tag{J3}</script><p>这个不需要证，应该可以直接看出来。</p>
+<hr>
+<p>上面公式在代码中对应： <code>class IMUFactor : public ceres::SizedCostFunction&lt;15, 7, 9, 7, 9&gt;</code><br>对于 <code>Evaluate</code> 输入 <code>double const *const *parameters, parameters[0], parameters[1], parameters[2],parameters[3]</code> 分别对应 $4$ 个输入参数, 它们的长度依次是 $7,9,7,9$，分别对应 $4$ 个优化变量的<br>参数块。  </p>
+<h2 id="协方差"><a href="#协方差" class="headerlink" title="协方差"></a>协方差</h2><p>代码 <code>IMUFactor::Evaluate()</code> 中 <code>residual</code> 还乘以一个<strong>信息矩阵</strong> <code>sqrt_info</code>，这是因为真正的优化项其实是 马氏距离：$d = \mathbf{r}^T\mathbf{P}^{-1}\mathbf{r}$， $\mathbf{P}$ 是协方差， 又因为 Ceres 只接受最小二乘优化， 也就是  $\min(e^Te)$, 所以把 $\mathbf{P}$ 做 LLT 分解， 即 $𝐿𝐿^T= \mathbf{P}^{-1}$, 则有：  </p>
+<script type="math/tex; mode=display">
+d=\mathbf{r}^TLL^T\mathbf{r}=(L^T\mathbf{r})^T(L^T\mathbf{r})\tag{9}</script><p>令 $\mathbf{r}^{\prime} = L^T\mathbf{r}$ 作为新的优化误差, 这样就能用 Ceres 求解了。<strong>马氏距离距离其实相当于一个残差加权, 协方差大的加权小, 协方差小的加权大</strong>, 着重优化那些比较确定的残差。若写成 <code>“sqrt_info.setIdentity()”</code> 相当于不加权。  </p>
+<p>其中，$\mathbf{P}$ 是协方差，由之前提出的递推公式得到：</p>
+<p>协方差的迭代公式为：  </p>
+<script type="math/tex; mode=display">
+{\mathbf{P}^{b_k}_{k+1} }^{15\times15}
+=\mathbf{F}\mathbf{P}^{b_k}_{k}\mathbf{F}^T+\mathbf{V}\mathbf{Q}\mathbf{V}^T\tag{10}</script><p>其中， 初始值 $\mathbf{P}^{b_k}_{b_k}=0$。 $\mathbf{Q}$ 为表示噪声项的对角协方差矩阵：</p>
+<script type="math/tex; mode=display">
+\mathbf{Q}^{18\times18}=
+\begin{bmatrix}
+\sigma^2_{a}&0&0&0&0&0\\
+0&\sigma^2_{w}&0&0&0&0\\
+0&0&\sigma^2_{a}&0&0&0\\
+0&0&0&\sigma^2_{w}&0&0\\
+0&0&0&0&\sigma^2_{b_a}&0\\
+0&0&0&0&0&\sigma^2_{b_w}\\
+\end{bmatrix}\tag{11}</script>
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat.png" alt="爱喝烫水的阿水哥 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="爱喝烫水的阿水哥 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>爱喝烫水的阿水哥
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://lukeyalvin.top/posts/70ecd932.html" title="VINS-Mono_4-后端非线性优化_IMU约束">https://lukeyalvin.top/posts/70ecd932.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/VIO/" rel="tag"> <i class="fa fa-tag"></i> VIO</a>
+              <a href="/tags/VINS/" rel="tag"> <i class="fa fa-tag"></i> VINS</a>
+              <a href="/tags/%E6%96%87%E7%8C%AE%E9%98%85%E8%AF%BB/" rel="tag"> <i class="fa fa-tag"></i> 文献阅读</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/posts/6eff9a87.html" rel="prev" title="VINS-Mono_3-PVQ增量误差、协方差及雅可比推导">
+      <i class="fa fa-chevron-left"></i> VINS-Mono_3-PVQ增量误差、协方差及雅可比推导
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/posts/1b2b3846.html" rel="next" title="VINS-Mono_5-后端非线性优化_视觉约束">
+      VINS-Mono_5-后端非线性优化_视觉约束 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A0-%E7%8A%B6%E6%80%81%E5%90%91%E9%87%8F%E4%B8%8E%E7%9B%AE%E6%A0%87%E5%87%BD%E6%95%B0"><span class="nav-text">Ⅰ.  状态向量与目标函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E2%85%A1-IMU-%E7%BA%A6%E6%9D%9F"><span class="nav-text">Ⅱ. IMU 约束</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%AE%8B%E5%B7%AE"><span class="nav-text">残差</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%8F%98%E9%87%8F"><span class="nav-text">优化变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Jacobian"><span class="nav-text">Jacobian</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%8F%E6%96%B9%E5%B7%AE"><span class="nav-text">协方差</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="爱喝烫水的阿水哥"
+      src="/images/R-C.jpeg">
+  <p class="site-author-name" itemprop="name">爱喝烫水的阿水哥</p>
+  <div class="site-description" itemprop="description">东北大学控制工程研究生</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">68</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">58</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/lukeyalvin" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;lukeyalvin" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:lukeyalvin@gmail.com" title="E-Mail → mailto:lukeyalvin@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://blog.csdn.net/qq_44717317" title="CSDN → https:&#x2F;&#x2F;blog.csdn.net&#x2F;qq_44717317" rel="noopener" target="_blank"><i class="fab fa-pied-piper fa-fw"></i>CSDN</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://space.bilibili.com/302660649" title="BiliBili → https:&#x2F;&#x2F;space.bilibili.com&#x2F;302660649" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>BiliBili</a>
+      </span>
+  </div>
+
+
+<div style="">
+  <canvas id="canvas" style="width:60%;">当前浏览器不支持canvas，请更换浏览器后再试</canvas>
+</div>
+<script>
+(function(){
+
+   var digit=
+    [
+        [
+            [0,0,1,1,1,0,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,0,1,1,0],
+            [0,0,1,1,1,0,0]
+        ],//0
+        [
+            [0,0,0,1,1,0,0],
+            [0,1,1,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [1,1,1,1,1,1,1]
+        ],//1
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,1,1],
+            [1,1,1,1,1,1,1]
+        ],//2
+        [
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//3
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,0],
+            [0,0,1,1,1,1,0],
+            [0,1,1,0,1,1,0],
+            [1,1,0,0,1,1,0],
+            [1,1,1,1,1,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,1,1]
+        ],//4
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,1,1,1,1,0],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//5
+        [
+            [0,0,0,0,1,1,0],
+            [0,0,1,1,0,0,0],
+            [0,1,1,0,0,0,0],
+            [1,1,0,0,0,0,0],
+            [1,1,0,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//6
+        [
+            [1,1,1,1,1,1,1],
+            [1,1,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,0,0,1,1,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0],
+            [0,0,1,1,0,0,0]
+        ],//7
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,1,1,0]
+        ],//8
+        [
+            [0,1,1,1,1,1,0],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [1,1,0,0,0,1,1],
+            [0,1,1,1,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,0,1,1],
+            [0,0,0,0,1,1,0],
+            [0,0,0,1,1,0,0],
+            [0,1,1,0,0,0,0]
+        ],//9
+        [
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,1,1,1,0,0],
+            [0,0,0,0,0,0,0]
+        ]//:
+    ];
+
+var canvas = document.getElementById('canvas');
+
+if(canvas.getContext){
+    var cxt = canvas.getContext('2d');
+    //声明canvas的宽高
+    var H = 100,W = 700;
+    canvas.height = H;
+    canvas.width = W;
+    cxt.fillStyle = '#f00';
+    cxt.fillRect(10,10,50,50);
+
+    //存储时间数据
+    var data = [];
+    //存储运动的小球
+    var balls = [];
+    //设置粒子半径
+    var R = canvas.height/20-1;
+    (function(){
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        //存储时间数字，由十位小时、个位小时、冒号、十位分钟、个位分钟、冒号、十位秒钟、个位秒钟这7个数字组成
+        data.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+    })();
+
+    /*生成点阵数字*/
+    function renderDigit(index,num){
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    cxt.beginPath();
+                    cxt.arc(14*(R+2)*index + j*2*(R+1)+(R+1),i*2*(R+1)+(R+1),R,0,2*Math.PI);
+                    cxt.closePath();
+                    cxt.fill();
+                }
+            }
+        }
+    }
+
+    /*更新时钟*/
+    function updateDigitTime(){
+        var changeNumArray = [];
+        var temp = /(\d)(\d):(\d)(\d):(\d)(\d)/.exec(new Date());
+        var NewData = [];
+        NewData.push(temp[1],temp[2],10,temp[3],temp[4],10,temp[5],temp[6]);
+        for(var i = data.length-1; i >=0 ; i--){
+            //时间发生变化
+            if(NewData[i] !== data[i]){
+                //将变化的数字值和在data数组中的索引存储在changeNumArray数组中
+                changeNumArray.push(i+'_'+(Number(data[i])+1)%10);
+            }
+        }
+        //增加小球
+        for(var i = 0; i< changeNumArray.length; i++){
+            addBalls.apply(this,changeNumArray[i].split('_'));
+        }
+        data = NewData.concat();
+    }
+
+    /*更新小球状态*/
+    function updateBalls(){
+        for(var i = 0; i < balls.length; i++){
+            balls[i].stepY += balls[i].disY;
+            balls[i].x += balls[i].stepX;
+            balls[i].y += balls[i].stepY;
+            if(balls[i].x > W + R || balls[i].y > H + R){
+                balls.splice(i,1);
+                i--;
+            }
+        }
+    }
+
+    /*增加要运动的小球*/
+    function addBalls(index,num){
+        var numArray = [1,2,3];
+        var colorArray =  ["#3BE","#09C","#A6C","#93C","#9C0","#690","#FB3","#F80","#F44","#C00"];
+        for(var i = 0; i < digit[num].length; i++){
+            for(var j = 0; j < digit[num][i].length; j++){
+                if(digit[num][i][j] == 1){
+                    var ball = {
+                        x:14*(R+2)*index + j*2*(R+1)+(R+1),
+                        y:i*2*(R+1)+(R+1),
+                        stepX:Math.floor(Math.random() * 4 -2),
+                        stepY:-2*numArray[Math.floor(Math.random()*numArray.length)],
+                        color:colorArray[Math.floor(Math.random()*colorArray.length)],
+                        disY:1
+                    };
+                    balls.push(ball);
+                }
+            }
+        }
+    }
+
+    /*渲染*/
+    function render(){
+        //重置画布宽度，达到清空画布的效果
+        canvas.height = 100;
+        //渲染时钟
+        for(var i = 0; i < data.length; i++){
+            renderDigit(i,data[i]);
+        }
+        //渲染小球
+        for(var i = 0; i < balls.length; i++){
+            cxt.beginPath();
+            cxt.arc(balls[i].x,balls[i].y,R,0,2*Math.PI);
+            cxt.fillStyle = balls[i].color;
+            cxt.closePath();
+            cxt.fill();
+        }
+    }
+
+    clearInterval(oTimer);
+    var oTimer = setInterval(function(){
+        //更新时钟
+        updateDigitTime();
+        //更新小球状态
+        updateBalls();
+        //渲染
+        render();
+    },50);
+}
+
+})();
+</script>
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">爱喝烫水的阿水哥</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">530k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">8:02</span>
+</div>
+<div>
+<span id="timeDate">载入天数...</span><span id="times">载入时分秒...</span>
+<script>
+    var now = new Date();
+    function createtime() {
+        var grt= new Date("03/04/2020 00:00:00");
+        now.setTime(now.getTime()+250);
+        days = (now - grt ) / 1000 / 60 / 60 / 24; dnum = Math.floor(days);
+        hours = (now - grt ) / 1000 / 60 / 60 - (24 * dnum); hnum = Math.floor(hours);
+        if(String(hnum).length ==1 ){hnum = "0" + hnum;} minutes = (now - grt ) / 1000 /60 - (24 * 60 * dnum) - (60 * hnum);
+        mnum = Math.floor(minutes); if(String(mnum).length ==1 ){mnum = "0" + mnum;}
+        seconds = (now - grt ) / 1000 - (24 * 60 * 60 * dnum) - (60 * 60 * hnum) - (60 * mnum);
+        snum = Math.round(seconds); if(String(snum).length ==1 ){snum = "0" + snum;}
+        document.getElementById("timeDate").innerHTML = "本站已安全运行 "+dnum+" 天 ";
+        document.getElementById("times").innerHTML = hnum + " 小时 " + mnum + " 分 " + snum + " 秒";
+    }
+setInterval("createtime()",250);
+</script>
+</div>
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/medium-zoom@1/dist/medium-zoom.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+  (function() {
+    var host = window.location.host;
+    if (host.indexOf("127.0.0.1") == -1 && host.indexOf("localhost") == -1) {
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+      } else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    }
+  })();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RSn9UrdvOxuELtYJPo0QQk2b-gzGzoHsz',
+      appKey     : 'jqyQYkTz9aPC20dNsSpgdUb5',
+      placeholder: "个人技术能力有限,如有问题请多包涵,请多指教!",
+      avatar     : '/images/ROBOT_TXT.png',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+
+
+
+    </div>
+</body>
+</html>

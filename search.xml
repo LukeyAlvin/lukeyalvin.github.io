@@ -1,6 +1,1122 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>VINS-Mono_5-后端非线性优化_视觉约束</title>
+    <url>/posts/1b2b3846.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍后端非线性优化中的视觉约束。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-状态向量与目标函数"><a href="#Ⅰ-状态向量与目标函数" class="headerlink" title="Ⅰ.  状态向量与目标函数"></a>Ⅰ.  状态向量与目标函数</h1><p>状态向量共包括滑动窗口内的 $n+1$ 个所有 IMU 状态$\mathbf{x}_k,k\in[0,n]$（包括位置、朝向、速度、加速度计 $bias$ 和陀螺仪 $bias$）、 Camera 到 IMU 的外参 $\mathbf{x}^b_c$、 $m+1$ 个 3D 点的逆深度$\lambda_l,l\in[0,m]$：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{X}&=[\mathbf{x}_0,\mathbf{x}_1,···,\mathbf{x}_n,\mathbf{x}^b_c,\lambda_0,\lambda_1,···,\lambda_m]\\
+\mathbf{x}_k&=[\mathbf{p}^w_{b_k},\mathbf{v}^w_{b_k},\mathbf{q}^w_{b_k},\mathbf{b}_a,\mathbf{b}_g],k\in[0,n]\\
+\mathbf{x}^b_c&=[\mathbf{p}^b_c,\mathbf{q}^b_c]
+\end{align*}\tag{1}</script><p> $n$ 是关键帧的总数，$m$ 是滑动窗口中的特征总数。 $λ_l$ 是第 $l$ 个特征与其第一次观察的逆深度。</p>
+<p>使用 BA 公式，我们最小化所有测量残差的先验和马氏距离之和，以获得<strong>最大后验估计</strong>为：</p>
+<script type="math/tex; mode=display">
+\underset{\mathcal{X} }{\min}
+\left\{
+\underbrace
+{\parallel \mathbf{r}_p-\mathbf{H}_p\mathcal{X} \parallel^2}_{边缘化的先验信息}
++\underbrace
+{\sum_{k\in\mathcal{B} }\parallel\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})  \parallel^2_{\mathbf{P}^{b_k}_{b_{k+1} } } }_{IMU 测量残差}
++\underbrace
+{\sum_{(l,j)\in\mathcal{C} }\rho(\parallel\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) \parallel^2_{\mathbf{P}^{c_j}_l })}_{视觉的重投影残
+差}
+\right\}\tag{2}</script><p>其中 $\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})$ 和 $\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) $ 分别是 IMU 和视觉测量的残差。 $\mathcal{B}$ 是所有 IMU 测量值的集合，$\mathcal{C}$  是在当前滑动窗口中至少观察到两次的特征集合。 $\{\mathbf{r}_p, \mathbf{H}_p\}$ 是来自边缘化的先验信息。 三种残差都是用马氏距离表示。</p>
+<h1 id="Ⅱ-视觉约束"><a href="#Ⅱ-视觉约束" class="headerlink" title="Ⅱ. 视觉约束"></a>Ⅱ. 视觉约束</h1><h2 id="A-残差"><a href="#A-残差" class="headerlink" title="A. 残差"></a>A. 残差</h2><p>视觉残差是重投影误差， 对于第 $l$ 个路标点 $P$，将 $P$ 从第一次观看到它的第 i 个相机坐标系，转换到当前的第 $j $个相机坐标系下的像素坐标，可定义<strong>视觉误差项</strong>为：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X})&=[\mathbf{b}_1,\mathbf{b}_2]^T\cdot(\hat{\overline{\mathcal{P} } }^{c_j}_l-\frac{\mathcal{P}^{c_j}_l}{\parallel\mathcal{P}^{c_j}_l \parallel^2})\\
+\end{align*}\tag{3}</script><p> $\hat{\overline{\mathcal{P} } }^{c_j}_l$ 为第 $l$ 个路标点在第 $j$ 个相机归一化相机坐标系中的<strong>观察到的坐标</strong>：  </p>
+<script type="math/tex; mode=display">
+\hat{\overline{\mathcal{P} } }^{c_j}_l=\pi^{-1}_c
+\left(\begin{bmatrix}\hat{u}^{c_j}_l\\\hat{v}^{c_j}_l \end{bmatrix}\right)\tag{4}</script><p>$\mathcal{P}^{c_j}_l$ 是估计第 $i$ 个图像中发生的第 $l$个特征的第一次观察，<strong>转换到</strong>第 $j$ 个相机归一化相机坐标系中的<strong>理论的坐标</strong>:  </p>
+<script type="math/tex; mode=display">
+\mathcal{P}^{c_j}_l =\mathbf{R}^c_b
+\left\{\mathbf{R}^{b_j}_w
+\left[\mathbf{R}^{w}_{b_i}
+\left(\mathbf{R}^{b}_{c}
+\frac{1}{\lambda_l}
+\overline{\mathcal{P} }^{c_i}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_i}-\mathbf{p}^{w}_{b_j}
+\right]-\mathbf{p}^{b}_{c}
+\right\}\tag{5}</script><p>其中， $[\hat{u}^{c_i}_l,\hat{v}^{c_i}_l]$ 是第 $i$ 个图像中发生的第 $l$个特征的第一次观察。 $[\hat{u}^{c_j}_l,\hat{v}^{c_j}_l]$ 是对第 $j$ 个图像中相同特征的观察。 $\pi^{-1}_c$ 是反投影函数，它使用相机内在参数将像素位置转换为单位向量。</p>
+<script type="math/tex; mode=display">
+\overline{\mathcal{P} }^{c_i}_l=
+\pi^{-1}_c
+\left(\begin{bmatrix}\hat{u}^{c_i}_l\\\hat{v}^{c_i}_l \end{bmatrix}
+\right)\tag{6}</script><p>由于视觉残差的自由度为 $2$，我们将残差向量投影到切平面上。  $\mathbf{b}_1$ 和 $\mathbf{b}_2$  是两个任意选择的<strong>正交基</strong>，它们跨越 $\hat{\overline{\mathcal{P} } }^{c_j}_l$ 的切平面，如图所示。在 $(2)$ 中使用的方差 $\mathbf{P}^{c_j}_l$ 也从像素坐标传播到单位球体上.</p>
+<p><img src="D:\source\images\VINS-Mono_5-后端非线性优化_视觉约束\image-20220517164958082.png" alt="image-20220517164958082" style="zoom: 40%;" /></p>
+<blockquote>
+<p>单位球面上的视觉残差图。 $\hat{\overline{\mathcal{P} } }^{c_j}_l$ 是在第 $j$ 帧中观察第 $l$ 个特征的单位向量。$\mathcal{P}^{c_j}_l$  是通过将其在第 $i$ 帧中的第一个观察值转换为第 $j$ 帧来预测的单位球体上的特征测量。残差定义在  $\hat{\overline{\mathcal{P} } }^{c_j}_l$  的切平面上</p>
+</blockquote>
+<p>这里给出公式 $(5)$ 的推导：</p>
+<p><img src="D:\source\images\VINS-Mono_5-后端非线性优化_视觉约束\image-20220520145326457.png" alt="image-20220520145326457"></p>
+<p>设特征 $l$ 点 在第 $i$ 帧被观测到的像素坐标系下的坐标为： $\mathcal{P}_{uv_i}$ ，在世界坐标系下的坐标为：$\mathcal{P}^w_l$，则根据变换矩阵可得：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{P}_{uv_i}&=\lambda_l\pi_c\left({\mathbf{T}^b_c}^{-1}{\mathbf{T}^w_{b_i} }^{-1}\mathcal{P}^w_l  \right)\\
+\Leftrightarrow 
+\mathcal{P}^w_l&=\mathbf{T}^w_{b_i}\mathbf{T}^b_c\frac{1}{\lambda_l}{\pi_c}^{-1}(\mathcal{P}_{uv_i})\\
+&=\mathbf{T}^w_{b_i}\mathbf{T}^b_c\frac{1}{\lambda_l}\overline{\mathcal{P} }^{c_i}_l\\
+\mathcal{P}^w_l&=
+\begin{bmatrix}\mathbf{R}^w_{b_i}&\mathbf{p}^w_{b_i}\\0&1\end{bmatrix}
+\begin{bmatrix}\mathbf{R}^b_c&\mathbf{p}^b_c\\0&1\end{bmatrix}\frac{1}{\lambda_l}
+\overline{\mathcal{P} }^{c_i}_l\\
+&=\begin{bmatrix}
+\mathbf{R}^w_{b_i}\mathbf{R}^b_c&\mathbf{R}^w_{b_i}\mathbf{p}^b_c+\mathbf{p}^w_{b_i}\\
+0&1\end{bmatrix}\frac{1}{\lambda_l}\overline{\mathcal{P} }^{c_i}_l\\
+&=\mathbf{R}^{w}_{b_i}
+\left(\mathbf{R}^{b}_{c}
+\frac{1}{\lambda_l}
+\overline{\mathcal{P} }^{c_i}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_i}
+\end{align*}\tag{IIA-1}</script><p> 设特征 $l$ 点 在第 $j$ 帧被观测到的相机坐标系下的坐标为： $\mathcal{P}^{c_j}_{l}$ </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{P}^{c_j}_l&={\mathbf{T}^b_c}^{-1}{\mathbf{T}^w_{b_j} }^{-1}\mathcal{P}^w_l \\
+\Leftrightarrow 
+\mathcal{P}^w_l&=\mathbf{T}^w_{b_j}\mathbf{T}^b_c\mathcal{P}^{c_j}_l\\
+\mathcal{P}^w_l&=\begin{bmatrix}\mathbf{R}^w_{b_j}&\mathbf{p}^w_{b_j}\\0&1\end{bmatrix}
+\begin{bmatrix}\mathbf{R}^b_c&\mathbf{p}^b_c\\0&1\end{bmatrix}\mathcal{P}^{c_j}_l\\
+&=\begin{bmatrix}
+\mathbf{R}^w_{b_j}\mathbf{R}^b_c&\mathbf{R}^w_{b_j}\mathbf{p}^b_c+\mathbf{p}^w_{b_j}\\
+0&1\end{bmatrix}\mathcal{P}^{c_j}_l\\
+&=\mathbf{R}^{w}_{b_j}
+\left(\mathbf{R}^{b}_{c}
+\mathcal{P}^{c_j}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_j}
+\end{align*}\tag{IIA-2}</script><p>将 $\mathrm{(IIA-1)}$ 带入 $\mathrm{(IIA-2)}$ ，可以得到：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&\mathbf{R}^{w}_{b_i}
+\left(\mathbf{R}^{b}_{c}
+\frac{1}{\lambda_l}
+\overline{\mathcal{P} }^{c_i}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_i}=\mathbf{R}^{w}_{b_j}
+\left(\mathbf{R}^{b}_{c}
+\mathcal{P}^{c_j}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_j}\\
+&\Rightarrow
+\mathcal{P}^{c_j}_l =\mathbf{R}^c_b
+\left\{\mathbf{R}^{b_j}_w
+\left[\mathbf{R}^{w}_{b_i}
+\left(\mathbf{R}^{b}_{c}
+\frac{1}{\lambda_l}
+\overline{\mathcal{P} }^{c_i}_l
++\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_i}-\mathbf{p}^{w}_{b_j}
+\right]-\mathbf{p}^{b}_{c}
+\right\}
+\end{align*}\tag{IIA-3}</script><h2 id="B-优化变量"><a href="#B-优化变量" class="headerlink" title="B. 优化变量"></a>B. 优化变量</h2><p>待优化变量主要是 $i$ 和 $j$ 两个时刻相机的位姿以及逆深度：</p>
+<script type="math/tex; mode=display">
+[\mathbf{p}^w_{b_i},\mathbf{q}^w_{b_i}],\ \ \ \ \ 
+[\mathbf{p}^w_{b_j},\mathbf{q}^w_{b_j}],\ \ \ \ \ 
+[\mathbf{p}^b_{c},\mathbf{q}^b_{c}],\ \ \ \ \ 
+\lambda_l\tag{7}</script><h2 id="C-Jacobian"><a href="#C-Jacobian" class="headerlink" title="C. Jacobian"></a>C. Jacobian</h2><p>根据视觉残差公式，我们可以得到相对于各优化变量的 Jacobian：</p>
+<script type="math/tex; mode=display">
+\mathbf{J}[0]^{3\times7}=
+\left[
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{p}^w_{b_i} },
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{q}^w_{b_i} }
+\right]
+=
+\begin{bmatrix}
+\mathbf{R}^c_b\mathbf{R}^{b_j}_w
+&
+-\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
+\left(\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l}+\mathbf{p}^{b}_{c}
+\right)^{\land}
+\end{bmatrix}\tag{8}</script><script type="math/tex; mode=display">
+\mathbf{J}[1]^{3\times7}=
+\left[
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{p}^w_{b_j} },
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{q}^w_{b_j} }
+\right]
+=
+\begin{bmatrix}
+-\mathbf{R}^c_b\mathbf{R}^{b_j}_w
+&
+\mathbf{R}^c_b
+\left\{
+\mathbf{R}^{b_j}_w
+\left[\mathbf{R}^{w}_{b_i}
+\left(\mathbf{R}^{b}_{c}
+\frac{\overline{\mathcal{P} }^{c_j}_l}{\lambda_l}+\mathbf{p}^{b}_{c}
+\right)+\mathbf{p}^{w}_{b_i}-\mathbf{p}^{w}_{b_j}
+\right]
+\right\}^{\land}
+\end{bmatrix}\tag{9}</script><script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{J}[2]^{3\times7}&=
+\left[
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{p}^b_c },
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\mathbf{q}^b_c }
+\right]\\
+&=\begin{bmatrix}
+\mathbf{R}^c_b(\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}-I_{3\times3})
+\\
+-\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
+\mathbf{R}^{b}_{c}\left(\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
++\left(\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
+\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l} \right)^{\land}
++\left\{
+\mathbf{R}^c_b
+\left[
+\mathbf{R}^{b_j}_w
+\left(
+\mathbf{R}^w_{b_i}\mathbf{p}^{b}_{c}+\mathbf{p}^{w}_{b_i}-\mathbf{p}^{w}_{b_j}
+\right)-\mathbf{p}^{b}_{c}
+\right]
+\right\}^{\land}
+\end{bmatrix}^T
+\end{align*}\tag{10}</script><script type="math/tex; mode=display">
+\mathbf{J}[3]^{3\times1}=
+\frac{\partial \mathbf{r}_{\mathcal{C} } }{\partial\lambda_l }
+=-\mathbf{R}^c_b\mathbf{R}^{b_j}_w\mathbf{R}^w_{b_i}\
+\mathbf{R}^{b}_{c}\frac{\overline{\mathcal{P} }^{c_i}_l}{\lambda_l^2}\tag{11}</script>]]></content>
+      <categories>
+        <category>VINS</category>
+        <category>文献阅读</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>VINS</tag>
+        <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VINS-Mono_4-后端非线性优化_IMU约束</title>
+    <url>/posts/70ecd932.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍后端非线性优化中的IMU约束。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="Ⅰ-状态向量与目标函数"><a href="#Ⅰ-状态向量与目标函数" class="headerlink" title="Ⅰ.  状态向量与目标函数"></a>Ⅰ.  状态向量与目标函数</h1><p>状态向量共包括滑动窗口内的 $n+1$ 个所有 IMU 状态$\mathbf{x}_k,k\in[0,n]$（包括位置、朝向、速度、加速度计 $bias$ 和陀螺仪 $bias$）、 Camera 到 IMU 的外参 $\mathbf{x}^b_c$、 $m+1$ 个 3D 点的逆深度$\lambda_l,l\in[0,m]$：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{X}&=[\mathbf{x}_0,\mathbf{x}_1,···,\mathbf{x}_n,\mathbf{x}^b_c,\lambda_0,\lambda_1,···,\lambda_m]\\
+\mathbf{x}_k&=[\mathbf{p}^w_{b_k},\mathbf{v}^w_{b_k},\mathbf{q}^w_{b_k},\mathbf{b}_a,\mathbf{b}_g],k\in[0,n]\\
+\mathbf{x}^b_c&=[\mathbf{p}^b_c,\mathbf{q}^b_c]
+\end{align*}\tag{1}</script><p> $n$ 是关键帧的总数，$m$ 是滑动窗口中的特征总数。 $λ_l$ 是第 $l$ 个特征与其第一次观察的逆深度。</p>
+<p>使用 BA 公式，我们最小化所有测量残差的先验和马氏距离之和，以获得<strong>最大后验估计</strong>为：</p>
+<script type="math/tex; mode=display">
+\underset{\mathcal{X} }{\min}
+\left\{
+\underbrace
+{\parallel \mathbf{r}_p-\mathbf{H}_p\mathcal{X} \parallel^2}_{边缘化的先验信息}
++\underbrace
+{\sum_{k\in\mathcal{B} }\parallel\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})  \parallel^2_{\mathbf{P}^{b_k}_{b_{k+1} } } }_{IMU 测量残差}
++\underbrace
+{\sum_{(l,j)\in\mathcal{C} }\rho(\parallel\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) \parallel^2_{\mathbf{P}^{c_j}_l })}_{视觉的重投影残
+差}
+\right\}\tag{2}</script><p>其中 $\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})$ 和 $\mathbf{r}_\mathcal{C}(\hat{\mathbf{z} }^{c_j}_{l},\mathcal{X}) $ 分别是 IMU 和视觉测量的残差。 $\mathcal{B}$ 是所有 IMU 测量值的集合，$\mathcal{C}$  是在当前滑动窗口中至少观察到两次的特征集合。 $\{\mathbf{r}_p, \mathbf{H}_p\}$ 是来自边缘化的先验信息。 三种残差都是用马氏距离表示。</p>
+<h1 id="Ⅱ-IMU-约束"><a href="#Ⅱ-IMU-约束" class="headerlink" title="Ⅱ. IMU 约束"></a>Ⅱ. IMU 约束</h1><h2 id="残差"><a href="#残差" class="headerlink" title="残差"></a>残差</h2><p>两帧之间的 PVQ 和 $bias$ 的变化量的差  :</p>
+<script type="math/tex; mode=display">
+\mathbf{r}_{\mathcal{B} }(\hat{\mathbf{z} }^{b_k}_{b_{k+1} },\mathcal{X})=
+\begin{bmatrix}
+\delta {\alpha}^{b_k}_{b_{k+1} }\\
+\delta {\theta}^{b_k}_{b_{k+1} }\\
+\delta {\beta}^{b_k}_{b_{k+1} }\\
+\delta {b}_{a}\\\delta {b}_{g}
+\end{bmatrix}=
+\begin{align*}
+\begin{bmatrix}
+\mathbf{R}^{b_k}_w(\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}+
+\frac{1}{2}g^w\Delta t_k^2-\mathbf{v}^w_{b_k}\Delta t_k)-\hat{\alpha}^{b_k}_{b_{k+1} }\\
+2[{\mathbf{q}^w_{b_k}}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz}\\
+\mathbf{R}^{b_k}_w(\mathbf{v}^w_{b_{k+1} }-\mathbf{v}^w_{b_k}+g^w\Delta t_k)-\hat{\beta}^{b_k}_{b_{k+1} }\\
+\mathbf{b}_{ab_{k+1} }-\mathbf{b}_{ab_k}\\
+\mathbf{b}_{wb_{k+1} }-\mathbf{b}_{wb_k}\\
+\end{bmatrix}
+\end{align*}\tag{3}</script><p>其中各增量关于 bias 的 Jacobian 可从公式 $(4)$ 的 大 Jacobian 中的相应位置获得。 上面与其中各增量关于 $bias$ 的 Jacobian 可从公式 $(4)$ 的大 Jacobian 中的相应位置获得。</p>
+<script type="math/tex; mode=display">
+{\mathbf{J}_{k+1} }^{15\times15}=\mathbf{F}\mathbf{J}_{k}\tag{4}</script><h2 id="优化变量"><a href="#优化变量" class="headerlink" title="优化变量"></a>优化变量</h2><p>待优化变量主要为两个时刻的 PVQ 以及 $bais$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+k时刻&： [\mathbf{p}^w_{b_k},\mathbf{q}^w_{b_k}],[\mathbf{v}^w_{b_k},\mathbf{b}_{a_k},\mathbf{b}_{w_k}]\\
+k+1时刻&：[\mathbf{p}^w_{b_{k+1} },\mathbf{q}^w_{b_{k+1} }],[\mathbf{v}^w_{b_{k+1}  },\mathbf{b}_{a_{k+1} },\mathbf{b}_{w_{k+1} }]\\
+\end{align*}</script><h2 id="Jacobian"><a href="#Jacobian" class="headerlink" title="Jacobian"></a>Jacobian</h2><p>计算 Jacobian 时，残差对应的求偏导对象为上面的优化变量，但是计算时采用扰动方式计算，即扰动为 ：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+k时刻&： [\delta\mathbf{p}^w_{b_k},\delta\theta^w_{b_k}],[\delta\mathbf{v}^w_{b_k},\delta\mathbf{b}_{a_k},\delta\mathbf{b}_{w_k}]\\
+k+1时刻&：[\delta\mathbf{p}^w_{b_{k+1} },\delta\theta^w_{b_{k+1} }],[\delta\mathbf{v}^w_{b_{k+1}  },\delta\mathbf{b}_{a_{k+1} },\delta\mathbf{b}_{w_{k+1} }]\\
+\end{align*}</script><script type="math/tex; mode=display">
+\mathbf{J}[0]^{15\times7}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{q}^w_{b_k} }]
+=\begin{bmatrix}
+-\mathbf{R}^{b_k}_w&
+\left[\mathbf{R}^{b_k}_w\left(\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}-\mathbf{v}^w_{b_k}\Delta t_k+
+\frac{1}{2}g^w\Delta t_k^2\right) \right]^{\land}\\
+0&-\mathcal{R}
+\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}
+\left[\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}\\
+0&\left[\mathbf{R}^{b_k}_w(\mathbf{v}^w_{b_{k+1} }-\mathbf{v}^w_{b_k}+g^w\Delta t_k)\right]^{\land}\\
+0&0\\
+0&0\\
+\end{bmatrix}\tag{J0}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[0]$</strong></li>
+</ul>
+<p>定义：$\mathbf{J}[0]_{[i,j]}$ 表示矩阵 $\mathbf{J}[0]$ 的 第 $i$  行 第 $j$ 列；</p>
+<p>首先是 $\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_k} }$，显然，由公式 $(3)$，对于 $\mathbf{r}_{\mathcal{B} } $ 而言，只有 $\delta {\alpha}^{b_k}_{b_{k+1} }$ 对 $\mathbf{p}^w_{b_k}$ 求偏导才有值，其他为0，这就组成 $(J0)$ 里矩阵的第一列；</p>
+<p>对于矩阵的 $\mathbf{J}[0]_{[2,1]}$ 和  $\mathbf{J}[0]_{[2,3]}$，可以使用旋转矩阵的左乘扰动模型来求：</p>
+<p>这里为了书写方便，令 $\mathcal{P}^w=\mathbf{p}^w_{b_{k+1} }-\mathbf{p}^w_{b_k}+<br>\frac{1}{2}g^w\Delta t_k^2-\mathbf{v}^w_{b_k}\Delta t_k$</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\alpha}^{b_k}_{b_{k+1} } }{\partial \mathbf{p}^w_{b_k} }
+&=\frac{\partial 
+\left[\mathbf{R}^{b_k}_w\mathcal{P}^w-\hat{\alpha}^{b_k}_{b_{k+1} }\right]}{\partial \mathbf{p}^w_{b_k} }\\
+&=\underset{\varphi\rightarrow0}{\lim}
+\frac{(\mathbf{R}^{b_k}_w\exp(\varphi^{\land}))^{-1}\mathcal{P}^w }{\delta\varphi}\\
+&\approx\underset{\varphi\rightarrow0}{\lim}
+\frac{(I-\varphi^{\land})\exp(\phi^{\land})\mathcal{P}^w-\exp(\phi^{\land})\mathcal{P} }{\delta\varphi}\\
+&=\underset{\varphi\rightarrow0}{\lim}
+-\frac{\varphi^{\land}\mathbf{R}^{b_k}_w\mathcal{P}^w }{\delta\varphi}\\
+&=\underset{\varphi\rightarrow0}{\lim}
+\frac{[\mathbf{R}^{b_k}_w\mathcal{P}^w]^{\land}\varphi }{\delta\varphi}\\
+&=[\mathbf{R}^{b_k}_w\mathcal{P}^w]^{\land}
+\end{align*}\tag{J0-1}</script><p>因此，对于$\mathbf{J}[0]_{[2,1]}$ 和  $\mathbf{J}[0]_{[2,3]}$，他们仅仅是 $\mathcal{P}^w$ 不同，推导过程都是一样的。</p>
+<p>关键是对于$\mathbf{J}[0]_{[2,2]}$  的推导，是比较关键的，对应的雅可比为 $\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }$：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }
+&=\frac{\partial 2[{\mathbf{q}^w_{b_k}}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial \mathbf{q}^w_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\left(\mathbf{q}_{b_k}^w\otimes
+\begin{bmatrix}1\\\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix} \right)^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+-\left(\mathbf{q}_{b_k}^w\otimes
+\begin{bmatrix}1\\0\end{bmatrix} \right)^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\begin{bmatrix}1\\-\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix}
+\otimes{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+-\begin{bmatrix}1\\0 \end{bmatrix}\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=2\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\left(
+\begin{bmatrix}1\\-\frac{\delta\theta^{w}_{b_k} }{2} \end{bmatrix}
+-\begin{bmatrix}1\\0 \end{bmatrix}
+\right)
+\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\begin{bmatrix}0\\-\delta\theta^{w}_{b_k} \end{bmatrix}
+\otimes
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=\underset{\delta {\theta}^{b_k}_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]
+\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]
+\otimes\begin{bmatrix}0\\-\delta\theta^{w}_{b_k} \end{bmatrix}
+}{\delta {\theta}^{w}_{b_k} }\\
+&=-\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+\end{align*}\tag{J0-2}</script><p>对于四元数的左右乘，在第二节的$\mathrm{(IA-3)}$ 提到过，这里再次作展示：</p>
+<p>我们设四元数 $\mathbf{q}=[x,y,z,s]$为 $\mathbf{q}=[w,s]$，则：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}_a)&=\Omega(w)+sI_{4\times4}
+=\begin{bmatrix}-w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}\\
+\mathcal{L}(\mathbf{q}_a)&=\Psi(w)+sI_{4\times4}
+=\begin{bmatrix}w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}
+\end{align*}\tag{5}</script><p>则有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}^{-1})=\Omega(-w)+sI_{4\times4}
+&=\begin{bmatrix}w^{\land}&-w\\w^T&0\end{bmatrix}+sI_{4\times4}\\
+\mathcal{L}(\mathbf{q}^{-1})=\Omega(-w)+sI_{4\times4}
+&=\begin{bmatrix}-w^{\land}&-w\\w^T&0\end{bmatrix}+sI_{4\times4}\\
+\end{align*}
+\tag{6}</script><p> 如果我们只取左上角的 $3\times3$ 虚部部分，则有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}^{-1})=sI_{3\times3}+w^{\land}=\mathcal{L}(\mathbf{q})_{3\times3}\\
+\mathcal{L}(\mathbf{q}^{-1})=sI_{3\times3}-w^{\land}=\mathcal{R}(\mathbf{q})_{3\times3}
+\end{align*}
+\tag{7}</script><p>故而 $\mathrm{(J0-2)}$ 可以整理如下：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta {\theta}^{b_k}_{b_{k+1} } }{\partial \mathbf{q}^w_{b_k} }
+&=-\mathcal{R}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+&=-\mathcal{R}
+\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}
+\left[\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}
+\end{align*}\tag{J0-3}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[1]^{15\times9}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{v}^w_{b_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{a_k} }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{w_k} }]
+=\begin{bmatrix}
+-\mathbf{R}^{b_k}_w\Delta t&-\mathbf{J}^{\alpha}_{b_a}&-\mathbf{J}^{\alpha}_{b_w}\\
+0&0&-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes\hat{\gamma}^{b_k}_{b_{k+1} }
+\right]_{3\times3}\mathbf{J}^{\gamma}_{b_w}\\
+-\mathbf{R}^{b_k}_w&-\mathbf{J}^{\beta}_{b_a}&-\mathbf{J}^{\beta}_{b_w}\\
+0&-\mathbf{I}&0\\
+0&0&-\mathbf{I}
+\end{bmatrix}\tag{J1}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[1]$</strong></li>
+</ul>
+<p>首先第一列的求导都是直接可以看出来的，这里不做推导。</p>
+<p>论文中， $\alpha^{b_k}_{b_{k+1} },\beta^{b_k}_{b_{k+1} },\gamma^{b_k}_{b_{k+1} }$  关于偏差的一阶近似可以写成：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha^{b_k}_{b_{k+1} }&\approx \hat{\alpha}^{b_k}_{b_{k+1} }+\mathbf{J}^{\alpha}_{b_a}\delta b_{a_k}+\mathbf{J}^{\alpha}_{b_w}\delta b_{w_k}
+\\
+\beta^{b_k}_{b_{k+1} }&\approx \hat{\beta}^{b_k}_{b_{k+1} }+\mathbf{J}^{\beta}_{b_a}\delta b_{a_k}+\mathbf{J}^{\beta}_{b_w}\delta b_{w_k}
+\\
+\gamma^{b_k}_{b_{k+1} }&\approx \hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+\end{align*}\tag{8}</script><p>其中 $\mathbf{J}^{\alpha}_{b_a}$ 和 是 $\mathbf{J}^{\alpha}_{b_{k+1} }$ 中的子块矩阵，其位置对应于 $\frac{\delta\alpha^{b_k}_{b_{k+1} } }{\delta b_{a_k} }$ 。 $\mathbf{J}^{\alpha}_{b_w}、\mathbf{J}^{\beta}_{b_a}、\mathbf{J}^{\beta}_{b_w}、\mathbf{J}^{\gamma}_{b_w}$ 也使用相同的含义。当偏差的估计发生轻微变化时，我们使用 $(8)$ 来近似地校正预积分结果，而不是重新传播。</p>
+<p>这里主要对 $\mathbf{J[1]}_{[2,3]}$ 进行推导，对应的雅可比为 $\frac{\partial \delta\theta^{b_k}_{b_{k+1}} }{\partial\mathbf{q}^{w}_{k+1} }$:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta\theta^{b_k}_{b_{k+1}} }{\partial b_{w_k} }
+&=\frac{\partial 2[{\mathbf{q}^{b_k}_w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial b_{w_k} }\\
+&=2\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\left[
+\hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+\right]}^{-1}-
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\left[
+\hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\0 \end{bmatrix}
+\right]}^{-1}
+}{\delta b_{w_k}}\\
+&=2\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\begin{bmatrix}0\\-\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+}\otimes{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1}
+}{\delta b_{w_k}}\\
+&=\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}_{b_k}^w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+{\begin{bmatrix}0\\-\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+}\otimes{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1}
+}{\delta b_{w_k}}\\
+&=\underset{\delta b_{w_k}\rightarrow0}{\lim}
+\frac{
+\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]\otimes
+\mathcal{R}\left[{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1} \right]\otimes
+{\begin{bmatrix}0\\-\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix} }
+}{\delta b_{w_k}}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]
+\mathcal{R}\left[{\hat{\gamma}^{b_k}_{b_{k+1} } }^{-1} \right]\mathbf{J}^{\gamma}_{b_w}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} } \right]_{3\times3}
+\mathcal{L}\left[\hat{\gamma}^{b_k}_{b_{k+1} } \right]_{3\times3}
+\mathbf{J}^{\gamma}_{b_w}\\
+&=-\mathcal{L}\left[{\mathbf{q}_{b_k}^w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes\hat{\gamma}^{b_k}_{b_{k+1} }
+\right]_{3\times3}\mathbf{J}^{\gamma}_{b_w}
+\end{align*}\tag{J1-1}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[2]^{15\times7}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{p}^w_{b_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{q}^w_{b_{k+1} } }]
+=\begin{bmatrix}
+\mathbf{R}^{b_k}_w&0\\
+0&\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}\\
+0&0\\
+0&0\\
+0&0\\
+\end{bmatrix}\tag{J2}</script><hr>
+<ul>
+<li><strong>推导 $\mathbf{J}[2]$</strong></li>
+</ul>
+<p>主要是对 $\mathbf{J}[2]_{[2,2]}$ 进行推导，即 $\frac{\partial \delta\theta^{b_k}_{b_{k+1}} } {\partial \mathbf{q}^w_{b_{k+1} } }$：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\frac{\partial \delta\theta^{b_k}_{b_{k+1}} } {\partial \mathbf{q}^w_{b_{k+1} } }
+&=\frac{\partial 2[{\mathbf{q}^{b_k}_w}^{-1}\otimes\mathbf{q}^w_{b_{k+1} }
+\otimes(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1}]_{xyz} }{\partial \mathbf{q}^w_{b_{k+1} } }\\
+&=2\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{\delta\theta^w_{b_{k+1} } }{2}\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+-{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}1\\0\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes
+\begin{bmatrix}0\\\delta\theta^w_{b_{k+1} }\end{bmatrix}\otimes
+(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} 
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\underset{\delta\theta^w_{b_{k+1} }\rightarrow0}{\lim}
+\frac{
+\mathcal{L}[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }]
+\mathcal{R}[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} ]
+\begin{bmatrix}0\\\delta\theta^w_{b_{k+1} }\end{bmatrix}
+}{\delta\theta^w_{b_{k+1} } }\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\right]
+\mathcal{R}\left[(\hat{\gamma}^{b_k}_{b_{k+1} })^{-1} \right]\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\right]_{3\times3}
+\mathcal{L}\left[(\hat{\gamma}^{b_k}_{b_{k+1} }) \right]_{3\times3}\\
+&=\mathcal{L}\left[{\mathbf{q}^{b_k}_w}^{-1}\otimes
+\mathbf{q}^w_{b_{k+1} }\otimes\hat{\gamma}^{b_k}_{b_{k+1} }\right]_{3\times3}
+\end{align*}</script><p><strong>证毕！</strong></p>
+<hr>
+<script type="math/tex; mode=display">
+\mathbf{J}[3]^{15\times9}=
+[\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{v}^w_{b_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{a_{k+1} } }
+,\frac{\partial \mathbf{r}_{\mathcal{B} } }{\partial \mathbf{b}_{w_{k+1} } }]
+=\begin{bmatrix}
+0&0&0\\
+0&0&0\\
+\mathbf{R}^{b_k}_w&0&0\\
+0&\mathbf{I}&0\\
+0&0&\mathbf{I}\\
+\end{bmatrix}\tag{J3}</script><p>这个不需要证，应该可以直接看出来。</p>
+<hr>
+<p>上面公式在代码中对应： <code>class IMUFactor : public ceres::SizedCostFunction&lt;15, 7, 9, 7, 9&gt;</code><br>对于 <code>Evaluate</code> 输入 <code>double const *const *parameters, parameters[0], parameters[1], parameters[2],parameters[3]</code> 分别对应 $4$ 个输入参数, 它们的长度依次是 $7,9,7,9$，分别对应 $4$ 个优化变量的<br>参数块。  </p>
+<h2 id="协方差"><a href="#协方差" class="headerlink" title="协方差"></a>协方差</h2><p>代码 <code>IMUFactor::Evaluate()</code> 中 <code>residual</code> 还乘以一个<strong>信息矩阵</strong> <code>sqrt_info</code>，这是因为真正的优化项其实是 马氏距离：$d = \mathbf{r}^T\mathbf{P}^{-1}\mathbf{r}$， $\mathbf{P}$ 是协方差， 又因为 Ceres 只接受最小二乘优化， 也就是  $\min(e^Te)$, 所以把 $\mathbf{P}$ 做 LLT 分解， 即 $𝐿𝐿^T= \mathbf{P}^{-1}$, 则有：  </p>
+<script type="math/tex; mode=display">
+d=\mathbf{r}^TLL^T\mathbf{r}=(L^T\mathbf{r})^T(L^T\mathbf{r})\tag{9}</script><p>令 $\mathbf{r}^{\prime} = L^T\mathbf{r}$ 作为新的优化误差, 这样就能用 Ceres 求解了。<strong>马氏距离距离其实相当于一个残差加权, 协方差大的加权小, 协方差小的加权大</strong>, 着重优化那些比较确定的残差。若写成 <code>“sqrt_info.setIdentity()”</code> 相当于不加权。  </p>
+<p>其中，$\mathbf{P}$ 是协方差，由之前提出的递推公式得到：</p>
+<p>协方差的迭代公式为：  </p>
+<script type="math/tex; mode=display">
+{\mathbf{P}^{b_k}_{k+1} }^{15\times15}
+=\mathbf{F}\mathbf{P}^{b_k}_{k}\mathbf{F}^T+\mathbf{V}\mathbf{Q}\mathbf{V}^T\tag{10}</script><p>其中， 初始值 $\mathbf{P}^{b_k}_{b_k}=0$。 $\mathbf{Q}$ 为表示噪声项的对角协方差矩阵：</p>
+<script type="math/tex; mode=display">
+\mathbf{Q}^{18\times18}=
+\begin{bmatrix}
+\sigma^2_{a}&0&0&0&0&0\\
+0&\sigma^2_{w}&0&0&0&0\\
+0&0&\sigma^2_{a}&0&0&0\\
+0&0&0&\sigma^2_{w}&0&0\\
+0&0&0&0&\sigma^2_{b_a}&0\\
+0&0&0&0&0&\sigma^2_{b_w}\\
+\end{bmatrix}\tag{11}</script>]]></content>
+      <categories>
+        <category>VINS</category>
+        <category>文献阅读</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>VINS</tag>
+        <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VINS-Mono_3-PVQ增量误差、协方差及雅可比推导</title>
+    <url>/posts/6eff9a87.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍PVQ增量误差、协方差及雅可比推导。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h2 id="Ⅰ-连续形式下"><a href="#Ⅰ-连续形式下" class="headerlink" title="Ⅰ.  连续形式下"></a>Ⅰ.  连续形式下</h2><h3 id="A-PVQ增量误差"><a href="#A-PVQ增量误差" class="headerlink" title="A. PVQ增量误差"></a>A. PVQ增量误差</h3><p>IMU 在每一个时刻积分出来的值是有误差的，下面我们对误差进行分析。首先我们直<br>接给出在 t 时刻误差项的导数 ：（即推导出 $(8)$ 的误差项的连续时间线性化方程）</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\begin{bmatrix}
+\delta \dot{\alpha}^{b_k}_t\\\delta \dot{\beta}^{b_k}_t\\
+\delta \dot{\theta}^{b_k}_t\\\delta \dot{b}_{a_t}\\\delta \dot{b}_{w_t}\\
+\end{bmatrix}&=
+\begin{bmatrix}
+0&\mathbf{I}&0&0&0\\
+0&0&-\mathbf{R}^{b_k}_t[\hat{a}_t-b_{a_t}]^{\land}&-\mathbf{R}^{b_k}_t&0\\
+0&0&-[\hat{w}_t-b_{w_t}]^{\land}&0&-\mathbf{I}\\
+0&0&0&0&0\\
+0&0&0&0&0\\
+\end{bmatrix}
+\begin{bmatrix}
+\delta {\alpha}^{b_k}_t\\\delta {\beta}^{b_k}_t\\
+\delta {\theta}^{b_k}_t\\\delta {b}_{a_t}\\\delta {b}_{w_t}\\
+\end{bmatrix}+
+\begin{bmatrix}
+0&0&0&0\\
+-\mathbf{R}^{b_k}_t&0&0&0\\
+0&-\mathbf{I}&0&0\\
+0&0&\mathbf{I}&0\\
+0&0&0&\mathbf{I}\\
+\end{bmatrix}
+\begin{bmatrix}\mathbf{n}_a\\\mathbf{n}_w\\\mathbf{n}_{b_a}\\\mathbf{n}_{b_w}\end{bmatrix}\\
+&=\mathbf{F}_t\delta\mathbf{z}^{b_k}_t+\mathbf{G}_t\mathbf{n}_t
+\end{align*}\tag{1}</script><p>其中：$\mathbf{F}^{15\times15}_t,\mathbf{G}^{15\times12}_t,\delta{\mathbf{z}^{b_k}_t}^{15\times1},\mathbf{n}^{12\times1}_t$，下面给出其推导过程。</p>
+<p>在推导之前，引入两个概念：</p>
+<p>​    ① $true$：        真实测量值，包含了噪声 ，包括附加噪声和随机游走</p>
+<p>​    ① $nominal$：无噪声的理论值  </p>
+<ul>
+<li><strong>对于 $\dot{\beta}^{b_k}_t$ 的推导：</strong></li>
+</ul>
+<p>易知$\delta \dot{\beta}^{b_k}_t={\dot{\beta}^{b_k}_t}_{true}-{\dot{\beta}^{b_k}_t}_{nominal}$，我们分别推导${\dot{\beta}^{b_k}_t}_{true}$ 以及${\dot{\beta}^{b_k}_t}_{nominal}$ :</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+{\dot{\beta}^{b_k}_t}_{true}
+&={\mathbf{R}^{b_k}_t}_{true}({\hat{a}_t}_{true}-{b_{a_t} }_{true})\\
+&=\mathbf{R}^{b_k}_t\exp(\delta\theta^{\land})(\hat{a}_t-b_{a_t}-n_a-\delta b_{a_t})\\
+&=\mathbf{R}^{b_k}_t(I+\delta\theta^{\land})(\hat{a}_t-b_{a_t}-n_a-\delta b_{a_t})\\
+&=\mathbf{R}^{b_k}_t[\hat{a}_t-b_{a_t}-n_a-\delta b_{a_t}+\delta\theta^{\land}(\hat{a}_t-b_{a_t})]\\
+&=\mathbf{R}^{b_k}_t[\hat{a}_t-b_{a_t}-n_a-\delta b_{a_t}-(\hat{a}_t-b_{a_t})^{\land}\delta\theta]\\
+{\dot{\beta}^{b_k}_t}_{nominal}&=\mathbf{R}^{b_k}_t(\hat{a}_t-b_{a_t})
+\end{align*}\tag{IA-1}</script><p>因此，可以得到：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta \dot{\beta}^{b_k}_t
+&={\dot{\beta}^{b_k}_t}_{true}-{\dot{\beta}^{b_k}_t}_{nominal}\\
+&=\mathbf{R}^{b_k}_t[-n_a-\delta b_{a_t}-(\hat{a}_t-b_{a_t})^{\land}\delta\theta]\\
+&=-\mathbf{R}^{b_k}_t(\hat{a}_t-b_{a_t})^{\land}\delta\theta
+-\mathbf{R}^{b_k}_t\delta b_{a_t}-\mathbf{R}^{b_k}_tn_a
+\end{align*}\tag{IA-2}</script><ul>
+<li><strong>对于 $\dot{\theta}^{b_k}_t$ 的推导：</strong></li>
+</ul>
+<p>由公式 $(IA-5)$ 可知：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+{\dot{\mathbf{q} }_t}_{true}
+&=\frac{1}{2}{\mathbf{q}_t}_{true}\otimes\begin{bmatrix}w_{ture}\\0\end{bmatrix}\\
+&=\frac{1}{2}\mathbf{q}_t\otimes\delta\mathbf{q}\otimes
+\begin{bmatrix}\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\0\end{bmatrix}\\
+{\dot{\mathbf{q} }_t}_{nominal}&=\dot{\mathbf{q} }_t\\
+&=
+\frac{1}{2}\mathbf{q}_t\otimes\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix}\\
+\end{align*}\tag{IA-3}</script><p>根据导数的性质，又有：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+{\dot{\mathbf{q} }_t}_{true}&=\dot{\overbrace{\mathbf{q}_t\otimes\delta \mathbf{q} } }\\
+&=\dot{\mathbf{q} }_t\otimes\delta \mathbf{q}+\mathbf{q}_t\otimes\dot{\delta \mathbf{q} }\\
+&=\frac{1}{2}\mathbf{q}_t\otimes\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix}\otimes\delta \mathbf{q}+\mathbf{q}_t\otimes\dot{\delta \mathbf{q} }\\
+\end{align*}\tag{IA-4}</script><p>综合$ (\mathrm{IA-3})$ 和 $ (\mathrm{IA-4})$：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+&\frac{1}{2}\mathbf{q}_t\otimes\delta\mathbf{q}\otimes
+\begin{bmatrix}\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\0\end{bmatrix}
+=\frac{1}{2}\mathbf{q}_t\otimes\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix}\otimes\delta \mathbf{q}+\mathbf{q}_t\otimes\dot{\delta \mathbf{q} }\\
+&\Leftrightarrow 
+\frac{1}{2}\delta\mathbf{q}\otimes
+\begin{bmatrix}\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\0\end{bmatrix}
+=\frac{1}{2}\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix}\otimes\delta \mathbf{q}+\dot{\delta \mathbf{q} }\\
+&\Leftrightarrow 
+2\dot{\delta \mathbf{q} }=\delta\mathbf{q}\otimes\begin{bmatrix}\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\0\end{bmatrix}-\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix}\otimes\delta \mathbf{q}\\
+&\Leftrightarrow 
+2\dot{\delta \mathbf{q} }=\mathcal{R}\left(\begin{bmatrix}\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\0\end{bmatrix}  \right)\delta \mathbf{q}-\mathcal{L}\left(\begin{bmatrix}\hat{w}_t-b_{w_t}\\0\end{bmatrix} \right)\delta\mathbf{q}\\
+&\Leftrightarrow 
+2\dot{\delta \mathbf{q} }=\left(
+\begin{bmatrix}-(\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t})^{\land}&\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t}\\-(\hat{w}_t-b_{w_t}-n_w-\delta b_{w_t})^T&0 \end{bmatrix}
+-\begin{bmatrix}(\hat{w}_t-b_{w_t})^{\land}&\hat{w}_t-b_{w_t}\\-(\hat{w}_t-b_{w_t})^T&0\end{bmatrix}
+\right)\begin{bmatrix}\frac{\delta\theta}{2}\\1\end{bmatrix}\\
+&\Leftrightarrow 
+2\dot{\delta \mathbf{q} }=
+\begin{bmatrix}-(2\hat{w}_t-2b_{w_t}-n_w-\delta b_{w_t})^{\land}&-n_w-\delta b_{w_t}\\(n_w+\delta b_{w_t})^T&0 \end{bmatrix}\begin{bmatrix}\frac{\delta\theta}{2}\\1\end{bmatrix}
+\end{align*}</script><p>上式左侧也可以写成：</p>
+<script type="math/tex; mode=display">
+2\dot{\delta \mathbf{q} }=\begin{bmatrix}\dot{\delta\theta}\\0\end{bmatrix}
+=\begin{bmatrix}-(2\hat{w}_t-2b_{w_t}-n_w-\delta b_{w_t})^{\land}&-n_w-\delta b_{w_t}\\(n_w+\delta b_{w_t})^T&0 \end{bmatrix}\begin{bmatrix}\frac{\delta\theta}{2}\\1\end{bmatrix}</script><p>故而，可得到：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\dot{\delta\theta}&=-(2\hat{w}_t-2b_{w_t}-n_w-\delta b_{w_t})^{\land}\frac{\delta\theta}{2}-n_w-\delta b_{w_t}\\
+&\approx-(\hat{w}_t-b_{w_t})^{\land}\delta\theta-n_w-\delta b_{w_t}
+\end{align*}\tag{IA-5}</script><ul>
+<li><strong>其他的推导</strong></li>
+</ul>
+<p>对于 $\delta \dot{\alpha}^{b_k}_t$ 而言，我们知道加速度和速度之间就是相差一个导数，因此：$\delta \dot{\alpha}^{b_k}_t=\delta \beta^{b_k}_t$</p>
+<p>对于 $\delta \dot{b}_{a_t}$ 和 $\delta \dot{b}_{w_t}$​ ，已知加速度偏差和陀螺仪偏置被建模为<strong>随机游走</strong>，其导数为高斯，$n_{b_a}\sim\mathcal{N}(0, \sigma^2_{b_a}),n_{b_w}\sim\mathcal{N}(0, \sigma^2_{b_w})$：</p>
+<script type="math/tex; mode=display">
+\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}</script><p>故而： $\delta \dot{b}_{a_t}=\delta\mathbf{n_{b_a} }$  ,    $\delta \dot{b}_{w_t}=\delta\mathbf{n_{b_w} }$  </p>
+<h3 id="B-协方差及雅可比"><a href="#B-协方差及雅可比" class="headerlink" title="B. 协方差及雅可比"></a>B. 协方差及雅可比</h3><p>对于公式 $(1)$ 可以简写为：</p>
+<script type="math/tex; mode=display">
+\delta\dot{\mathbf{z} }^{b_k}_t=\mathbf{F}_t\delta\mathbf{z}^{b_k}_t+\mathbf{G}_t\mathbf{n}_t\tag{2}</script><p>根据导数定义可知：$\delta\dot{\mathbf{z} }^{b_k}_t=\underset{\delta t\rightarrow0}{\lim}\frac{\delta\mathbf{z}^{b_k}_{t+\delta t}+\delta\mathbf{z}^{b_k}_t}{\delta t}$   </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta\mathbf{z}^{b_k}_{t+\delta t}&=\delta\mathbf{z}^{b_k}_{t}+\delta\dot{\mathbf{z} }^{b_k}_t \delta t\\
+&=(\mathbf{I}+\mathbf{F}_t\delta t)\delta\mathbf{z}^{b_k}_t+(\mathbf{G}_t\delta t)\mathbf{n}_t\\
+&=\mathbf{F}\delta\mathbf{z}^{b_k}_t+\mathbf{V}\mathbf{n}_t
+\end{align*}\tag{3}</script><p>其中，$\mathbf{F}=\mathbf{I}+\mathbf{F}_t\delta t,\mathbf{V}=\mathbf{G}_t\delta t$。</p>
+<p>这里我们对公式 $(3)$ 的 IMU 误差运动方程再说明，将上式和 EKF 对比可知，上式恰好给出了如 EKF 一般对非线性系统线性化的过程，这里的意义是表示下一个时刻的 IMU 测量误差与上一个时刻的成线性关系，这样<strong>我们根据当前时刻的值，可以预测出下一个时刻的均值和协方差</strong>，而公式 $(3)$ 给出的是均值预测，协方差预测公式如下：  </p>
+<script type="math/tex; mode=display">
+\mathbf{P}^{b_k}_{t+\delta t}=
+(\mathbf{I}+\mathbf{F}_t\delta t)\mathbf{P}^{b_k}_{t}(\mathbf{I}+\mathbf{F}_t\delta t)^T+
+(\mathbf{G}_t\delta t)\mathbf{Q}_t(\mathbf{G}_t\delta t)^T,t\in[k,k+1]\tag{4}</script><p>上式给出了协方差的迭代公式，初始值 $\mathbf{P}^{b_k}_{b_k}=0$。其中， $\mathbf{Q}$ 为表示噪声项的对角协方差矩阵：  </p>
+<script type="math/tex; mode=display">
+\mathbf{Q}^{12\times12}=
+\begin{bmatrix}\delta^2_{a}&0&0&0\\0&\delta^2_{w}&0&0\\ 0&0&\delta^2_{b_a}&0\\ 
+ 0&0&0&\delta^2_{b_w}\\ \end{bmatrix}\tag{5}</script><p>另外根据 $(3)$ 式可获得误差项的 Jacobian 的迭代公式：  </p>
+<script type="math/tex; mode=display">
+\mathbf{J}_{t+\delta t}=(\mathbf{I}+\mathbf{F}_t\delta t)\mathbf{J}_\tag{6}t</script><p>其中，Jacobian 的初始值 $\mathbf{J}^{b_k}_{b_k}=\mathbf{I}$</p>
+<h2 id="Ⅱ-离散形式下"><a href="#Ⅱ-离散形式下" class="headerlink" title="Ⅱ. 离散形式下"></a>Ⅱ. 离散形式下</h2><h3 id="A-PVQ增量误差-1"><a href="#A-PVQ增量误差-1" class="headerlink" title="A. PVQ增量误差"></a>A. PVQ增量误差</h3><p>我们首先直接给出 PVQ 增量误差在离散形式下的矩阵形式，为了与代码一致，我们修改下变量顺序，这和代码中 <code>midPointIntegration()</code> 函数是一致的。 （ 但不知为何计算的 V 中与前四个噪声项相关的差个负号？ ）  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\begin{bmatrix}
+\delta\alpha_{k+1}\\ \delta\theta_{k+1}\\ \delta\beta_{k+1}\\ 
+\delta b_{a_{k+1} }\\ \delta b_{w_{k+1} }\\ 
+\end{bmatrix}
+&=\begin{bmatrix}
+\mathbf{I}&f_{12}&\delta t&f_{14}&f_{15}\\
+0&f_{22}&0&0&-\delta t\\
+0&f_{32}&\mathbf{I}&f_{34}&f_{35}\\
+0&0&0&\mathbf{I}&0\\
+0&0&0&0&\mathbf{I}
+\end{bmatrix}
+\begin{bmatrix}
+\delta\alpha_k\\\delta\theta_k\\\delta\beta_k\\\delta b_{a_k}\\\delta b_{w_k}\\ \end{bmatrix}
++\begin{bmatrix}
+g_{11}&g_{12}&g_{13}&g_{14}&0&0\\
+0&\frac{1}{2}\delta t&0&\frac{1}{2}\delta t&0&0\\
+\frac{1}{2}\mathbf{R}_k\delta t&g_{32}&\frac{1}{2}\mathbf{R}_k\delta t&g_{34}&0&0\\
+0&0&0&0&\delta t&0\\
+0&0&0&0&0&\delta t
+\end{bmatrix}
+\begin{bmatrix}
+\mathbf{n}_{a_k}\\ \mathbf{n}_{w_k}\\ \mathbf{n}_{a_{k+1} }\\ 
+\mathbf{n}_{w_{k+1} }\\ \mathbf{n}_{b_a}\\ \mathbf{n}_{b_w}\\ 
+\end{bmatrix}\\
+&=\mathbf{F}
+\begin{bmatrix}
+\delta\alpha_k\\\delta\theta_k\\\delta\beta_k\\\delta b_{a_k}\\\delta b_{w_k}\\ \end{bmatrix}
++\mathbf{G}
+\begin{bmatrix}
+\mathbf{n}_{a_k}\\ \mathbf{n}_{w_k}\\ \mathbf{n}_{a_{k+1} }\\ 
+\mathbf{n}_{w_{k+1} }\\ \mathbf{n}_{b_a}\\ \mathbf{n}_{b_w}\\ 
+\end{bmatrix}\\
+\end{align*}\tag{7}</script><p>$\mathbf{F},\mathbf{G}$为两个时刻间的协方差传递矩阵。</p>
+<p>下面给出推导过程。</p>
+<p>首先是两个比较简单的：</p>
+<script type="math/tex; mode=display">
+\delta b_{a_{k+1} }=\delta b_{a_k}+\delta t\mathbf{n}_a \\
+\delta b_{w_{k+1} }=\delta b_{w_k}+\delta t\mathbf{n}_w \\</script><p>主要推导其他三个：$\delta\alpha_{k+1}, \delta\theta_{k+1}, \delta\beta_{k+1}$，分别推导：</p>
+<ul>
+<li><strong>对于 $\delta\theta_{k+1}$ 的推导</strong></li>
+</ul>
+<p>由公式 $\mathrm{(IA-5)}$ 可知，角度误差的连续形式为：</p>
+<script type="math/tex; mode=display">
+\dot{\delta\theta}\approx-(\hat{w}_t-b_{w_t})^{\land}\delta\theta-n_w-\delta b_{w_t}</script><p>则离散形式为：</p>
+<script type="math/tex; mode=display">
+\dot{\delta\theta_k}\approx-
+\left(\frac{\hat{w}_k+\hat{w}_{k+1}}{2}-b_{w_k}\right)^{\land}\delta\theta_k-
+\frac{n_{w_k}+n_{w_{k+1} } }{2}-\delta b_{w_k}</script><p>由导数的定义：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta\theta_{k+1} &=\delta\theta_{k}+\dot{\delta\theta_{k} }\ \delta t\\
+&=f_{22}\ {\color{red}\delta\theta_{k} }-\delta t\  {\color{red}\delta b_{w_k} }
+-\frac{\delta t}{2}{\color{red}n_{w_k} }  -\frac{\delta t}{2}{\color{red}n_{w_{k+1} } }
+\end{align*}\tag{IIA-1}</script><p>其中，</p>
+<script type="math/tex; mode=display">
+f_{22}=I-
+\left(\frac{\hat{w}_k+\hat{w}_{k+1}}{2}-b_{w_k}\right)^{\land}\delta t
+\tag{IIA-2}</script><ul>
+<li><strong>对于 $\delta\beta_{k+1}$ 的推导</strong></li>
+</ul>
+<p>由公式 $\mathrm{(IA-2)}$ 可知，速度误差的连续形式为：</p>
+<script type="math/tex; mode=display">
+\delta \dot{\beta}^{b_k}_t
+=-\mathbf{R}^{b_k}_t(\hat{a}_t-b_{a_t})^{\land}\delta\theta
+-\mathbf{R}^{b_k}_t\delta b_{a_t}-\mathbf{R}^{b_k}_tn_a</script><p>则离散形式为：</p>
+<script type="math/tex; mode=display">
+\delta \dot{\beta}^{b_k}_t
+=-\frac{
+\mathbf{R}^{b_k}_k(\hat{a}_k-b_{a_k})^{\land}\delta\theta_k+
+\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}\delta\theta_{k+1} }
+{2}-\frac{\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1} }
+{2}\delta b_{a_k}
+-\frac{\mathbf{R}^{b_k}_kn_{a_k}+\mathbf{R}^{b_{k} }_{k+1}n_{a_{k+1} } }{2}</script><p>将公式 $\mathrm{(IIA-1)}$ 代入上式：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta \dot{\beta}^{b_k}_t=
+&-\frac{1}{2}\mathbf{R}^{b_k}_k(\hat{a}_k-b_{a_k})^{\land}\delta\theta_k\\
+&-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}
+\left\{
+\left[ I-
+\left(\frac{\hat{w}_k+\hat{w}_{k+1}}{2}-b_{w_k}\right)^{\land}\delta t \right]\delta\theta_{k}-
+\frac{n_{w_k}+n_{w_{k+1} } }{2}\delta t-\delta b_{w_k}\delta t
+\right\}\\
+&-\frac{1}{2}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta b_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_k}_kn_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1}n_{a_{k+1} }\\
+=&\left\{
+-\frac{1}{2}\mathbf{R}^{b_k}_k(\hat{a}_k-b_{a_k})^{\land}
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}
+\left[ I-
+\left(\frac{\hat{w}_k+\hat{w}_{k+1}}{2}-b_{w_k}\right)^{\land}\delta t \right]
+\right\}\delta\theta_{k}\\
+&+\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}n_{w_k}
++\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1}(\hat{a}_{k+1} -b_{a_k})^{\land}n_{w_{k+1} }
++\frac{\delta t}{2}\mathbf{R}^{b_{k} }_{k+1}(\hat{a}_{k+1} -b_{a_k})^{\land}\delta b_{w_k}\\
+&-\frac{1}{2}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta b_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_k}_kn_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1}n_{a_{k+1} }\\
+\end{align*}</script><p>同理，由导数的定义可知：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta \beta^{b_k}_{k+1}&=\delta \beta^{b_k}_k+\delta \dot{\beta}^{b_k}_t\ \delta t\\
+=&f_{32}\ {\color{red}\delta\theta_k}+{\color{red}\delta \beta^{b_k}_k}-\frac{1}{2}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ {\color{red}\delta b_{a_k} }
++f_{35}\ {\color{red}\delta b_{w_k} }\\
+&-\frac{1}{2}\mathbf{R}^{b_k}_k\delta t\ {\color{red}n_{a_k} }+g_{32}\ {\color{red}n_{w_k} }
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1}\delta t\ {\color{red}n_{a_{k+1} } }
++g_{34}\ {\color{red}n_{w_{k+1} } }
+\end{align*}\tag{IIA-3}</script><p>其中：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+f_{32}&=
+-\frac{1}{2}\mathbf{R}^{b_k}_k(\hat{a}_k-b_{a_k})^{\land}\delta t
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}
+\left[ I-
+\left(\frac{\hat{w}_k+\hat{w}_{k+1}}{2}-b_{w_k}\right)^{\land}\delta t \right]\delta t\\
+f_{35}&=\frac{\delta t}{2}\mathbf{R}^{b_{k} }_{k+1}(\hat{a}_{k+1} -b_{a_k})^{\land}\delta t^2\\
+g_{32}&=\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}\delta t^2\\
+g_{34}&=\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1} (\hat{a}_{k+1} -b_{a_k})^{\land}\delta t^2\\
+\end{align*}\tag{IIA-4}</script><ul>
+<li><strong>对于 $\delta\alpha_{k+1}$ 的推导</strong></li>
+</ul>
+<p>我们知道加速度和速度之间就是相差一个导数，因此：$\delta \dot{\alpha}^{b_k}_t=\delta \beta^{b_k}_t$</p>
+<p>则离散形式为：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta \dot{\alpha}^{b_k}_k=&\frac{1}{2}(\delta \beta^{b_k}_k+\delta \beta^{b_k}_{k+1})\\
+=&\frac{1}{2}(\delta \beta^{b_k}_k+\delta \beta^{b_k}_k+f_{32}\ \delta\theta_k+f_{35}\ \delta b_{w_k}+g_{32}\ n_{w_k}
++g_{34}\ n_{w_{k+1} }\\
+&-\frac{1}{2}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ \delta b_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_k}_k\delta t\ n_{a_k}
+-\frac{1}{2}\mathbf{R}^{b_{k} }_{k+1}\delta t\ n_{a_{k+1} })\\
+=&\delta \beta^{b_k}_k+\frac{1}{2}f_{32}\ \delta\theta_k+\frac{1}{2}f_{35}\ \delta b_{w_k}+\frac{1}{2}g_{32}\ n_{w_k}+\frac{1}{2}g_{34}\ n_{w_{k+1} }\\
+&-\frac{1}{4}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ \delta b_{a_k}
+-\frac{1}{4}\mathbf{R}^{b_k}_k\delta t\ n_{a_k}
+-\frac{1}{4}\mathbf{R}^{b_{k} }_{k+1}\delta t\ n_{a_{k+1} }\\
+\end{align*}</script><p>同理，由导数的定义可知：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\delta\alpha_{k+1}&=\delta\alpha_{k}+\delta \dot{\alpha}^{b_k}_k\ \delta t\\
+=&\delta\alpha_{k}+(\delta \beta^{b_k}_k+\frac{1}{2}f_{32}\ \delta\theta_k+\frac{1}{2}f_{35}\ \delta b_{w_k}+\frac{1}{2}g_{32}\ n_{w_k}+\frac{1}{2}g_{34}\ n_{w_{k+1} }\\
+&-\frac{1}{4}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ \delta b_{a_k}
+-\frac{1}{4}\mathbf{R}^{b_k}_k\delta t\ n_{a_k}
+-\frac{1}{4}\mathbf{R}^{b_{k} }_{k+1}\delta t\ n_{a_{k+1} })\delta t\\
+=&\delta\alpha_{k}+\delta \beta^{b_k}_k\delta t+\frac{\delta t}{2}f_{32}\ \delta\theta_k+\frac{\delta t}{2}f_{35}\ \delta b_{w_k}+\frac{\delta t}{2}g_{32}\ n_{w_k}+\frac{\delta t}{2}g_{34}\ n_{w_{k+1} }\\
+&-\frac{\delta t}{4}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ \delta b_{a_k}
+-\frac{\delta t}{4}\mathbf{R}^{b_k}_k\delta t\ n_{a_k}
+-\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1}\delta t\ n_{a_{k+1} }\\
+=&{\color{red}\delta\alpha_{k} }+\frac{\delta t}{2}f_{32}\ {\color{red}\delta\theta_k}+\delta t\ {\color{red}\delta \beta^{b_k}_k}-\frac{\delta t}{4}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\ {\color{red}\delta b_{a_k} }+\frac{\delta t}{2}f_{35}\ {\color{red}\delta b_{w_k} }\\
+&-\frac{\delta t}{4}\mathbf{R}^{b_k}_k\delta t\ {\color{red}n_{a_k} }
++\frac{\delta t}{2}g_{32}\ {\color{red}n_{w_k} }
+-\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1}\delta t\ {\color{red}n_{a_{k+1} } }
++\frac{\delta t}{2}g_{34}\ {\color{red}n_{w_{k+1} } }
+\\
+\end{align*}\tag{IIA-5}</script><p>所以：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+f_{12}&=\frac{\delta t}{2}f_{32}\\
+f_{14}&=-\frac{\delta t}{4}(\mathbf{R}^{b_k}_k+\mathbf{R}^{b_{k} }_{k+1})\delta t\\
+f_{15}&=\frac{\delta t}{2}f_{35}\\
+g_{11}&=-\frac{\delta t}{4}\mathbf{R}^{b_k}_k\delta t\\
+g_{12}&=\frac{\delta t}{2}g_{32}\\
+g_{13}&=-\frac{\delta t}{4}\mathbf{R}^{b_{k} }_{k+1}\delta t\\
+g_{14}&=\frac{\delta t}{2}g_{34}\\
+\end{align*}\tag{IIA-6}</script><h3 id="B-协方差及雅可比-1"><a href="#B-协方差及雅可比-1" class="headerlink" title="B. 协方差及雅可比"></a>B. 协方差及雅可比</h3><p>公式 $(7)$ 可以简写为：</p>
+<script type="math/tex; mode=display">
+\delta{\mathbf{z}_{k+1} }^{15\times1}=\mathbf{F}^{15\times15}\delta{\mathbf{z}_k}^{15\times1}+\mathbf{V}^{15\times18}\mathbf{Q}^{18\times1}\tag{8}</script><p>协方差的迭代公式为：  </p>
+<script type="math/tex; mode=display">
+{\mathbf{P}^{b_k}_{k+1} }^{15\times15}
+=\mathbf{F}\mathbf{P}^{b_k}_{k}\mathbf{F}^T+\mathbf{V}\mathbf{Q}\mathbf{V}^T\tag{9}</script><p>其中， 初始值 $\mathbf{P}^{b_k}_{b_k}=0$。 $\mathbf{Q}$ 为表示噪声项的对角协方差矩阵：  </p>
+<script type="math/tex; mode=display">
+\mathbf{Q}^{18\times18}=
+\begin{bmatrix}
+\sigma^2_{a}&0&0&0&0&0\\
+0&\sigma^2_{w}&0&0&0&0\\
+0&0&\sigma^2_{a}&0&0&0\\
+0&0&0&\sigma^2_{w}&0&0\\
+0&0&0&0&\sigma^2_{b_a}&0\\
+0&0&0&0&0&\sigma^2_{b_w}\\
+\end{bmatrix}\tag{10}</script><p>另外根据 $(8)$ 式可获得误差项的 Jacobian 的迭代公式：  </p>
+<script type="math/tex; mode=display">
+{\mathbf{J}_{k+1} }^{15\times15}=\mathbf{F}\mathbf{J}_{k}\tag{11}</script><p>其中， Jacobian 的初始值为 $\mathbf{J}_k= \mathbf{I}$。 这里计算出来的 $\mathbf{J}_{k+1}$ 只是为了给后面提供对 $bias$ 的 Jacobian。  </p>
+]]></content>
+      <categories>
+        <category>VINS</category>
+        <category>文献阅读</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>VINS</tag>
+        <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VINS-Mono_2-IMU预积分公式推导</title>
+    <url>/posts/9c201995.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍IMU预积分公式推导。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<h1 id="VINS公式推导：IMU预积分公式推导"><a href="#VINS公式推导：IMU预积分公式推导" class="headerlink" title="VINS公式推导：IMU预积分公式推导"></a>VINS公式推导：IMU预积分公式推导</h1><h2 id="符号约定"><a href="#符号约定" class="headerlink" title="符号约定"></a>符号约定</h2><p>我们将 $(·)^w$ 视为世界坐标系。重力方向与世界坐标系的 $z$ 轴对齐。$ (·)^b$是body 坐标系，我们定义它和IMU 坐标系一样。$ (·)^c $ 是相机坐标系。</p>
+<p>我们使用旋转矩阵 $R$ 和 Hamilton 四元数 $q$ 来表示旋转。我们主要在状态向量中使用四元数，但旋转矩阵也用于方便地旋转三维向量。  $q^w_b , p^w_b$ 是从本体坐标系到世界坐标系的旋转和平移。$b_k$ 是拍摄第 $k$ 张图像时的本体坐标系。 $c_k$ 是拍摄第 $k$ 张图像时的相机帧。 $\otimes$ 表示两个四元数之间的乘法运算。$g^w = [0, 0, g]^T$ 是世界坐标系中的重力矢量。最后，我们将 $\hat{(·)}$ 表示为某个量的噪声测量或估计。</p>
+<p>···Ⅳ·Ⅴ·Ⅵ·Ⅶ·Ⅷ·Ⅸ·Ⅹ·Ⅺ·Ⅻ</p>
+<h2 id="IMU-噪声模型"><a href="#IMU-噪声模型" class="headerlink" title="IMU 噪声模型"></a>IMU 噪声模型</h2><p>IMU 的原始陀螺仪和加速度计测量值 $\hat{w}$ 和 $\hat{a}$ 由下式给出：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\hat{a}_t&=a_t+b_{a_t}+R^t_wg^w+n_a\\
+\hat{w}_t&=w_t+b_{w_t}+n_w
+\end{align*}\tag{1}</script><p>我们假设加速度和陀螺仪测量中的<strong>附加噪声</strong>是高斯噪声，$n_a\sim\mathcal{N}(0,\sigma^2_a),n_w\sim\mathcal{N}(0,\sigma^2_w)$。加速度偏差和陀螺仪偏差被建模为<strong>随机游走</strong>，其导数为高斯，$n_{b_a}\sim\mathcal{N}(0, \sigma^2_{b_a}),n_{b_w}\sim\mathcal{N}(0, \sigma^2_{b_w})$：</p>
+<script type="math/tex; mode=display">
+\dot{b}_{a_t}=n_{b_a},\ \ \ \ \ \ \dot{b}_{w_t}=n_{b_w}\tag{2}</script><h2 id="Ⅰ-当前时刻-PVQ"><a href="#Ⅰ-当前时刻-PVQ" class="headerlink" title="Ⅰ.  当前时刻 PVQ"></a>Ⅰ.  当前时刻 PVQ</h2><h3 id="A-连续形式"><a href="#A-连续形式" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p><img src="D:\source\images\VINS-Mono_2-IMU预积分公式推导\image-20220517213931819.png" alt="image-20220517213931819" style="zoom:50%;" /></p>
+<p>将第 $k$ 帧和第 $k+1$ 帧之间的所有 IMU 进行积分，可得第 $k+1$ 帧的位置、速度和旋转<br>（ PVQ）,作为视觉估计的初始值，这里的旋转采用的四元数。  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{p}^w_{b_{k+1} }&=\mathbf{p}^w_{b_k}+\mathbf{v}^w_{b_k}\Delta t_k+\iint_{t\in[t_k, t_{k+1}]}(\mathbf{R}^w_t(\hat{a}_t-b_{a_t}-n_a)-g^w)dt^2\\
+\mathbf{v}^w_{b_{k+1} }&=\mathbf{v}^w_{b_k}+\int_{t\in[t_k, t_{k+1}]}(\mathbf{R}^w_t(\hat{a}_t-b_{a_t}-n_a)-g^w)dt\\
+\mathbf{q}^w_{b_{k+1} }&=\mathbf{q}^w_{b_k}\otimes\int_{t\in[t_k, t_{k+1}]}
+\frac{1}{2}\Omega(\hat{w}_t-b_{w_t}-n_w)\mathbf{q}^{b_k}_tdt
+\end{align*}\tag{3}</script><p>其中 $\hat{w}$ 和 $\hat{a}$ 分别是 IMU 的原始陀螺仪和加速度计测量值，$\Delta t_k$ 是时间间隔  $[t_k, t_{k+1}]$ 之间的持续时间。且</p>
+<script type="math/tex; mode=display">
+\Omega(w)=
+\begin{bmatrix}
+-w^{\land}&w\\-w^T&0
+\end{bmatrix},
+w^{\land}=\begin{bmatrix}
+0&-w_z&w_y\\
+w_z&0&-w_x\\
+-w_y&w_x&0
+\end{bmatrix}\tag{4}</script><p>其中，$w=\hat{w}_t-b_{w_t}-n_w$</p>
+<p>对于基于四元数的IMU积分，这里做进一步推导，</p>
+<p>公式(1)的 IMU 连续形式下的旋转状态推导如下，首先可写成：  </p>
+<script type="math/tex; mode=display">
+\mathbf{q}^w_{b_{k+1} }=\mathbf{q}^w_{b_{k} }\otimes\int_{t\in[k,k+1]}\dot{\mathbf{q}}_tdt\tag{IA-1}</script><p>设四元数 $\mathbf{q}=[x,y,z,s]$，由四元数的左乘右乘：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{q}_a\otimes\mathbf{q}_b
+&=\mathcal{R}(\mathbf{q}_b)\otimes\mathbf{q}_a=
+\begin{bmatrix}
+s_b&z_b&-y_b&x_b\\
+-z_b&s_b&x_b&y_b\\
+y_b&-x_b&s_b&z_b\\
+-x_b&-y_b&-z_b&s_b\\
+\end{bmatrix}
+\begin{bmatrix}x_a\\y_a\\z_a\\s_a\end{bmatrix}
+\\
+&=\mathcal{L}(\mathbf{q}_a)\otimes\mathbf{q}_b=
+\begin{bmatrix}
+s_a&-z_a&y_a&x_a\\
+z_a&s_a&-x_a&y_a\\
+-y_a&x_a&s_a&z_a\\
+-x_a&-y_a&-z_a&s_a\\
+\end{bmatrix}
+\begin{bmatrix}x_b\\y_b\\z_b\\s_b\end{bmatrix}
+\end{align*}\tag{IA-2}</script><p>为了简化以上的形式，我们设四元数 $\mathbf{q}=[x,y,z,s]$为 $\mathbf{q}=[w,s]$，则：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathcal{R}(\mathbf{q}_a)&=\Omega(w)+sI_{4\times4}
+=\begin{bmatrix}-w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}\\
+\mathcal{L}(\mathbf{q}_a)&=\Psi(w)+sI_{4\times4}
+=\begin{bmatrix}w^{\land}&w\\-w^T&0\end{bmatrix}+sI_{4\times4}
+\end{align*}\tag{IA-3}</script><p> 因此，可以推导<strong>四元数的导数</strong>：这里也可以参考：<a href="https://lukeyalvin.top/posts/28639.html#B-%E5%9B%9B%E5%85%83%E6%95%B0">四元数求导</a></p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\dot{\mathbf{q} }_t
+&=\underset{\delta t}{\lim}\frac{1}{\delta t}
+(\mathbf{q}_{t+\delta t}-\mathbf{q}_t)\\
+&=\underset{\delta t}{\lim}\frac{1}{\delta t}
+(\mathbf{q}_t\otimes\mathbf{q}^t_{t+\delta t}-\mathbf{q}_t\otimes
+\begin{bmatrix}0\\1\end{bmatrix})\\
+&=\underset{\delta t}{\lim}\frac{1}{\delta t}
+\left(
+\mathbf{q}_t\otimes\begin{bmatrix}\mathbf{n}\sin\frac{\theta}{2}\\\cos
+\frac{\theta}{2}\end{bmatrix}-\mathbf{q}_t\otimes
+\begin{bmatrix}0\\1\end{bmatrix}
+\right)\\
+&\approx\underset{\delta t}{\lim}\frac{1}{\delta t}
+\left(
+\mathbf{q}_t\otimes\begin{bmatrix}\mathbf{n}\frac{\theta}{2}\\1\end{bmatrix}-\mathbf{q}_t\otimes
+\begin{bmatrix}0\\1\end{bmatrix}
+\right)\\
+&=\underset{\delta t}{\lim}\frac{1}{\delta t}
+\left[
+\mathcal{R}\left(\begin{bmatrix}\mathbf{n}\frac{\theta}{2}\\1\end{bmatrix}\right)-
+\mathcal{R}\left(\begin{bmatrix}0\\1\end{bmatrix}\right)
+\right]\mathbf{q}_t\\
+&=\underset{\delta t}{\lim}\frac{1}{\delta t}
+\begin{bmatrix}
+-\frac{\theta\mathbf{n}}{2}^{\land}
+&\frac{\theta\mathbf{n}}{2}\\
+-\frac{\theta\mathbf{n}}{2}^T&0
+\end{bmatrix}\mathbf{q}_t
+\end{align*}\tag{IA-4}</script><p>其中，$\mathbf{n}$ 表示旋转轴，而角速度定义有：$w=\underset{\delta t}{\lim}\frac{\mathbf{n}\theta}{\delta t}$，则有：</p>
+<script type="math/tex; mode=display">
+\dot{\mathbf{q} }_t
+=\frac{1}{2}\begin{bmatrix}-w^{\land}&w\\-w^T&0\end{bmatrix}\mathbf{q}_t
+=\frac{1}{2}\Omega(w)\mathbf{q}_t
+=\frac{1}{2}\mathcal{R}\left(\begin{bmatrix}w\\0\end{bmatrix}\right)\mathbf{q}_t
+=\frac{1}{2}\mathbf{q}_t\otimes\begin{bmatrix}w\\0\end{bmatrix}\tag{IA-5}</script><h3 id="B-中值法离散形式"><a href="#B-中值法离散形式" class="headerlink" title="B.中值法离散形式"></a>B.中值法离散形式</h3><p>公式 $(1)$ 给出的是连续时刻的相机当前 PVQ 的迭代公式，实际上，IMU在工作的时候是离散采集数据，所以代码中使用的也是离散形式，为了跟代码一致，下面给出基于中值法的公式，（还有基于欧拉法的公式，但是代码中使用的是前者）， 即从第 $i$ 个 IMU 时刻到第 $i+1$ 个 IMU 时刻的积分过程， 这与 <code>Estimator::processIMU()</code> 函数中的 <code>Ps[j]</code>、 <code>Rs[j]</code> 和 <code>Vs[j]</code> 是一致的，（代码中的 $j$ 时刻即为此处的 $i+1$），IMU 积分出来的第 $j$ 时刻的物理量可以作为第 $j$ 帧图像的初始值。  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{p}^w_{b_{i+1} }&=\mathbf{p}^w_{b_i}+\mathbf{v}^w_{b_i}\delta t+\frac{1}{2}\overline{\hat{a} }_i\delta t^2\\
+\mathbf{v}^w_{b_{i+1} }&=\mathbf{v}^w_{b_i}+\overline{\hat{a} }_i\delta t\\
+\mathbf{q}^w_{b_{i+1} }&=\mathbf{q}^w_{b_i}\otimes
+\begin{bmatrix} 1\\\frac{1}{2}\overline{\hat{w} }_i\delta t \end{bmatrix}
+\end{align*}\tag{5}</script><p>其中使用 mid-point 方法，即两个相邻时刻 $i$ 到 $j$ 的位姿是用两个时刻的测量值 $ a,w $ 的平均值来计算：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\overline{\hat{a} }_i&=\frac{1}{2}
+[\mathbf{q}_i(\hat{a}_i-b_{a_i})-g^w+\mathbf{q}_{i+1}(\hat{a}_{i+1}-b_{a_i})-g^w]\\
+\overline{\hat{w} }_i&=\frac{1}{2}(\hat{w}_i+\hat{w}_{i+1})-b_{w_i}
+\end{align*}\tag{6}</script><h2 id="Ⅱ-两帧之间-PVQ"><a href="#Ⅱ-两帧之间-PVQ" class="headerlink" title="Ⅱ. 两帧之间 PVQ"></a>Ⅱ. 两帧之间 PVQ</h2><h3 id="A-连续形式-1"><a href="#A-连续形式-1" class="headerlink" title="A.连续形式"></a>A.连续形式</h3><p>观察公式 $(3)$ 可知， IMU 的预积分需要依赖与第 $k$ 帧的 $\mathbf{v}$ 和 $\mathbf{R}$ ，当我们在后端进行非线性优化时，需要迭代更新第 $k$ 帧的 $\mathbf{v}$ 和 $\mathbf{R}$ ，这将导致我们需要根据每次迭代后值重新进行积分，这将非常耗时。</p>
+<p>因此，我们考虑将优化变量从第 $k$ 帧到第 $k+1$ 帧的 IMU 预积分项中分离开来， 通过对公式 $(3)$ 左右两侧各乘 $\mathbf{R}^{b_k}_{w}$，可化简为：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\mathbf{R}^{b_k}_w\mathbf{p}^w_{b_{k+1} }&=\mathbf{R}^{b_k}_w(\mathbf{p}^w_{b_k}+\mathbf{v}^w_{b_k}\Delta t_k-
+\frac{1}{2}g^w\Delta t_k^2)+\alpha^{b_k}_{b_{k+1} }\\
+\mathbf{R}^{b_k}_w\mathbf{v}^w_{b_{k+1} }&=
+\mathbf{R}^{b_k}_w(\mathbf{v}^w_{b_k}-g^w\Delta t_k)+\beta^{b_k}_{b_{k+1} }\\
+\mathbf{q}^{b_k}_w\otimes\mathbf{q}^w_{b_{k+1} }&=\gamma^{b_k}_{b_{k+1} }
+\end{align*}\tag{7}</script><p>其中，</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha^{b_k}_{b_{k+1} }&=\iint_{t\in[t_k, t_{k+1}]}\mathbf{R}^{b_k}_t(\hat{a}_t-b_{a_t}-n_a)dt^2\\
+\beta ^{b_k}_{b_{k+1} }&=\int_{t\in[t_k, t_{k+1}]}\mathbf{R}^{b_k}_t(\hat{a}_t-b_{a_t}-n_a)dt\\
+\gamma^{b_k}_{b_{k+1} }&= \int_{t\in[t_k, t_{k+1}]}
+\frac{1}{2}\Omega(\hat{w}_t-b_{w_t}-n_w)\gamma^{b_k}_tdt
+\end{align*}\tag{8}</script><p>可以看出，预积分项 $(8)$ 可以仅通过以 $b_k$ (表示第 $k$ 帧时的本体坐标系) 作为参考系的 IMU 测量来获得。</p>
+<p> $\alpha^{b_k}_{b_{k+1} },\beta^{b_k}_{b_{k+1} },\gamma^{b_k}_{b_{k+1} }$ 与IMU的 $bais$ 有关，而 $bais$ 也是我们需要优化的变量，这将导致的问题是，当每次迭代时，我们得到一个新的 $bais$ ，又得根据公式 $(8)$ 重新对第 $k$ 帧和第 $k+1$ 帧之间的 IMU 预积分，非常耗时。</p>
+<p>当 $bais$ 的估计发生变化时，如果变化很小，我们通过它们对 $bais$ 的一阶近似来调整 $\alpha^{b_k}_{b_{k+1} },\beta^{b_k}_{b_{k+1} },\gamma^{b_k}_{b_{k+1} }$ ，否则我们进行重新传播。这种策略为基于优化的算法节省了大量的计算资源，因为我们不需要重复传播 IMU 测量。一阶近似如下：</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\alpha^{b_k}_{b_{k+1} }&\approx \hat{\alpha}^{b_k}_{b_{k+1} }+\mathbf{J}^{\alpha}_{b_a}\delta b_{a_k}+\mathbf{J}^{\alpha}_{b_w}\delta b_{w_k}
+\\
+\beta^{b_k}_{b_{k+1} }&\approx \hat{\beta}^{b_k}_{b_{k+1} }+\mathbf{J}^{\beta}_{b_a}\delta b_{a_k}+\mathbf{J}^{\beta}_{b_w}\delta b_{w_k}
+\\
+\gamma^{b_k}_{b_{k+1} }&\approx \hat{\gamma}^{b_k}_{b_{k+1} }\otimes
+\begin{bmatrix}1\\\frac{1}{2}\mathbf{J}^{\gamma}_{b_w}\delta b_{w_k} \end{bmatrix}
+\end{align*}\tag{9}</script><p>其中 $\mathbf{J}^{\alpha}_{b_a}$ 和 是 $\mathbf{J}^{\alpha}_{b_{k+1} }$ 中的子块矩阵，其位置对应于 $\frac{\delta\alpha^{b_k}_{b_{k+1} } }{\delta b_{a_k} }$ 。 $\mathbf{J}^{\alpha}_{b_w}、\mathbf{J}^{\beta}_{b_a}、\mathbf{J}^{\beta}_{b_w}、\mathbf{J}^{\gamma}_{b_w}$ 也使用相同的含义。</p>
+<h3 id="B-离散形式"><a href="#B-离散形式" class="headerlink" title="B.离散形式"></a>B.离散形式</h3><h4 id="欧拉法"><a href="#欧拉法" class="headerlink" title="欧拉法"></a>欧拉法</h4><p>下面给出离散时刻的 IMU 预积分公式， 首先按照<strong>论文中采用的欧拉法</strong>， 给出第 $i$ 个 IMU<br>时刻与第 $i+1$ 个 IMU 时刻的变量关系为：  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\hat{\alpha}^{b_k}_{i+1}&=\hat{\alpha}^{b_k}_{i}+\hat{\beta}^{b_k}_{i}\delta t+\frac{1}{2}\overline{\hat{a} }_i^{\prime}\delta t^2\\
+\hat{\beta}^{b_k}_{i+1}&=\hat{\beta}^{b_k}_{i}+\overline{\hat{a} }_i^{\prime}\delta t\\
+\hat{\gamma}^{b_k}_{i+1}&=
+\hat{\gamma}^{b_k}_{i}\otimes\hat{\gamma}^{i}_{i+1}
+=\hat{\gamma}^{b_k}_{i}\otimes
+\begin{bmatrix}1\\\frac{1}{2}\overline{\hat{w} }_i^{\prime}\delta t\end{bmatrix}
+\\
+\end{align*}\tag{10}</script><p>使用欧拉法，即两个相邻时刻 $i$ 到 $i+1$的位姿是用第 $i$ 时刻的测量值 $\overline{\hat{a} }_i^{\prime}, \overline{\hat{w} }_i^{\prime}$ 来计算:</p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\overline{\hat{a} }_i^{\prime}&=\mathbf{R}(\hat{\gamma}^{b_k}_{i})(\hat{a}_i-b_{a_i})\\
+\overline{\hat{w} }_i^{\prime}&=\hat{w}_i-b_{w_i}
+\end{align*}\tag{11}</script><h4 id="中值法"><a href="#中值法" class="headerlink" title="中值法"></a>中值法</h4><p>下面给出<strong>代码中采用的基于中值法</strong>的 IMU 预积分公式，这与 <code>Estimator::processIMU()</code> 函<br>数中的 <code>IntegrationBase::push_back()</code>上是一致的。注意这里跟公式 $(5)$ 是不一样的，这里积分出来的是前后两帧之间的 IMU 增量信息，而公式 $(5)$ 给出的当前帧时刻的物理量信息。  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\hat{\alpha}^{b_k}_{i+1}&=\hat{\alpha}^{b_k}_{i}+\hat{\beta}^{b_k}_{i}\delta t+\frac{1}{2}\overline{\hat{a} }_i^{\prime} \delta t^2\\
+\hat{\beta}^{b_k}_{i+1}&=\hat{\beta}^{b_k}_{i}+\overline{\hat{a} }_i^{\prime}\delta t\\
+\hat{\gamma}^{b_k}_{i+1}&=
+\hat{\gamma}^{b_k}_{i}\otimes\hat{\gamma}^{i}_{i+1}
+=\hat{\gamma}^{b_k}_{i}\otimes
+\begin{bmatrix}1\\\frac{1}{2}\overline{\hat{w} }_i^{\prime}\delta t\end{bmatrix}
+\\
+\end{align*}\tag{12}</script><p>其中，  </p>
+<script type="math/tex; mode=display">
+\begin{align*}
+\overline{\hat{a} }_i^{\prime}&=\frac{1}{2}
+[\mathbf{q}_i(\hat{a}_i-b_{a_i})+\mathbf{q}_{i+1}(\hat{a}_{i+1}-b_{a_i})]\\
+\overline{\hat{w} }_i^{\prime}&=\frac{1}{2}(\hat{w}_i+\hat{w}_{i+1})-b_{w_i}
+\end{align*}\tag{13}</script>]]></content>
+      <categories>
+        <category>VINS</category>
+        <category>文献阅读</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>VINS</tag>
+        <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>VINS-Mono_1-总体框架</title>
+    <url>/posts/3cf7a3c1.html</url>
+    <content><![CDATA[<blockquote class="blockquote-center">
+            <i class="fa fa-quote-left"></i>
+            <p>VINS是由香港科技大学秦通等人，于2018年提出的一种强大且通用的单目视觉惯性状态估计器，是初学者接触VIO 比较好的开源学习资料，作者的论文条理清晰，分为五个主要部分对该系统展开描述：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化。<strong>本节介绍整体框架。</strong></p>
+
+            <i class="fa fa-quote-right"></i>
+          </blockquote>
+<span id="more"></span>
+<p>VINS 的功能模块如图所示，可以分为五个部分：测量预处理、初始化、后端非线性优化、闭环检测、闭环优化；代码中主要开启了四个线程，分别是：前端图像跟踪、后端非线性优化（其中初始化和 IMU 预积分在这个线程中）、闭环检测、闭环优化。  </p>
+<h2 id="1-预处理"><a href="#1-预处理" class="headerlink" title="1. 预处理"></a>1. 预处理</h2><p>预处理主要指的是视觉前端里的图像处理以及IMU 测量量的处理。</p>
+<p><strong>图像：</strong>提取图像 Harris 角点， 利用<strong>金字塔光流</strong>跟踪相邻帧，利用<strong>基础矩阵模型的RANSAC算法</strong>进行异常点剔除  ，最后将跟踪到的特征点 push 到图像队列中，并通知后端进行处理。  </p>
+<p>另外，在此步骤中还选择了关键帧。  并定义两种选择关键帧的标准：① 与上一个关键帧的平均视差和某个特定阈值相比较；② 跟踪质量。</p>
+<p><strong>IMU：</strong> 将 IMU 数据进行积分，得到当前时刻的位置、速度和旋转（ <strong>PVQ</strong>），同时计算在后端优化中将用到的相邻帧的<strong>预积分增量</strong>，及预积分误差的 <strong>Jacobian 矩阵</strong>和<strong>协方差项</strong>。 </p>
+<p>这里涉及基于四元数的 IMU 推导过程，具体查看：</p>
+<p>LK光流法：<a href="https://blog.csdn.net/sgfmby1994/article/details/68489944">总结：光流—LK光流—基于金字塔分层的LK光流—中值流</a></p>
+<p>基础矩阵模型的RANSAC算法：<a href="https://blog.csdn.net/qq_38898129/article/details/93982154">计算机视觉：RANSAC剔除基础矩阵F错误匹配(Python实现)</a></p>
+<h2 id="2-初始化"><a href="#2-初始化" class="headerlink" title="2. 初始化"></a>2. 初始化</h2><p>首先， 利用 SFM 进行纯视觉估计滑窗内所有帧的位姿及 3D 点逆深度， 最后与 IMU 预<br>积分进行对齐求解初始化参数 。</p>
+<p>SfM算法：<a href="https://zhuanlan.zhihu.com/p/55712813">基于单目视觉的三维重建算法综述</a>、<a href="https://blog.csdn.net/qq_20791919/article/details/74936438">SFM算法流程</a>、<a href="https://blog.csdn.net/Mahabharata_/article/details/70799695">[CV] Structure from motion（SFM）- 附我的实现结果</a></p>
+<p>逆深度：<a href="https://blog.csdn.net/weixin_39568744/article/details/88582406">SLAM中的逆深度及参数化问题</a></p>
+<h2 id="3-后端滑窗优化"><a href="#3-后端滑窗优化" class="headerlink" title="3. 后端滑窗优化"></a>3. 后端滑窗优化</h2><p>将视觉约束（视觉测量残差）、 IMU 约束（IMU测量残差）和闭环约束放在一个大的目标函数中进行非线性优化，求解滑窗内所有帧的 PVQ、 bias 等 。</p>
+<h2 id="4-闭环检测和优化"><a href="#4-闭环检测和优化" class="headerlink" title="4. 闭环检测和优化"></a>4. 闭环检测和优化</h2><p>利用 DBoW 进行<strong>闭环检测</strong>，当检测成功后进行<strong>重定位</strong>，最后对整个相机轨迹进行<strong>闭环优</strong><br><strong>化</strong>。  </p>
+]]></content>
+      <categories>
+        <category>VINS</category>
+        <category>文献阅读</category>
+      </categories>
+      <tags>
+        <tag>VIO</tag>
+        <tag>VINS</tag>
+        <tag>文献阅读</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>七、滑动窗口算法</title>
     <url>/posts/a39e0cda.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
@@ -3930,8 +5046,8 @@ c_ys_xc_z+s_zs_y&-c_ys_zs+s_yc_z&0
       </categories>
       <tags>
         <tag>激光SLAM</tag>
-        <tag>LOAM</tag>
         <tag>文献阅读</tag>
+        <tag>LOAM</tag>
       </tags>
   </entry>
   <entry>
@@ -4098,8 +5214,8 @@ T^L_{k+1}\gets T^L_{k+1}-(J^TJ+\lambda diag(J^TJ))^{-1}J^Td.\tag{12}</script><p>
       </categories>
       <tags>
         <tag>激光SLAM</tag>
-        <tag>LOAM</tag>
         <tag>文献阅读</tag>
+        <tag>LOAM</tag>
       </tags>
   </entry>
   <entry>
