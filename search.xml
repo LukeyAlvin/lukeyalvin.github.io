@@ -1555,7 +1555,7 @@ v-EC^{-1}w\\w
       </tags>
   </entry>
   <entry>
-    <title>SLAM中的概率基础</title>
+    <title>高斯分布、协方差矩阵以及舒尔补的应用</title>
     <url>/posts/2613d057.html</url>
     <content><![CDATA[<blockquote class="blockquote-center">
             <i class="fa fa-quote-left"></i>
@@ -1927,6 +1927,7 @@ P(a,b)=\mathcal{N}\left(
       </categories>
       <tags>
         <tag>概率基础</tag>
+        <tag>舒尔补</tag>
       </tags>
   </entry>
   <entry>
